@@ -183,41 +183,13 @@ def _fetch_woowahan() -> list[dict]:
 # ---------------------------------------------------------------------------
 
 
-YANOLJA_BASE = "https://careers.yanolja.co"
-
-
 def _fetch_yanolja() -> list[dict]:
-    """야놀자: careers.yanolja.co 는 Greeting Career 랜딩이지만 페이지 sections
-    안에 opening list 가 없고, '지원하기' 버튼이 외부 Workday ATS
-    (yanolja.wd102.myworkdayjobs.com/External_Yanolja) 로 보냄.
-
-    Workday CXS API (`/wday/cxs/yanolja/External_Yanolja/jobs`) 호출 시도했으나
-    크롤링 시점 (2026-05-10) 502 + maintenance redirect 응답. robots 자체는 Allow
-    이므로 점검 종료 후 재시도 가능. 현재는 skip.
+    """야놀자: Greeting 랜딩에 opening list 없음 → '지원하기' 버튼이 외부 Workday
+    ATS 로 위임. Workday CXS API 호출 시점 502/maintenance. SKIP.
     """
-    home = http_get(YANOLJA_BASE + "/").text
-    next_data = _extract_next_data(home)
-    apply_url = ""
-    if next_data:
-        try:
-            page = (
-                next_data["props"]["pageProps"]["dehydratedState"]["queries"][1][
-                    "state"
-                ]["data"]["page"]
-            )
-            for s in page.get("sections", []):
-                if s.get("name") == "지원하기":
-                    apply_url = (
-                        s["layouts"][0]["columns"][0]["blocks"][0]
-                        .get("link", {})
-                        .get("url", "")
-                    )
-                    break
-        except (KeyError, IndexError, TypeError):
-            pass
     raise RuntimeError(
-        f"yanolja: ATS 가 외부 Workday ({apply_url or 'unresolved'}) 로 위임. "
-        "Workday CXS API 시도 시 502/maintenance — skip"
+        "yanolja: ATS 가 외부 Workday (yanolja.wd102.myworkdayjobs.com) 로 위임. "
+        "CXS API 502/maintenance — skip"
     )
 
 
@@ -409,13 +381,11 @@ def _fetch_dunamu() -> list[dict]:
 
 
 def _fetch_sk() -> list[dict]:
-    """SK Careers: `/Recruit/GetRecruitList` 가 ASP.NET MVC 컨트롤러로
-    `$.post` 호출. 모든 form 필드 + Referer + X-Requested-With + 세션 쿠키를
-    셋업해 호출해도 302 → /Error/Index 로 리다이렉트 (anti-bot 가능성).
-    sitemap.xml 도 정적 페이지만 노출 — 개별 recruit URL 미포함. skip."""
+    """SK: GetRecruitList POST 가 모든 form 필드 + Referer + X-Requested-With
+    + 세션 쿠키 셋업해도 302→Error/Index. sitemap 도 정적 페이지만. SKIP.
+    """
     raise RuntimeError(
-        "sk: GetRecruitList POST 가 anti-bot/세션 검증으로 Error 페이지 반환. "
-        "sitemap 에도 개별 공고 URL 없음 — skip"
+        "sk: GetRecruitList POST 가 anti-bot/세션 검증으로 Error 페이지 반환 — skip"
     )
 
 
