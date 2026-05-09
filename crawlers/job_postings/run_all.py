@@ -20,12 +20,19 @@ OUTPUT_CSV = REPO_ROOT / "data" / "job_posting.csv"
 
 # 등록된 fetcher 모듈 (모두 crawlers.job_postings.{name})
 FETCHERS = [
+    # 라운드 1: 표준 ATS / 자체 JSON / sitemap
     "greenhouse",
     "naver",
     "kakao",
-    "greetinghr",
+    "greetinghr",   # 라운드 5에서 11사로 확장됨
     "toss",
     "jumpit",
+    "korean_tech",  # 무신사·두나무 best-effort
+    # 라운드 5: ATS 어댑터 + 자체 SSR 추가
+    "ashby",        # 42dot, furiosa-ai, twelve-labs
+    "channelio",    # 채널톡
+    "ncsoft",       # NCSOFT 자체 Spring SSR
+    "lunit",        # Lunit Greenhouse 신도메인
 ]
 
 

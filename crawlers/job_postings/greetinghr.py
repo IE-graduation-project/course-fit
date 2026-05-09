@@ -1,17 +1,28 @@
-"""GreetingHR ATS SaaS fetcher (한국 3사 통합).
+"""GreetingHR ATS SaaS fetcher (한국 다수 회사 통합).
 
-대상 (한국 본사·법인 한정):
-    1. 컬리 (kurly)               — sitemap.xml 기반
-    2. 카카오페이 (kakaopay)        — sitemap.xml 기반
-    3. 카카오모빌리티 (kakaomobility) — sitemap.xml 기반
+GreetingHR 은 ATS SaaS 로, 두 도메인 패턴을 동시에 지원:
+    A. 표준 서브도메인: https://{slug}.career.greetinghr.com/
+    B. 커스텀 도메인:    https://careers.kakaoent.com/  (회사가 직접 별칭 도메인 사용)
 
-GreetingHR 은 ATS SaaS 로 호스팅 도메인이 회사별로 분리된다.
-    https://{slug}.career.greetinghr.com/
+대상 (한국 본사·법인 한정, 라운드 4 검증 슬러그 포함):
+    표준 슬러그
+        - kurly (컬리)             - kakaopay (카카오페이)
+        - kakaomobility (카카오모빌리티) - kakaoenterprise (카카오엔터프라이즈)
+        - upstage (Upstage)         - rebellions (Rebellions)
+        - makinarocks (MakinaRocks)  - 11st (11번가, 가능성)
+        - socar (쏘카, 가능성)
+    커스텀 도메인
+        - 카카오엔터테인먼트  https://careers.kakaoent.com
+        - 카카오게임즈        https://recruit.kakaogames.com
+        - 데브시스터즈        https://careers.devsisters.com
 
-robots.txt (3사 공통):
+robots.txt (모든 GreetingHR 호스트 공통 패턴):
     Allow:    /
     Disallow: /o/*/apply, /ko/o/*/apply, /en/o/*/apply, /m/*, /a/*
 즉 공고 상세 (`/o/{id}`, `/ko/o/{id}`) 자체는 허용. 지원 페이지만 차단.
+
+회사별 fetch 단위 try/except 로 격리 — 한 회사 실패가 전체를 죽이지 않음
+(슬러그/도메인 추측 일부는 실측에서 fail 가능성 있음).
 
 수집 전략 (정적 HTML 만 사용 — selenium 불필요):
     1. `https://{slug}.career.greetinghr.com/sitemap.xml` 에서 `/o/{id}` URL 수집
@@ -47,16 +58,34 @@ from crawlers.job_postings._common import (
 )
 
 
-# slug -> 표시용 한글명
-COMPANIES: dict[str, str] = {
-    "kurly": "컬리",
-    "kakaopay": "카카오페이",
-    "kakaomobility": "카카오모빌리티",
+# slug -> {"name": 한글명, "base": optional custom base URL}
+# base 가 없으면 표준 패턴 https://{slug}.career.greetinghr.com 사용
+COMPANIES: dict[str, dict] = {
+    # 라운드 1 (검증 완료)
+    "kurly": {"name": "컬리"},
+    "kakaopay": {"name": "카카오페이"},
+    "kakaomobility": {"name": "카카오모빌리티"},
+    # 라운드 4 — 표준 슬러그 (carrier.greetinghr.com 서브도메인 검증됨)
+    "upstage": {"name": "Upstage"},
+    "rebellions": {"name": "Rebellions"},
+    "makinarocks": {"name": "MakinaRocks"},
+    "kakaoenterprise": {"name": "카카오엔터프라이즈"},
+    # 라운드 4 — 표준 슬러그 (실측 sitemap 200 / 5 openings 확인)
+    "11st": {"name": "11번가"},
+    # 쏘카: socar.career.greetinghr.com 은 404. 자체 도메인(socarcorp.kr) 별도
+    # fetcher 필요 — 본 모듈에서는 처리하지 않음.
+    # 라운드 4 — 커스텀 도메인 (sitemap 200 검증됨)
+    "kakaoent": {"name": "카카오엔터테인먼트", "base": "https://careers.kakaoent.com"},
+    "kakaogames": {"name": "카카오게임즈", "base": "https://recruit.kakaogames.com"},
+    "devsisters": {"name": "데브시스터즈", "base": "https://careers.devsisters.com"},
 }
 
-BASE_TEMPLATE = "https://{slug}.career.greetinghr.com"
-SITEMAP_TEMPLATE = BASE_TEMPLATE + "/sitemap.xml"
-DETAIL_TEMPLATE = BASE_TEMPLATE + "/ko/o/{opening_id}"
+
+def _base_url(slug: str, conf: dict) -> str:
+    base = conf.get("base")
+    if base:
+        return base.rstrip("/")
+    return f"https://{slug}.career.greetinghr.com"
 
 SITEMAP_NS = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
 OPENING_PATH_RE = re.compile(r"/o/(\d+)$")
@@ -67,9 +96,9 @@ NEXT_DATA_RE = re.compile(
 MIN_RAW_TEXT_LEN = 80
 
 
-def _collect_opening_ids(slug: str) -> list[str]:
+def _collect_opening_ids(base: str) -> list[str]:
     """sitemap.xml 에서 `/o/{id}` 경로의 ID 만 추려 정렬 반환."""
-    url = SITEMAP_TEMPLATE.format(slug=slug)
+    url = f"{base}/sitemap.xml"
     resp = http_get(url, headers={"Accept": "application/xml, text/xml, */*"})
     root = ET.fromstring(resp.content)
 
@@ -183,8 +212,10 @@ def _build_raw_text(opening: dict[str, Any], company_kr: str) -> str:
     return combined
 
 
-def _fetch_company(slug: str, company_kr: str) -> list[dict]:
-    ids = _collect_opening_ids(slug)
+def _fetch_company(slug: str, conf: dict) -> list[dict]:
+    company_kr = conf["name"]
+    base = _base_url(slug, conf)
+    ids = _collect_opening_ids(base)
     print(
         f"[greetinghr] {slug} ({company_kr}): sitemap openings = {len(ids)}",
         file=sys.stderr,
@@ -194,7 +225,7 @@ def _fetch_company(slug: str, company_kr: str) -> list[dict]:
     source = f"Greeting:{slug}"
     for idx, opening_id in enumerate(ids):
         polite_sleep()  # 첫 호출 직전에도 대기 (sitemap 직후라서 OK)
-        detail_url = DETAIL_TEMPLATE.format(slug=slug, opening_id=opening_id)
+        detail_url = f"{base}/ko/o/{opening_id}"
         try:
             resp = http_get(detail_url)
         except Exception as exc:  # noqa: BLE001 — 단건 격리
@@ -242,23 +273,23 @@ def _fetch_company(slug: str, company_kr: str) -> list[dict]:
 
 
 def fetch() -> list[dict]:
-    """GreetingHR 3사 통합 채용공고 수집."""
+    """GreetingHR 다수 회사 통합 채용공고 수집."""
     all_records: list[dict] = []
-    slugs = list(COMPANIES.items())
-    for idx, (slug, company_kr) in enumerate(slugs):
+    items = list(COMPANIES.items())
+    for idx, (slug, conf) in enumerate(items):
         try:
-            recs = _fetch_company(slug, company_kr)
-        except Exception as exc:  # noqa: BLE001 — fetcher 단위 격리
+            recs = _fetch_company(slug, conf)
+        except Exception as exc:  # noqa: BLE001 — 회사 단위 격리
             print(
                 f"[greetinghr] {slug} 실패: {type(exc).__name__}: {exc}",
                 file=sys.stderr,
             )
             recs = []
         print(
-            f"[greetinghr] {slug} ({company_kr}): {len(recs)} records",
+            f"[greetinghr] {slug} ({conf['name']}): {len(recs)} records",
             file=sys.stderr,
         )
         all_records.extend(recs)
-        if idx < len(slugs) - 1:
+        if idx < len(items) - 1:
             polite_sleep()
     return all_records
