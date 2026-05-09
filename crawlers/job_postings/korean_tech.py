@@ -235,13 +235,7 @@ def _dunamu_parse_chunks(flow: str) -> dict[str, str]:
 
 
 def _dunamu_extract_positions(flow: str) -> list[dict]:
-    """dehydratedState 안의 모든 `content` 객체를 정규식으로 골라낸다.
-
-    각 content 는 `{"jobNoticeId":...,"positionId":...,"jobNoticeName":...,
-    "jobNoticeContent":"$<chunkId>","jobGroupCode":...,"experienceLevel":...,
-    "employmentType":..., "workLocation":{"street":...,"detail":...}, ...}`.
-    JSON parser 대신 필요한 필드만 정규식으로 뽑아 안전성 확보.
-    """
+    """dehydratedState 의 모든 content 객체에서 핵심 필드만 정규식으로 추출."""
     out: list[dict] = []
     pattern = re.compile(
         r'"jobNoticeId":(\d+),'
@@ -275,68 +269,50 @@ def _dunamu_extract_positions(flow: str) -> list[dict]:
 
 
 def _fetch_dunamu() -> list[dict]:
-    """두나무: 홈에서 모든 position 발견 → 한 detail 페이지만 fetch 해도 같은
-    jobBoardCode 안의 모든 공고 데이터가 RSC 에 인라인됨. 다만 board 가 여러 개일
-    수 있으므로 각 positionId 의 `/detail/{id}` 를 한 번씩 fetch 해 보강.
+    """두나무: 홈 listing → 각 `/detail/{positionId}` 의 RSC 에서 본문 보강.
 
-    URL convention: 사용자가 보는 detail URL 은 `/detail/{positionId}` 이며,
-    `/jobs/{id}` 는 marketing redirect (307→/tech2026 등). robots.txt 는 fully open.
+    `/jobs/{id}` 는 marketing 307 redirect (→/tech2026 등) 이므로 사용 금지.
     """
-    home = http_get(DUNAMU_BASE + "/").text
-    home_flow = _dunamu_decode_flow(home)
-    home_positions = _dunamu_extract_positions(home_flow)
-
-    # fallback: 홈 페이지는 jobBoard 의 단순 listing (`{"id":...}`) 만 가진 경우가
-    # 많다. 본문은 /detail/{positionId} 에서 보강한다.
-    if not home_positions:
+    home_flow = _dunamu_decode_flow(http_get(DUNAMU_BASE + "/").text)
+    positions = _dunamu_extract_positions(home_flow)
+    if not positions:
+        # 홈은 단순 listing (`{"id":...}`) 만 가진 경우 fallback
         simple = re.findall(
             r'\{"id":(\d+),"name":"([^"]+)","jobGroupCode":"([^"]+)",'
             r'"experienceLevel":"([^"]+)","employmentType":"([^"]+)"\}',
             home_flow,
         )
         if not simple:
-            raise RuntimeError("dunamu: 홈 RSC 에서 jobs/positions 패턴 미발견")
-        for jid, name, jg, exp, emp in simple:
-            home_positions.append(
-                {
-                    "jobNoticeId": "",
-                    "positionId": jid,
-                    "jobNoticeName": name,
-                    "contentChunkId": "",
-                    "jobGroupCode": jg,
-                    "experienceLevel": exp,
-                    "employmentType": emp,
-                    "workLocationName": "",
-                }
-            )
+            raise RuntimeError("dunamu: 홈 RSC 에서 positions 패턴 미발견")
+        positions = [
+            {
+                "jobNoticeId": "",
+                "positionId": jid,
+                "jobNoticeName": name,
+                "contentChunkId": "",
+                "jobGroupCode": jg,
+                "experienceLevel": exp,
+                "employmentType": emp,
+                "workLocationName": "",
+            }
+            for jid, name, jg, exp, emp in simple
+        ]
+    print(f"[dunamu] 홈에서 {len(positions)}개 position 발견", file=sys.stderr)
 
-    print(
-        f"[dunamu] 홈에서 {len(home_positions)}개 position 발견",
-        file=sys.stderr,
-    )
-
-    # 한 detail 페이지로 jobBoard 단위 본문을 수집
-    seen_boards_by_first_pid: dict[str, dict[str, str]] = {}
     records: list[dict] = []
-
-    for p in home_positions:
+    for p in positions:
         pid = p["positionId"]
         url = f"{DUNAMU_BASE}/detail/{pid}"
+        meta = p
         body_html = ""
-        full_meta = p
-
         try:
-            detail = http_get(url).text
-            flow = _dunamu_decode_flow(detail)
+            flow = _dunamu_decode_flow(http_get(url).text)
             chunks = _dunamu_parse_chunks(flow)
-            # 동일 board 의 모든 position 메타도 같이 들어있을 수 있음
-            board_positions = _dunamu_extract_positions(flow)
-            for bp in board_positions:
+            for bp in _dunamu_extract_positions(flow):
                 if bp["positionId"] == pid:
-                    full_meta = bp
+                    meta = bp
                     break
-            cid = full_meta.get("contentChunkId") or ""
-            body_html = chunks.get(cid, "")
+            body_html = chunks.get(meta.get("contentChunkId") or "", "")
         except Exception as exc:  # noqa: BLE001
             print(
                 f"[dunamu] /detail/{pid} 실패: {type(exc).__name__}: {exc}",
@@ -346,18 +322,15 @@ def _fetch_dunamu() -> list[dict]:
             polite_sleep()
 
         body = html_to_text(body_html) if body_html else ""
-        title = full_meta.get("jobNoticeName") or p["jobNoticeName"]
-        header_lines = [f"[두나무] {title}"]
-        jg = full_meta.get("jobGroupCode") or p["jobGroupCode"]
+        header_lines = [f"[두나무] {meta.get('jobNoticeName') or p['jobNoticeName']}"]
+        jg = meta.get("jobGroupCode") or p["jobGroupCode"]
         if jg:
-            header_lines.append(f"직군: {jg.replace('T_','').replace('_',' ').title()}")
-        exp = full_meta.get("experienceLevel") or p["experienceLevel"]
-        if exp and exp != "NONE":
-            header_lines.append(f"경력: {exp}")
-        emp = full_meta.get("employmentType") or p["employmentType"]
-        if emp and emp != "NONE":
-            header_lines.append(f"고용형태: {emp}")
-        loc = full_meta.get("workLocationName") or ""
+            header_lines.append(f"직군: {jg.replace('T_', '').replace('_', ' ').title()}")
+        for label, key in (("경력", "experienceLevel"), ("고용형태", "employmentType")):
+            v = meta.get(key) or p[key]
+            if v and v != "NONE":
+                header_lines.append(f"{label}: {v}")
+        loc = meta.get("workLocationName") or ""
         if loc:
             header_lines.append(f"근무지: {loc}")
         header = "\n".join(header_lines)
@@ -365,11 +338,7 @@ def _fetch_dunamu() -> list[dict]:
         if len(raw_text) < MIN_RAW_TEXT_LEN:
             raw_text = f"{raw_text}\npositionId: {pid}"
         records.append(
-            make_record(
-                source="Dunamu",
-                posting_url=url,
-                raw_text=raw_text,
-            )
+            make_record(source="Dunamu", posting_url=url, raw_text=raw_text)
         )
     print(f"[dunamu] {len(records)} records", file=sys.stderr)
     return records
