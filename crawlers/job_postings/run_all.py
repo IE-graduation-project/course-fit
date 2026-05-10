@@ -33,6 +33,13 @@ FETCHERS = [
     "channelio",    # 채널톡
     "ncsoft",       # NCSOFT 자체 Spring SSR
     "lunit",        # Lunit Greenhouse 신도메인
+    # 라운드 6: 경영 직군 보강 (금융 SaaS·대기업·학부 메타)
+    "recruiter_co_kr",  # 신한·하나·미래에셋 등 SaaS
+    "careerlink",       # InHR (실측에서 대부분 robots 차단 — best-effort 1~2건)
+    "samsung_workday",  # 삼성전자 Workday CXS Public API
+    "kb_lotte",         # KB금융 + 롯데건설 자체 SSR
+    "student_jobs",     # 링커리어 + 자소설닷컴 (학부 메타)
+    "alio",             # 잡알리오 OpenAPI (공공기관 채용 — 경영 backbone)
 ]
 
 

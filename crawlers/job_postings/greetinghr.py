@@ -61,23 +61,69 @@ from crawlers.job_postings._common import (
 # slug -> {"name": 한글명, "base": optional custom base URL}
 # base 가 없으면 표준 패턴 https://{slug}.career.greetinghr.com 사용
 COMPANIES: dict[str, dict] = {
-    # 라운드 1 (검증 완료)
+    # 라운드 1 (검증)
     "kurly": {"name": "컬리"},
     "kakaopay": {"name": "카카오페이"},
     "kakaomobility": {"name": "카카오모빌리티"},
-    # 라운드 4 — 표준 슬러그 (carrier.greetinghr.com 서브도메인 검증됨)
+    # 라운드 4 — 표준 슬러그
     "upstage": {"name": "Upstage"},
     "rebellions": {"name": "Rebellions"},
     "makinarocks": {"name": "MakinaRocks"},
     "kakaoenterprise": {"name": "카카오엔터프라이즈"},
-    # 라운드 4 — 표준 슬러그 (실측 sitemap 200 / 5 openings 확인)
     "11st": {"name": "11번가"},
-    # 쏘카: socar.career.greetinghr.com 은 404. 자체 도메인(socarcorp.kr) 별도
-    # fetcher 필요 — 본 모듈에서는 처리하지 않음.
-    # 라운드 4 — 커스텀 도메인 (sitemap 200 검증됨)
+    # 라운드 4 — 커스텀 도메인
     "kakaoent": {"name": "카카오엔터테인먼트", "base": "https://careers.kakaoent.com"},
     "kakaogames": {"name": "카카오게임즈", "base": "https://recruit.kakaogames.com"},
     "devsisters": {"name": "데브시스터즈", "base": "https://careers.devsisters.com"},
+    # 라운드 6 신규 — 엔터·콘텐츠
+    "hybe": {"name": "하이브"},
+    "wavve": {"name": "웨이브"},
+    "seoulauction": {"name": "서울옥션"},
+    # 라운드 6 신규 — 패션·이커머스·D2C
+    "musinsa": {"name": "무신사"},
+    "wconcept": {"name": "W컨셉"},
+    "idus": {"name": "아이디어스"},
+    "craver-corp": {"name": "크레이버"},
+    # 라운드 6 신규 — 트래블·항공
+    "myrealtrip": {"name": "마이리얼트립"},
+    "tripbtoz": {"name": "트립비토즈"},
+    "gccompany": {"name": "여기어때"},
+    "aerok-recruiter": {"name": "에어로케이항공"},
+    # 라운드 6 신규 — 핀테크·증권·암호화폐·송금
+    "wadiz": {"name": "와디즈"},
+    "finda": {"name": "핀다"},
+    "kbsec": {"name": "KB증권"},
+    "korbit": {"name": "코빗"},
+    "gme": {"name": "글로벌머니익스프레스"},
+    # 라운드 6 신규 — AI·에듀테크
+    "scatterlab": {"name": "스캐터랩(이루다)"},
+    "qanda": {"name": "QANDA(매스프레소)"},
+    # 라운드 6 신규 — 광고·마케팅·미디어
+    "buzzvil": {"name": "버즈빌"},
+    "dable": {"name": "데이블"},
+    "echomarketing": {"name": "에코마케팅"},
+    "playd": {"name": "플레이디"},
+    # 라운드 6 신규 — 게임
+    "epidgames": {"name": "에피드게임즈"},
+    # 라운드 6 신규 — 그룹사·대기업·산업
+    "lf": {"name": "LF그룹"},
+    "oci": {"name": "OCI그룹"},
+    "hecto": {"name": "Hecto Group"},
+    "dongkuk": {"name": "동국제강그룹"},
+    "phcgroup": {"name": "PHC Group"},
+    "gsitm": {"name": "GS ITM"},
+    "kovahr": {"name": "벤처기업협회 HR브릿지"},
+    "nice": {"name": "NICE그룹"},
+    "enf-recruit": {"name": "한국알콜그룹"},
+    "kcenc": {"name": "KC E&C"},
+    "daangnservice": {"name": "당근서비스"},
+    "cj-recruit": {"name": "CJ"},
+    # 라운드 6 신규 — 학습·법률
+    "yanadoo": {"name": "야나두"},
+    "lbox": {"name": "엘박스"},
+    # 라운드 6 신규 — ATS 본사·기타
+    "doodlin": {"name": "두들린(그리팅 본사)"},
+    "ablelabs": {"name": "에이블랩스"},
 }
 
 

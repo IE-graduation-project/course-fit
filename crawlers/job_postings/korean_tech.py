@@ -364,10 +364,13 @@ def _fetch_sk() -> list[dict]:
 
 
 def fetch() -> list[dict]:
-    """무신사·우아한·야놀자·두나무·SK 5사 best-effort 통합."""
+    """우아한·야놀자·두나무·SK best-effort 통합.
+
+    무신사는 GreetingHR 어댑터(`crawlers.job_postings.greetinghr`)의
+    `musinsa` 슬러그로 위임 — 동일 데이터 중복 fetch 방지.
+    """
     records: list[dict] = []
     for company_fn in [
-        _fetch_musinsa,
         _fetch_woowahan,
         _fetch_yanolja,
         _fetch_dunamu,

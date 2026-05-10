@@ -1,13 +1,16 @@
-"""Greenhouse Job Board API fetcher (한국 4사 통합).
+"""Greenhouse Job Board API fetcher (한국 6사 통합).
 
 대상 (한국 본사·법인 한정):
-    1. 쿠팡 (coupang)         — ~387건
-    2. 크래프톤 (krafton)      — ~57건
-    3. 당근 (daangn)           — ~45건
+    1. 쿠팡 (coupang)            — ~387건
+    2. 크래프톤 (krafton)         — ~57건
+    3. 당근 (daangn)              — ~45건
     4. Seoul Robotics (seoulrobotics) — ~7건
+    5. 당근페이 (daangnpay)        — ~4건 (라운드 6 신규, 100% Seoul)
+    6. Sendbird (sendbird)        — ~21건 중 ~11건 Seoul (라운드 6 신규, ~52%)
 
 ⚠️ 글로벌 board id 중 Naver Vietnam, Krafton Americas/India 등은 한국 본사가
-아니므로 의도적으로 제외.
+아니므로 의도적으로 제외. Sendbird 는 미국 법인이지만 한국계 창업·실질 R&D 가
+서울이라 한국 페르소나 매칭에 가치.
 
 Greenhouse Job Board API:
     https://boards-api.greenhouse.io/v1/boards/{board}/jobs?content=true
@@ -38,6 +41,9 @@ BOARDS: list[tuple[str, str]] = [
     ("krafton", "크래프톤"),
     ("daangn", "당근"),
     ("seoulrobotics", "Seoul Robotics"),
+    # 라운드 6 신규
+    ("daangnpay", "당근페이"),
+    ("sendbird", "Sendbird"),
 ]
 
 API_TEMPLATE = "https://boards-api.greenhouse.io/v1/boards/{board}/jobs"
