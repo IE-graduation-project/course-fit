@@ -49,13 +49,6 @@ BIZ,2022,특성화교양,3,
 ## 3. `course.csv`
 과목 정보. 가장 중요한 테이블.
 
-```
-course_id,course_name,credit,dept_id,area,allowed_years,prerequisites,time_slots_raw,time_slots_int,semester,is_pn,is_major_required,is_certified_sw,msc_subarea
-101503,알고리즘분석,3,IDE,전공선택,"2,3,4",013312,월3-4,,2026-1,0,0,0,
-013312,자료구조및프로그래밍,4,IDE,전공필수,2,012305,화1-2,,2025-2,0,1,0,
-007006,전공영어(1),1,IDE,전공기초영어,2,,,,2024-1,1,0,0,
-```
-
 **필드 설명**
 - `course_id`: 학수번호 (문자열, leading zero 유지)
 - `credit`: 정수
@@ -64,7 +57,9 @@ course_id,course_name,credit,dept_id,area,allowed_years,prerequisites,time_slots
 - `prerequisites`: 선수과목 course_id 콤마구분. 없으면 빈 문자열
 - `time_slots_raw`: 사람용 표기 (`월3-4,수3-4`). 없으면 빈 문자열
 - `time_slots_int`: 정수 슬롯 (전처리 후 채움. 크롤링 단계에선 빈 값 OK)
-- `semester`: `YYYY-S` 형식 (예: `2026-1`)
+- `semester`: 학년-학기 형식, 다중 학기 가능 시 콤마 구분
+  - 예: `1-2` (1학년 2학기), `1-2,2-1` (1학년 2학기 또는 2학년 1학기 부학기 개설)
+  - 본학기 + 부학기 모두 표기 (학생이 둘 중 하나에 수강 가능)
 - `is_pn`: P/N 과목이면 1
 - `is_major_required`: 전공필수면 1
 - `is_certified_sw`: SW/데이터활용역량 인증과목이면 1
@@ -147,7 +142,6 @@ DA,DATAVIZ,0.8
 4. `course.area` ∈ enum
 5. `course.area`가 해당 dept의 `graduation_requirement.area`에 존재 (없으면 warning)
 6. `course.allowed_years`: 1~4 범위
-7. `course.is_major_required = 1` ⟹ `area = '전공필수'`
-8. `course.msc_subarea` not null ⟹ `area = 'MSC'`
+7. `course.msc_subarea` not null ⟹ `area = 'MSC'`
 
 검증 실패 시 ingest 중단. 에러 메시지로 수정 위치 표시.
