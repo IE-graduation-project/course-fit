@@ -284,7 +284,7 @@ def llm_classify(title: str, raw_excerpt: str) -> str | None:
     prompt = LLM_PROMPT.format(title=title, excerpt=raw_excerpt[:800])
     try:
         resp = client.chat.completions.create(
-            model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
+            model=os.getenv("OPENAI_MODEL", "gpt-5.4-nano"),
             messages=[{"role": "user", "content": prompt}],
             temperature=0,
             max_tokens=4,
