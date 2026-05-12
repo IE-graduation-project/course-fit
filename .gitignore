@@ -34,6 +34,9 @@ logs/
 mapping/cache/
 mapping/raw_outputs/
 
+# OMC tooling cache (oh-my-claudecode)
+.omc/
+
 # Jupyter
 .ipynb_checkpoints/
 *.ipynb
