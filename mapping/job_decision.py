@@ -20,8 +20,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 import os
 import re
+import sys
 from collections import Counter
 from pathlib import Path
 
@@ -32,6 +34,16 @@ try:
     load_dotenv()
 except ImportError:
     pass
+
+logger = logging.getLogger("job_decision")
+
+# Exit codes
+EXIT_OK = 0
+EXIT_INPUT_NOT_FOUND = 2
+EXIT_VALIDATION_FAILED = 3
+EXIT_UNEXPECTED = 1
+
+MIN_POSTINGS_PER_JOB = 20  # 가이드 권고 최소치
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"
@@ -288,7 +300,11 @@ def llm_classify(title: str, raw_excerpt: str) -> str | None:
 
 
 def run(use_llm: bool = False, top: int = 30, dry_run: bool = False, llm_limit: int | None = None) -> dict:
+    if not SRC_POSTING.exists():
+        logger.error("입력 파일 없음: %s", SRC_POSTING)
+        return {"ok": False, "reason": "input_not_found", "path": str(SRC_POSTING)}
     df = pd.read_csv(SRC_POSTING)
+    logger.info("[입력] %s: %d건", SRC_POSTING.name, len(df))
     print(f"[입력] {SRC_POSTING.name}: {len(df):,}건")
 
     # Step 1: 직무명 후보 추출
@@ -348,13 +364,21 @@ def run(use_llm: bool = False, top: int = 30, dry_run: bool = False, llm_limit: 
         .to_dict()
     )
 
+    # 검증: 직무별 최소 공고 수
+    below_min = {jid: int(dist.get(jid, 0)) for jid in TARGET_IDS if dist.get(jid, 0) < MIN_POSTINGS_PER_JOB}
+    if below_min:
+        logger.warning("검증 미통과 — 직무별 최소 %d건 미달: %s", MIN_POSTINGS_PER_JOB, below_min)
+
     report = {
+        "ok": not below_min,
         "input_rows": int(len(df)),
         "distribution": {k: int(v) for k, v in dist.items()},
         "pre_llm_unmapped": pre_llm_unmapped,
         "llm_calls": llm_calls,
         "unmapped_top30": unmapped_sample,
         "target_jobs": TARGET_JOBS,
+        "min_postings_per_job": MIN_POSTINGS_PER_JOB,
+        "validation_below_min": below_min,
     }
 
     if dry_run:
@@ -384,15 +408,40 @@ def run(use_llm: bool = False, top: int = 30, dry_run: bool = False, llm_limit: 
     return report
 
 
-def main() -> None:
+def main() -> int:
     p = argparse.ArgumentParser()
     p.add_argument("--llm", action="store_true", help="OPENAI_API_KEY로 미매핑 건 LLM 분류")
     p.add_argument("--llm-limit", type=int, default=None, help="LLM 호출 건수 상한")
     p.add_argument("--top", type=int, default=30, help="빈도 표시 상위 N")
     p.add_argument("--dry-run", action="store_true", help="파일 쓰지 않음")
+    p.add_argument("--strict", action="store_true",
+                   help="직무별 공고 수 < %d 면 비-0 exit (CI/cron 용)" % MIN_POSTINGS_PER_JOB)
+    p.add_argument("--log-level", default=os.getenv("LOG_LEVEL", "INFO"),
+                   choices=["DEBUG", "INFO", "WARNING", "ERROR"])
     args = p.parse_args()
-    run(use_llm=args.llm, top=args.top, dry_run=args.dry_run, llm_limit=args.llm_limit)
+
+    logging.basicConfig(
+        level=getattr(logging, args.log_level),
+        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+
+    try:
+        report = run(use_llm=args.llm, top=args.top, dry_run=args.dry_run, llm_limit=args.llm_limit)
+    except FileNotFoundError as e:
+        logger.error("필요 파일 누락: %s", e)
+        return EXIT_INPUT_NOT_FOUND
+    except Exception as e:  # 의도적: 어떤 예외든 cron/CI에서 비-0 exit
+        logger.exception("예기치 못한 오류: %s", e)
+        return EXIT_UNEXPECTED
+
+    if report.get("reason") == "input_not_found":
+        return EXIT_INPUT_NOT_FOUND
+    if args.strict and not report.get("ok", True):
+        logger.error("--strict: 검증 미통과로 exit %d", EXIT_VALIDATION_FAILED)
+        return EXIT_VALIDATION_FAILED
+    return EXIT_OK
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
