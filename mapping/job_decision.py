@@ -55,10 +55,15 @@ OVERRIDES_CSV = Path(__file__).resolve().parent / "job_decision_overrides.csv"
 
 TARGET_JOBS = [
     ("DA", "데이터 분석가"),
+    ("DE", "데이터 엔지니어"),
     ("DS", "데이터 사이언티스트"),
     ("PM", "프로덕트 매니저"),
     ("MKT", "마케팅 매니저"),
+    ("FIN", "재무 분석가"),
 ]
+# 분류 우선순위 — DA > DE > DS > PM > MKT > FIN 순서로 검사
+# (DA는 "Data Analytics Engineer" 같은 분석 직무 먼저 잡고, DE는 순수 Data Engineer,
+#  DS는 ML/AI 엔지니어, 그 외 직무는 학과 강점 따라 배치)
 TARGET_IDS = [jid for jid, _ in TARGET_JOBS]
 
 # raw_text 앞부분에서 추출할 라벨 패턴 (직무명 시그널이 강한 순)
@@ -81,6 +86,19 @@ POOL_RECRUIT_PATTERNS = [
     re.compile(r"talent\s*pool", re.IGNORECASE),
     re.compile(r"부문별\s*경력사원\s*채용"),
     re.compile(r"수시\s*모집$|수시채용$"),
+]
+
+# 양식형 제목 (직무 정보 없는 회사 양식 — 빈도 분석 노이즈 + 매핑 의미 없음)
+GENERIC_FORM_PATTERNS = [
+    re.compile(r"\d+년\s*[상하]반기\s*부문별\s*경력사원"),
+    re.compile(r"경력사원\s*상시채용"),
+    re.compile(r"기간제\s*(모집|채용|사원)"),
+    re.compile(r"(사무|행정)\s*보조\s*기간제"),
+    re.compile(r"(중장비|크레인|조선사업부)"),
+    re.compile(r"현장(안전보조|\s*PJ)"),
+    re.compile(r"보훈[/·]?장애인\s*대상자"),
+    re.compile(r"신입사원\s*(모집|채용)$"),
+    re.compile(r"2026년도?\s.*신규채용"),
 ]
 
 # 첫 segment가 이런 일반 단어/부서명이면 라벨 fallback 사용
@@ -106,6 +124,15 @@ JOB_KEYWORDS: dict[str, list[str]] = {
         "비즈니스애널리스트", "businessanalyst", "비즈니스분석가",
         "데이터analyst", "businessdevelopmentanalyst",
         "businessstrategicanalyst",
+    ],
+    "DE": [
+        "dataengineer", "데이터엔지니어", "data엔지니어",
+        "datapipelineengineer", "datapipeline",
+        "dataplatformengineer", "데이터플랫폼엔지니어",
+        "datainfraengineer", "데이터인프라엔지니어",
+        "etl엔지니어", "etlengineer",
+        "datawarehouseengineer", "데이터웨어하우스",
+        "dataopsengineer",
     ],
     "DS": [
         "데이터사이언티스트", "datascientist", "데이터과학자",
@@ -146,6 +173,20 @@ JOB_KEYWORDS: dict[str, list[str]] = {
         "marketingofficer", "marketingspecialist",
         "marketingoperations", "marketingcommunication", "마케팅커뮤니케이션",
     ],
+    "FIN": [
+        "financialanalyst", "financialanalysis", "재무분석가",
+        "financialaccountant", "financeaccountant", "재무회계",
+        "strategicfinance", "financialplanning", "fp&a",
+        "investmentanalyst", "investmentbanking", "investmentbanker",
+        "ibanalyst", "ib애널리스트",
+        "creditanalyst", "credit애널리스트",
+        "riskanalyst", "riskmanager", "리스크매니저", "신용분석가",
+        "treasury", "treasuryanalyst",
+        "회계사", "accountant",
+        "financialcontroller", "재무관리",
+        "corporatefinance", "기업금융",
+        "mxfinancial", "financialmanagement",
+    ],
 }
 
 # 부정 키워드 — 이게 들어있으면 해당 job_id 매핑을 약화/차단
@@ -180,6 +221,14 @@ NEGATIVE_KEYWORDS: dict[str, list[str]] = {
         "financialanalyst", "financialanalysis", "financialplanning",
         "ITsupport", "itsupport",
         "vulnerabilityanalyst",
+    ],
+    "DE": [
+        "gameengineer", "hardwareengineer", "salesengineer",
+        "securityengineer",
+    ],
+    "FIN": [
+        "salesengineer", "compliance",  # 컴플라이언스/세무는 우리 직무 외
+        "financialregulation",
     ],
 }
 
@@ -223,9 +272,9 @@ def classify(title: str, raw_text: str = "") -> str | None:
     """
     if not title:
         return None
-    # 풀/다중직무 모집 차단 — title 또는 raw_text 앞부분에 패턴이 있으면 미분류
+    # 풀/다중직무 모집 + 양식형 제목 차단
     head = raw_text[:300] if raw_text else ""
-    for pat in POOL_RECRUIT_PATTERNS:
+    for pat in POOL_RECRUIT_PATTERNS + GENERIC_FORM_PATTERNS:
         if pat.search(title) or pat.search(head):
             return None
     norm_title = normalize(title)
