@@ -1,50 +1,57 @@
 {
+  "ok": true,
   "input_rows": 3826,
   "distribution": {
-    "UNMAPPED": 3326,
-    "MKT": 151,
+    "UNMAPPED": 3248,
+    "MKT": 148,
     "DA": 63,
-    "DS": 147,
-    "PM": 139
+    "FIN": 50,
+    "DS": 146,
+    "PM": 139,
+    "DE": 32
   },
-  "pre_llm_unmapped": 3326,
+  "pre_llm_unmapped": 3248,
   "llm_calls": 0,
   "unmapped_top30": {
     "23년 상반기 부문별 경력사원 채용": 9,
     "Software Engineer, Backend": 9,
-    "Product Designer": 8,
-    "Security Engineer": 8,
     "조선사업부 기간제 크레인 신호수 모집": 8,
+    "Security Engineer": 8,
+    "Product Designer": 8,
     "기간제 모집": 7,
     "중장비 정비원 (계약직) 모집": 6,
     "22년 하반기 부문별 경력사원 채용": 6,
-    "22년 상반기 부문별 경력사원 채용": 6,
     "General Affairs Manager": 6,
+    "22년 상반기 부문별 경력사원 채용": 6,
     "사무행정보조 기간제 모집(GRC)": 6,
-    "중장비정비원(일반계약직) 모집": 5,
-    "보훈/장애인 대상자 상시채용": 5,
-    "크리에이티브/제작": 5,
     "현장안전보조(중장비유도) 일반계약직 채용": 5,
-    "DevOps Engineer": 5,
+    "크리에이티브/제작": 5,
     "Frontend Developer": 5,
-    "Data Engineer": 5,
     "Software Engineer, Frontend": 5,
-    "Server Developer (Product)": 5,
+    "보훈/장애인 대상자 상시채용": 5,
     "군산공장 기술직 기간제 사원 채용": 5,
+    "DevOps Engineer": 5,
     "Executive Assistant": 5,
-    "Forward Deployed Engineer - LLM": 4,
-    "2026년 상반기 경력사원 채용": 4,
-    "Technical Program Manager": 4,
-    "현장 PJ/전문직 경력사원 상시채용": 4,
-    "Collections Operations Assistant": 4,
+    "중장비정비원(일반계약직) 모집": 5,
+    "Server Developer (Product)": 5,
+    "Fire Safety Manager": 4,
     "사무보조 기간제 채용": 4,
-    "데이터 엔지니어(DE) 인턴/신입 채용": 4,
-    "AD Sales Manager": 4
+    "2025년 상반기 경력사원 채용": 4,
+    "2026년 상반기 경력사원 채용": 4,
+    "Forward Deployed Engineer - LLM": 4,
+    "HRBP": 4,
+    "AD Sales Manager": 4,
+    "캐릭터 컨셉 아티스트 모집": 4,
+    "통합구매부문 사무행정보조 기간제 모집": 4
   },
   "target_jobs": [
     [
       "DA",
       "데이터 분석가"
+    ],
+    [
+      "DE",
+      "데이터 엔지니어"
     ],
     [
       "DS",
@@ -57,6 +64,12 @@
     [
       "MKT",
       "마케팅 매니저"
+    ],
+    [
+      "FIN",
+      "재무 분석가"
     ]
-  ]
+  ],
+  "min_postings_per_job": 20,
+  "validation_below_min": {}
 }
