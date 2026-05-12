@@ -37,3 +37,8 @@ mapping/raw_outputs/
 # Jupyter
 .ipynb_checkpoints/
 *.ipynb
+
+# Google Drive sync artifacts
+*.gsheet
+*.gdoc
+*.gslides
