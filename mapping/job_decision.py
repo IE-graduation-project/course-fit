@@ -86,6 +86,9 @@ POOL_RECRUIT_PATTERNS = [
     re.compile(r"talent\s*pool", re.IGNORECASE),
     re.compile(r"부문별\s*경력사원\s*채용"),
     re.compile(r"수시\s*모집$|수시채용$"),
+    # 슬래시로 3개 이상 직군 묶음 (예: "마케팅(AE)/IT(웹기획자)/STAFF(재무 및 HRM)")
+    # 본문 "(영상, 비젼, AI)" 같은 평범한 콤마 묶음과 구분: 두 번 이상의 "()/X(...)" 시퀀스 필요
+    re.compile(r"\)/[가-힣A-Z]{2,}\([^)]+\)/[가-힣A-Z]+\("),
 ]
 
 # 양식형 제목 (직무 정보 없는 회사 양식 — 빈도 분석 노이즈 + 매핑 의미 없음)
@@ -215,6 +218,10 @@ NEGATIVE_KEYWORDS: dict[str, list[str]] = {
         "사무보조", "어시스턴트",
         "샵온라인",  # "카카오프렌즈샵 온라인 마케팅" 같은 케이스도 일단 어시스턴트는 부정
         "marketingdesigner",
+        # 직무가 부서명 안에 들어간 케이스 — 실제 직무는 다른 도메인
+        "계리사", "actuary",
+        # 영상 콘텐츠 제작은 디자이너/크리에이터 영역
+        "영상콘텐츠제작", "영상제작", "영상콘텐츠",
     ],
     "DA": [
         "security", "보안", "compliance", "컴플라이언스", "threatanalyst",
