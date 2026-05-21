@@ -14,6 +14,7 @@ course-fit/
 │   ├── department.csv
 │   ├── graduation_requirement.csv
 │   ├── course.csv
+│   ├── course_section.csv     # 공식 시간표 기반 학수번호-분반 스냅샷
 │   ├── competency.csv
 │   ├── job.csv
 │   ├── job_posting.csv

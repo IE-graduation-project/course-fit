@@ -69,6 +69,49 @@ BIZ,2022,특성화교양,3,
 - 콤마가 들어가는 필드(`allowed_years`, `prerequisites`, `time_slots_raw`)는 **반드시 큰따옴표로 감쌀 것**. 예: `"2,3,4"`
 - pandas로 저장 시 `df.to_csv(path, index=False, encoding='utf-8')` 사용
 
+
+## 3-1. `course_section.csv`
+홍익대학교 공식 시간표 조회 페이지(`https://cn.hongik.ac.kr/app/timetable/`)에서 생성한 **학수번호-분반 단위** 시간표 스냅샷. `course.csv`는 과목 단위 SOT로 유지하고, 분반/교원/시간표 정보는 이 파일에 둔다.
+
+**생성 명령**
+```bash
+python3 crawlers/courses/hongik_timetable.py --output data/course_section.csv
+python3 crawlers/courses/validate_course_sections.py --sections data/course_section.csv --courses data/course.csv
+```
+
+**필드 설명**
+- `course_id`: 학수번호에서 분반을 제거한 값. 예: `140715-1` → `140715`
+- `section`: 분반. 예: `140715-1` → `1`
+- `course_name`: 공식 시간표의 한글 과목명
+- `dept_name`: 공식 시간표의 개설학과
+- `offering_dept`: 공식 시간표의 주관학과
+- `professor`: 교원명
+- `time_slots_raw`: 공식 시간표 표기 그대로 저장 (`월91011`, `수89,금9`)
+- `credit`: 학점
+- `grade`: 개설학년 (`0`은 전체/학년 무관 개설로 취급)
+- `category`: 공식 시간표 이수구분 (`전필`, `전선`, `전기` 등)
+- `source_term`: 데이터 기준 학기. 현재 `2026-1`
+- `source_url`: `https://cn.hongik.ac.kr/app/timetable/`
+- `source_dept_code`: 크롤링에 사용한 공식 조회 scope 코드 (`A200`, `B010`, `GE1`, `ENG_GE14` 등). 동일 분반이 비공학/공학 교양 메뉴에 동시에 노출되면 세미콜론으로 병합한다. 예: `ENG_GE14;GE4`
+- `source_dept_name`: 공식 조회 scope명. 중복 scope 병합 시 세미콜론으로 병합한다.
+- `notes`: 공식 시간표 비고
+
+
+**현재 포함 scope (2026-1, 서울캠퍼스, 2022년 입학생~)**
+- 전공: `A200` 컴퓨터·데이터공학부(컴퓨터공학과, 산업·데이터공학과), `B010` 경영학부
+- 비공학 교양: `GE1~GE8`, `GE11~GE17`
+- 공학계열 교양/MSC: `ENG_GE1~ENG_GE7`, `ENG_GE11~ENG_GE16` (`ENG_GE14=MSC수학`, `ENG_GE15=MSC과학`, `ENG_GE16=MSC전산`)
+- 공식 페이지에서 동일 분반이 비공학/공학 교양 메뉴에 중복 노출되는 경우 한 row로 병합하고 source scope만 세미콜론으로 보존한다.
+
+**검증 규칙**
+1. 필수 헤더 존재
+2. 샘플 과목 검증
+   - `140715` 시스템분석 / 하정훈 / `월91011`
+   - `140524` 경제성분석 / 옥창수 / `화123`
+   - `140316` 데이터사이언스 / 박희석 / `수89,금9`
+   - `033102`, `033103`은 다중 분반 존재
+3. `course_section.course_id`가 `course.csv.course_id`에 존재하는지 매칭률 출력
+
 ## 4. `competency.csv`
 역량 taxonomy 10개 -- 한국 NCS 기반 + 약간 변형
 
