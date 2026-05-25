@@ -55,7 +55,7 @@
 
 | # | 선행 작업 | 현재 상태 | 담당/이슈 |
 |---|-----------|-----------|-----------|
-| P1 | **시간 슬롯 전처리**: `time_slots_raw`(`월91011`) → `time_slots_int`(정수 슬롯 집합) | `time_slots_int` **193행 전부 빈칸** | 본 설계 후속 |
+| P1 | **시간 슬롯 전처리**: `time_slots_raw`(`월91011`) → `time_slots_int`(정수 슬롯 집합) | ✅ **완료** — `course_section.csv`(986분반) 채움. 스크립트 `crawlers/courses/preprocess_time_slots.py` | 완료 |
 | P2 | **역량 매핑 CSV** 생성: `course_competency.csv`(weight 합=1), `job_competency.csv`(required_level 0~1) | data/에 아직 없음 | 이슈 #10 (박소연) |
 | P3 | **학생 현재 역량 산출**: `recommender/student_competency.py` (기수강 과목 → 역량 누적) | 미구현 | 후속 |
 
