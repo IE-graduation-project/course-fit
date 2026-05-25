@@ -17,9 +17,9 @@ NCS를 주 분류 체계로, 데이터·AI 직무의 정밀 분류는 O*NET을 �
 | DATA | Data Analysis & Statistical Methods | 20 정보통신 → 03 데이터분석 | 15-2041.00 |
 | ML | AI & Machine Learning | 20 정보통신 → 02 SW개발 → AI | 15-1221.00 |
 | DB | Database & Data Engineering | 20 정보통신 → 04 DB·빅데이터 | 15-1242.00 |
-| VIZ | Data Visualization & Reporting | 20 정보통신 → 03 데이터분석 → 시각화 | 15-1199.08 |
+| VIZ | Data Visualization & Reporting | 20 정보통신 → 03 데이터분석 → 시각화 | 15-2051.01 |
 | BIZ | Business Strategy & Management | 02 경영·회계·사무 → 01 기획 | 11-1021.00 |
-| FIN | Finance & Accounting | 02 경영·회계·사무 → 02 재무·회계 | 13-2011.00 |
+| FIN | Finance & Accounting | 02 경영·회계·사무 → 03 재무·회계 | 13-2011.00 |
 | MKT | Marketing & Consumer Insight | 02 경영·회계·사무 → 03 마케팅 | 11-2021.00 |
 | OR | Operations Research & Optimization | 20 정보통신 → 02 SW개발 → 운영연구 | 15-2031.00 |
 | COMM | Communication & Collaboration | 02 경영·회계·사무 → 04 사무 | 27-3031.00 |
