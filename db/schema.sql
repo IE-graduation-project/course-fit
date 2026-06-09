@@ -1,11 +1,12 @@
 -- database: :memory:
 -- DB schema (SQLite)
--- 9 tables for ILP-based curriculum recommendation
+-- 11 tables for ILP-based curriculum recommendation
 --   seed(7): department, graduation_requirement, course, competency,
 --            course_competency, job, job_competency
---   runtime(2, 빈 채로): recommendation_log, student_input
--- 참고: course_section.csv(2026-1 분반·시간표)는 시간표 추천 단계에서 적재 예정 — 현재 미적재.
---       job_posting 원본 크롤링은 매핑 도출에만 사용 — DB 미포함.
+--   runtime(4, 빈 채로): recommendation_log, student_input, student, student_course
+-- 참고: course_section.csv(2026-1 분반/시간표)는 시간표 추천 단계에서 적재 예정, 현재 미적재.
+--       job_posting 원본 크롤링은 매핑 도출에만 사용, DB 미포함.
+--       student/student_course/student_input은 성적표 적재(이슈 #16)로 채워진다.
 
 PRAGMA foreign_keys = ON;
 
@@ -103,6 +104,42 @@ CREATE TABLE IF NOT EXISTS student_input (
     FOREIGN KEY (course_id) REFERENCES course(course_id)
 );
 
+-- 10. student: 성적표 1건 = 학생 1명 (이슈 #16)
+CREATE TABLE IF NOT EXISTS student (
+    input_hash      TEXT    PRIMARY KEY,   -- 성적표 내용 기반 결정적 해시
+    student_no      TEXT,                  -- 학번 (성적표에 있으면)
+    name            TEXT,                  -- 성명 (있으면)
+    dept_id         TEXT,                  -- 매핑된 학과(IDE/BIZ), 매핑 실패 시 NULL
+    dept_name_raw   TEXT,                  -- 성적표 원문 학과명
+    admission_year  INTEGER,               -- 입학년도
+    current_grade   INTEGER,               -- 현재 학년 (성적표 기준/추정)
+    total_earned    INTEGER,               -- 총 취득학점 (성적표 합계)
+    gpa             REAL,                  -- 전체 평점평균 (성적표 표기)
+    source_file     TEXT,                  -- 원본 PDF 파일명
+    created_at      TEXT,
+    FOREIGN KEY (dept_id) REFERENCES department(dept_id)
+);
+
+-- 11. student_course: 성적표 전 과목 원본 (이슈 #16)
+-- catalog 미매칭(교양/타과/폐지) 과목까지 포함해 영역별 기수강학점(need_g) 산출에 사용.
+CREATE TABLE IF NOT EXISTS student_course (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    input_hash      TEXT    NOT NULL,
+    course_id       TEXT,                  -- 학수번호 (없을 수 있음)
+    course_name     TEXT    NOT NULL,
+    category_raw    TEXT,                  -- 성적표 이수구분 원문 (전필/전선/교양 등)
+    area            TEXT,                  -- area enum 매핑값 (실패 시 NULL)
+    credit          INTEGER NOT NULL,
+    grade_letter    TEXT,                  -- 등급 원문 (A+, B0, P, F, NP 등)
+    grade           REAL,                  -- 4.5 환산 (P/N/F 등 비해당 시 NULL)
+    is_pn           INTEGER DEFAULT 0,     -- P/N 과목이면 1
+    passed          INTEGER DEFAULT 0,     -- 이수(취득) 여부
+    superseded      INTEGER DEFAULT 0,     -- 재수강으로 대체된 이전 시도 (집계 제외)
+    term            TEXT,                  -- 수강 학기 (예: 2023-1, 2025-S)
+    matched         INTEGER DEFAULT 0,     -- course 카탈로그 매칭 여부
+    FOREIGN KEY (input_hash) REFERENCES student(input_hash)
+);
+
 -- Indexes (성능)
 CREATE INDEX IF NOT EXISTS idx_course_dept    ON course(dept_id);
 CREATE INDEX IF NOT EXISTS idx_course_area    ON course(area);
@@ -110,3 +147,5 @@ CREATE INDEX IF NOT EXISTS idx_course_sem     ON course(semester);
 CREATE INDEX IF NOT EXISTS idx_gr_dept_year   ON graduation_requirement(dept_id, admission_year);
 CREATE INDEX IF NOT EXISTS idx_cc_course      ON course_competency(course_id);
 CREATE INDEX IF NOT EXISTS idx_jc_job         ON job_competency(job_id);
+CREATE INDEX IF NOT EXISTS idx_sc_hash        ON student_course(input_hash);
+CREATE INDEX IF NOT EXISTS idx_si_hash        ON student_input(input_hash);
