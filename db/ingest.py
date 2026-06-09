@@ -26,6 +26,7 @@ LOAD_ORDER = [
     ("graduation_requirement", "graduation_requirement.csv"),
     ("competency",             "competency.csv"),
     ("course",                 "course.csv"),
+    ("course",                 "course_crawled.csv"),  # 다년도 시간표 보강분 (이슈 #18)
     ("job",                    "job.csv"),
     ("course_competency",      "course_competency.csv"),
     ("job_competency",         "job_competency.csv"),
