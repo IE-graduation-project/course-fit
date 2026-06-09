@@ -134,7 +134,8 @@ CREATE TABLE IF NOT EXISTS student_course (
     grade           REAL,                  -- 4.5 환산 (P/N/F 등 비해당 시 NULL)
     is_pn           INTEGER DEFAULT 0,     -- P/N 과목이면 1
     passed          INTEGER DEFAULT 0,     -- 이수(취득) 여부
-    term            TEXT,                  -- 수강 학기 (예: 2023-1)
+    superseded      INTEGER DEFAULT 0,     -- 재수강으로 대체된 이전 시도 (집계 제외)
+    term            TEXT,                  -- 수강 학기 (예: 2023-1, 2025-S)
     matched         INTEGER DEFAULT 0,     -- course 카탈로그 매칭 여부
     FOREIGN KEY (input_hash) REFERENCES student(input_hash)
 );

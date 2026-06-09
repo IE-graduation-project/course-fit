@@ -1,8 +1,9 @@
-"""홍익대 성적표 PDF 파서 (이슈 #16).
+"""홍익대 성적표 PDF 파서 (이슈 #16, 트랙 1, 미정).
 
 pdfplumber로 텍스트/표를 추출해 TranscriptResult로 변환한다.
 레이아웃 의존 부분(_extract_meta, _extract_rows)은 샘플 PDF 확정 후 채운다.
 매핑 적용(_row_to_course)과 오케스트레이션은 레이아웃과 무관하게 완성돼 있다.
+복붙(전체성적조회) 트랙은 parse_text.py 참고.
 """
 
 from __future__ import annotations
@@ -13,7 +14,7 @@ from . import mappings
 from .models import StudentMeta, TakenCourse, TranscriptResult
 
 
-def parse_transcript(pdf_path) -> TranscriptResult:
+def parse_transcript_pdf(pdf_path) -> TranscriptResult:
     """성적표 PDF -> TranscriptResult."""
     import pdfplumber  # 지연 import: 모듈 import 시 의존성 강제 안 함
 

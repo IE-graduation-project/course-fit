@@ -6,6 +6,7 @@ PDF 레이아웃과 무관한 매핑 규칙과 DB 적재 로직을 검증한다.
 
 from __future__ import annotations
 
+import pathlib
 import sqlite3
 
 import pytest
@@ -14,6 +15,9 @@ from transcript import mappings
 from transcript.load import ensure_schema, load_transcript
 from transcript.models import StudentMeta, TakenCourse, TranscriptResult
 from transcript.parse import _row_to_course
+from transcript.parse_text import parse_transcript_text
+
+FIXTURE = pathlib.Path(__file__).parent / "fixtures" / "transcript_paste_sample.txt"
 
 
 # --- 등급 매핑 ---------------------------------------------------------------
@@ -155,3 +159,54 @@ def test_load_pn_course(conn):
     load_transcript(TranscriptResult("h_pn_000000001", meta, courses), conn)
     row = conn.execute("SELECT grade, is_pn FROM student_input WHERE course_id='140999'").fetchone()
     assert row == (0.0, 1)   # P/N은 grade 0.0 + is_pn=1
+
+
+# --- 전체성적조회 복붙 파서 (트랙 2) ----------------------------------------
+def test_text_parse_basic():
+    r = parse_transcript_text(FIXTURE.read_text(encoding="utf-8"), dept_id="BIZ", admission_year=2021)
+    assert r.meta.dept_id == "BIZ"
+    assert r.meta.admission_year == 2021
+    assert r.meta.current_grade == 2
+    assert r.meta.total_earned == 15
+    assert r.meta.gpa == 3.10
+    assert len(r.courses) == 8
+    assert sum(1 for c in r.courses if c.superseded) == 1          # 재수강 1건
+    blanks = [c for c in r.courses if c.grade_letter is None]       # 공란 = 미이수
+    assert blanks and all(not c.passed for c in blanks)
+    ps = [c for c in r.courses if c.grade_letter == "P"]            # P = pn + 이수
+    assert ps and all(c.is_pn and c.passed for c in ps)
+
+
+def test_text_parse_infer_admission_year():
+    r = parse_transcript_text(FIXTURE.read_text(encoding="utf-8"))  # year 미지정 -> 추론
+    assert r.meta.admission_year == 2021   # 최초 1학년 학년도
+
+
+def test_text_load_end_to_end(conn):
+    conn.execute("INSERT INTO department VALUES ('BIZ', '경영학과', 132)")
+    for cid, area in [("311001", "전공필수"), ("311002", "전공기초"), ("311003", "전공선택"),
+                      ("311004", "전공기초"), ("900001", "공통교양")]:
+        conn.execute(
+            "INSERT INTO course (course_id, course_name, credit, dept_id, area) VALUES (?, ?, 3, 'BIZ', ?)",
+            (cid, cid, area),
+        )
+    conn.commit()
+
+    r = parse_transcript_text(FIXTURE.read_text(encoding="utf-8"), dept_id="BIZ", admission_year=2021)
+    load_transcript(r, conn)
+
+    assert conn.execute("SELECT COUNT(*) FROM student_course").fetchone()[0] == 8
+    si = dict(conn.execute("SELECT course_id, grade FROM student_input").fetchall())
+    assert set(si) == {"311001", "311002", "311003", "311004", "900001"}
+    assert si["311003"] == 3.0       # 재수강 최종 B0이 유효본
+    assert si["900001"] == 0.0       # P/N은 0.0
+    # 311003: 공란/재수강/B0 = student_course 3행
+    assert conn.execute("SELECT COUNT(*) FROM student_course WHERE course_id='311003'").fetchone()[0] == 3
+    # 007777 미매칭 -> student_input 제외, student_course엔 matched=0 area=NULL
+    assert conn.execute("SELECT matched, area FROM student_course WHERE course_id='007777'").fetchone() == (0, None)
+    # 영역별 기수강학점 (need_g 산출분): 매칭+이수+비대체만
+    area_credits = dict(conn.execute(
+        "SELECT area, SUM(credit) FROM student_course "
+        "WHERE matched=1 AND passed=1 AND superseded=0 GROUP BY area"
+    ).fetchall())
+    assert area_credits == {"전공필수": 3, "전공기초": 6, "전공선택": 3, "공통교양": 2}

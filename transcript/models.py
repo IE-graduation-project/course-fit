@@ -35,7 +35,8 @@ class TakenCourse:
     grade: float | None = None          # 4.5 환산 (P/N/F 등 비해당 시 None)
     is_pn: bool = False                 # P/N 과목 여부
     passed: bool = False                # 이수(취득) 여부
-    term: str | None = None             # 수강 학기 (예: 2023-1)
+    superseded: bool = False            # 재수강으로 대체된 이전 시도 (집계 제외, 이력 보존)
+    term: str | None = None             # 수강 학기 (예: 2023-1, 2025-S)
     matched: bool = False               # course 카탈로그 매칭 여부 (적재 시 확정)
 
 

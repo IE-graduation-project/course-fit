@@ -33,8 +33,9 @@ def ensure_schema(conn: sqlite3.Connection) -> None:
     conn.commit()
 
 
-def _catalog_course_ids(conn: sqlite3.Connection) -> set[str]:
-    return {row[0] for row in conn.execute("SELECT course_id FROM course")}
+def _catalog_areas(conn: sqlite3.Connection) -> dict[str, str]:
+    """course_id -> area (catalog가 권위 있는 영역 소스)."""
+    return {cid: area for cid, area in conn.execute("SELECT course_id, area FROM course")}
 
 
 def _delete_existing(conn: sqlite3.Connection, input_hash: str) -> None:
@@ -51,7 +52,7 @@ def load_transcript(
     source_file: str | None = None,
 ) -> str:
     """TranscriptResult를 3개 테이블에 적재하고 input_hash를 반환한다."""
-    catalog = _catalog_course_ids(conn)
+    catalog = _catalog_areas(conn)
     h = result.input_hash
     created_at = created_at or datetime.now(timezone.utc).isoformat()
 
@@ -67,20 +68,22 @@ def load_transcript(
          m.admission_year, m.current_grade, m.total_earned, m.gpa, source_file, created_at),
     )
 
-    # student_course: 전 과목 / student_input 후보: 매칭 + 이수 과목 중 최고 성적
+    # student_course: 전 과목 / student_input 후보: 매칭 + 이수 + 비대체 과목 중 최고 성적
     best_input: dict[str, tuple[float, int]] = {}
     for c in result.courses:
         matched = bool(c.course_id and c.course_id in catalog)
+        # 매칭 과목의 영역은 catalog가 권위(이수구분보다 세분), 미매칭은 파서 제공값 유지
+        area = catalog[c.course_id] if matched else c.area
         conn.execute(
             """INSERT INTO student_course
                    (input_hash, course_id, course_name, category_raw, area,
-                    credit, grade_letter, grade, is_pn, passed, term, matched)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-            (h, c.course_id, c.course_name, c.category_raw, c.area,
+                    credit, grade_letter, grade, is_pn, passed, superseded, term, matched)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (h, c.course_id, c.course_name, c.category_raw, area,
              c.credit, c.grade_letter, c.grade, int(c.is_pn), int(c.passed),
-             c.term, int(matched)),
+             int(c.superseded), c.term, int(matched)),
         )
-        if matched and c.passed:
+        if matched and c.passed and not c.superseded:
             # P/N은 평점이 없으므로 0.0으로 저장(소비자는 is_pn=1이면 grade 무시)
             g = 0.0 if (c.is_pn or c.grade is None) else c.grade
             prev = best_input.get(c.course_id)

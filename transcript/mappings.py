@@ -99,7 +99,11 @@ def compute_input_hash(meta, courses) -> str:
     학생 식별자(학번 우선, 없으면 성명) + 정렬된 과목 핵심값으로 산출.
     같은 성적표 재업로드 시 동일 hash -> idempotent 적재.
     """
-    ident = (getattr(meta, "student_no", None) or getattr(meta, "name", None) or "").strip()
+    ident = (
+        getattr(meta, "student_no", None)
+        or getattr(meta, "name", None)
+        or "{}|{}".format(getattr(meta, "dept_id", None), getattr(meta, "admission_year", None))
+    ).strip()
     rows = sorted(
         "{}|{}|{}|{}".format(
             c.course_id or "",
