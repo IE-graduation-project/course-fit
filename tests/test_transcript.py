@@ -210,3 +210,23 @@ def test_text_load_end_to_end(conn):
         "WHERE matched=1 AND passed=1 AND superseded=0 GROUP BY area"
     ).fetchall())
     assert area_credits == {"전공필수": 3, "전공기초": 6, "전공선택": 3, "공통교양": 2}
+
+
+# --- PDF 트랙(트랙 1) 보수적 골격 -------------------------------------------
+def test_pdf_delegates_to_text(monkeypatch):
+    # 실제 PDF 없이: 텍스트 추출만 모킹 -> 검증된 텍스트 파서에 위임됨을 확인
+    from transcript import parse as pdfmod
+
+    monkeypatch.setattr(pdfmod, "extract_pdf_text", lambda p: FIXTURE.read_text(encoding="utf-8"))
+    r = pdfmod.parse_transcript_pdf("dummy.pdf", dept_id="BIZ", admission_year=2021)
+    assert r.meta.dept_id == "BIZ"
+    assert len(r.courses) == 8
+
+
+def test_pdf_empty_raises(monkeypatch):
+    # 과목을 못 뽑으면 조용히 빈 결과 대신 명확히 실패 (보수적)
+    from transcript import parse as pdfmod
+
+    monkeypatch.setattr(pdfmod, "extract_pdf_text", lambda p: "헤더만 있고 과목 없음")
+    with pytest.raises(pdfmod.TranscriptParseError):
+        pdfmod.parse_transcript_pdf("dummy.pdf", dept_id="BIZ", admission_year=2021)
