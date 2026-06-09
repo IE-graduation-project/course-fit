@@ -1,10 +1,10 @@
 -- database: :memory:
 -- DB schema (SQLite)
--- 11 tables for ILP-based curriculum recommendation
---   seed(7): department, graduation_requirement, course, competency,
---            course_competency, job, job_competency
+-- 12 tables for ILP-based curriculum recommendation
+--   seed(8): department, graduation_requirement, course, competency,
+--            course_competency, job, job_competency, course_section
 --   runtime(4, 빈 채로): recommendation_log, student_input, student, student_course
--- 참고: course_section.csv(2026-1 분반/시간표)는 시간표 추천 단계에서 적재 예정, 현재 미적재.
+-- 참고: course_section(2026-1 분반/시간표)은 ILP 시간표 추천 후보의 시간정보. course 전체 적재 후 적재.
 --       job_posting 원본 크롤링은 매핑 도출에만 사용, DB 미포함.
 --       student/student_course/student_input은 성적표 적재(이슈 #16)로 채워진다.
 
@@ -140,6 +140,26 @@ CREATE TABLE IF NOT EXISTS student_course (
     FOREIGN KEY (input_hash) REFERENCES student(input_hash)
 );
 
+-- 12. course_section: 2026-1 분반/시간표 (ILP 시간표 추천 후보의 시간정보)
+-- grain: 과목 × 분반 × 학기. (course_id, section, source_term) 유일성 검증됨(986행 중복 0).
+-- course 전체 적재 후 적재(FK 의존). credit/course_name은 course에서 조인(중복 저장 안 함).
+-- time_slots_int NULL = 비대면/논문/실습 등 고정 시간 미지정(28행) → 추천 시 시간충돌 제약 제외.
+CREATE TABLE IF NOT EXISTS course_section (
+    course_id        TEXT    NOT NULL,   -- FK → course
+    section          TEXT    NOT NULL,   -- 분반 번호 ('1','2'...)
+    source_term      TEXT    NOT NULL,   -- 개설 학기 ('2026-1')
+    time_slots_int   TEXT,               -- ILP 충돌제약용 교시 인덱스 ('34,35,50,51')
+    time_slots_raw   TEXT,               -- 사람 읽기용 ('수23,목23')
+    professor        TEXT,
+    category         TEXT,               -- 개설시점 이수구분('전필' 등, 개설학부 관점)
+    offering_dept    TEXT,               -- 실제 개설학과
+    source_dept_code TEXT,               -- 크롤 스코프 코드('A200')
+    source_dept_name TEXT,               -- 크롤 스코프명
+    notes            TEXT,               -- 수강제한/비고
+    PRIMARY KEY (course_id, section, source_term),
+    FOREIGN KEY (course_id) REFERENCES course(course_id)
+);
+
 -- Indexes (성능)
 CREATE INDEX IF NOT EXISTS idx_course_dept    ON course(dept_id);
 CREATE INDEX IF NOT EXISTS idx_course_area    ON course(area);
@@ -149,3 +169,5 @@ CREATE INDEX IF NOT EXISTS idx_cc_course      ON course_competency(course_id);
 CREATE INDEX IF NOT EXISTS idx_jc_job         ON job_competency(job_id);
 CREATE INDEX IF NOT EXISTS idx_sc_hash        ON student_course(input_hash);
 CREATE INDEX IF NOT EXISTS idx_si_hash        ON student_input(input_hash);
+CREATE INDEX IF NOT EXISTS idx_section_course ON course_section(course_id);
+CREATE INDEX IF NOT EXISTS idx_section_term   ON course_section(source_term);

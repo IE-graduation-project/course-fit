@@ -1,7 +1,8 @@
 # DB 구축 계획
 
 ILP 기반 커리큘럼 추천용 SQLite DB(`db/schema.sql` → `db/app.db`) 적재 계획·결과.
-(2026-05-24 계획 확정 → **2026-05-27 실행 완료**: 7개 테이블 2222행, 검증 통과.)
+(2026-05-24 계획 확정 → **2026-05-27 실행 완료**: 7개 테이블 2222행, 검증 통과.
+→ **2026-06-10 갱신**: catalog 다년도 보강(#18)으로 `course` 193→3,304, `course_section` 적재(986행) → 8개 시드 테이블 6,319행. course_competency 전체 매핑 재실행은 후속.)
 
 ## 1. 적재 대상 테이블
 
@@ -9,12 +10,12 @@ ILP 기반 커리큘럼 추천용 SQLite DB(`db/schema.sql` → `db/app.db`) 적
 |--------|------|-----------|------|
 | `department` | `data/department.csv` | CSV 직적재 | IDE/BIZ/COMMON |
 | `graduation_requirement` | `data/graduation_requirement.csv` | CSV 직적재 | `req_id` autoincrement (CSV에 없음) |
-| `course` | `data/course.csv` | CSV 직적재 | 과목 단위 SOT |
+| `course` | `data/course.csv` + `data/course_crawled.csv` | CSV 직적재 | 커레이트 193 + 크롤 보강 3,111 = 3,304 (전체 카탈로그) |
 | `competency` | `data/competency.csv` | CSV 직적재 | taxonomy SOT, 10개 |
 | `job` | `data/job.csv` | CSV 직적재 | 6개 (DA/DE/DS/FIN/MKT/PM) |
-| `course_competency` | `data/course_competency.csv` | 역량 매핑 후 적재 ✅ | 매핑 산출물 1930행 |
+| `course_competency` | `data/course_competency.csv` | 역량 매핑 후 적재 ✅ | 매핑 산출물 1930행(193과목분). **전체 3,304 매핑 재실행 후속** |
 | `job_competency` | `data/job_competency.csv` | 역량 매핑 후 적재 ✅ | 매핑 산출물 60행 |
-| `course_section` | `data/course_section.csv` | **현재 미적재 (보류)** | 시간표 추천 단계로 미룸. CSV로만 보유 |
+| `course_section` | `data/course_section.csv` | **적재 완료 ✅ (#18 후속)** | 2026-1 분반/시간표 986행. course 적재 후(FK). 16컬럼 중 11컬럼 저장 |
 | `recommendation_log` | — | 런타임 생성(빈 테이블) ✅ | |
 | `student_input` | — | 런타임 생성(빈 테이블) ✅ | |
 
@@ -38,21 +39,23 @@ raw 채용공고는 DB 테이블로 만들지 않음. **schema.sql·ingest.py에
 
 | | `course` | `course_section` |
 |---|---|---|
-| 단위 | 과목 1행 (193개) | 분반 1행 (986개, 1:N) |
+| 단위 | 과목 1행 (3,304개) | 분반 1행 (986개, 1:N) |
 | 시간성 | 학기 무관 마스터/SOT | 2026-1 실제 개설 스냅샷 |
 | 목적 | ILP 입력 (역량매핑·졸업요건·선수과목) | 실제 수강가능·시간표 충돌검사 |
 | 고유 속성 | area, semester, prerequisites, is_major_required, is_pn, is_certified_sw, msc_subarea, allowed_years | section, professor, time_slots_raw, grade, category, offering_dept, source_* |
 
-- 공통 컬럼은 4개뿐(course_id, course_name, credit, time_slots_raw). course_section엔 ILP 핵심 속성이 없음.
-- 합치면 ILP 속성이 분반 수만큼 중복되고, 매칭률 42%(section 280개 course_id 중 117개만 course에 존재) 탓에 NULL/손실 발생.
+- 공통 컬럼은 course_id·course_name·credit·time_slots_raw 정도. course_section엔 ILP 핵심 속성(area·졸업요건·선수)이 없음.
+- 합치면 ILP 속성이 분반 수만큼 중복됨 → 별도 테이블 유지가 정규화상 깔끔.
 
-### 결정: `course_section`은 시간표 추천 단계에서 적재 (현재 보류)
-실측 986분반 / 고유 course_id 280개(전부 2026-1). 그중 **163개 course_id가 course 카탈로그(193) 밖**(타과·교양 등) → 역량 매핑이 없어 추천에 사용 불가.
+### 결정: `course_section` 적재 완료 (2026-06-10, #18 후속)
+실측 986분반 / 고유 course_id 280개(전부 2026-1). 과거엔 **163개 course_id가 course 카탈로그(193) 밖**이라 FK가 깨져 보류했으나, catalog 다년도 보강(#18)으로 `course`가 전체 3,304가 되면서 **280개 전부 course에 존재 → FK 위반 0** 확인. 그래서 필터 없이 986분반 전체 적재.
 
-- **현재**: 미적재. `course_section.csv` 파일로만 보유.
-- **적재 시(시간표 추천 단계)**: course 카탈로그(193) 기준 필터 후 적재 → FK 깔끔. ILP 결정 단위가 분반이므로 그때 테이블 신설.
+- **PK** `(course_id, section, source_term)` (986행 유일성 검증). **FK** `course_id → course`.
+- CSV 16컬럼 중 11컬럼 저장. 미저장 5개: `course_name`/`credit`(course 조인, credit 100% 일치), `dept_name`(`offering_dept`와 중복), `grade`(`allowed_years`와 중복), `source_url`(상수).
+- **추천 후보 = 별도 테이블 아님, 조인으로 도출**: `course_section ⋈ course WHERE dept_id IN ('IDE','BIZ','COMMON')` → 280과목/986분반(IDE 39, BIZ 32, COMMON 209). `course`(3,304)는 성적표 역량 매칭 universe, 추천 후보는 그중 26-1 분반이 있는 부분집합.
+- 컴공 전공(자료구조·알고리즘 등 21과목)도 분반이 적재됨 — 산데공과 같은 학부라 추천 scope 확장 시 활용 가능. 단 해당 과목 `area` 커레이트는 별도 과제.
 
-> 실제 시간표 충돌검사는 비어있는 `course.time_slots_int`가 아니라 `course_section`을 참조해야 정확함 (별도 설계 결정).
+> 시간표 충돌검사는 비어있는 `course.time_slots_int`가 아니라 `course_section.time_slots_int`를 참조 (28분반은 NULL=비대면/논문 등, 충돌제약 제외).
 
 ## 4. 역량 taxonomy — `data/competency.csv` 기준
 

@@ -27,6 +27,7 @@ LOAD_ORDER = [
     ("competency",             "competency.csv"),
     ("course",                 "course.csv"),
     ("course",                 "course_crawled.csv"),  # 다년도 시간표 보강분 (이슈 #18)
+    ("course_section",         "course_section.csv"),  # 2026-1 분반/시간표 (FK: course 적재 후)
     ("job",                    "job.csv"),
     ("course_competency",      "course_competency.csv"),
     ("job_competency",         "job_competency.csv"),
@@ -61,7 +62,15 @@ def load_csv(conn: sqlite3.Connection, table: str, csv_path: Path) -> int:
         print(f"  [SKIP] {csv_path.name} 비어있음")
         return 0
 
-    cols = list(rows[0].keys())
+    # 테이블에 실제 존재하는 컬럼만 적재 (CSV가 더 많은 컬럼을 가질 수 있음.
+    # 예: course_section.csv 16컬럼 → 테이블 11컬럼. provenance 컬럼은 미저장)
+    table_cols = {r[1] for r in conn.execute(f"PRAGMA table_info({table})")}
+    csv_cols = list(rows[0].keys())
+    cols = [c for c in csv_cols if c in table_cols]
+    dropped = [c for c in csv_cols if c not in table_cols]
+    if dropped:
+        print(f"  [INFO] {csv_path.name}: 테이블에 없는 컬럼 제외 → {dropped}")
+
     placeholders = ",".join(["?"] * len(cols))
     sql = f"INSERT INTO {table} ({','.join(cols)}) VALUES ({placeholders})"
 

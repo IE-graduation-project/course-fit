@@ -112,6 +112,16 @@ python3 crawlers/courses/validate_course_sections.py --sections data/course_sect
    - `033102`, `033103`은 다중 분반 존재
 3. `course_section.course_id`가 `course.csv.course_id`에 존재하는지 매칭률 출력
 
+**DB 적재 (`course_section` 테이블, 이슈 #18 후속)**
+- `db/ingest.py`가 `course` 전체 적재 후 적재(FK 의존). PK `(course_id, section, source_term)`.
+- CSV 16컬럼 중 **11컬럼만 저장**. 다음 5개는 미저장:
+  - `course_name`, `credit` → `course` 테이블에서 조인 (credit은 course와 100% 일치 검증됨)
+  - `dept_name` → `offering_dept`와 중복, `grade` → `course.allowed_years`와 중복, `source_url` → 전 행 상수
+- `time_slots_int` NULL(28분반) = 비대면/논문/실습 등 고정 시간 미지정 → ILP 시간충돌 제약에서 제외.
+- **추천 후보는 별도 테이블이 아니라 조인으로 도출**:
+  `course_section ⋈ course (dept_id IN ('IDE','BIZ','COMMON'))`
+  → 현재 280과목/986분반(IDE 39, BIZ 32, COMMON 209). `course`(전체 카탈로그 3,304)는 성적표 역량 매칭용 universe이고, 추천 후보는 26-1 분반이 있는 부분집합.
+
 ## 4. `competency.csv`
 역량 taxonomy 10개 -- 한국 NCS 기반 + 약간 변형
 
