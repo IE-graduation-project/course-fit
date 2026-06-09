@@ -202,8 +202,8 @@ def test_text_load_end_to_end(conn):
     assert si["900001"] == 0.0       # P/N은 0.0
     # 311003: 공란/재수강/B0 = student_course 3행
     assert conn.execute("SELECT COUNT(*) FROM student_course WHERE course_id='311003'").fetchone()[0] == 3
-    # 007777 미매칭 -> student_input 제외, student_course엔 matched=0 area=NULL
-    assert conn.execute("SELECT matched, area FROM student_course WHERE course_id='007777'").fetchone() == (0, None)
+    # 007777 미매칭 -> student_input 제외, student_course엔 matched=0 + 일반선택 fallback
+    assert conn.execute("SELECT matched, area FROM student_course WHERE course_id='007777'").fetchone() == (0, "일반선택")
     # 영역별 기수강학점 (need_g 산출분): 매칭+이수+비대체만
     area_credits = dict(conn.execute(
         "SELECT area, SUM(credit) FROM student_course "

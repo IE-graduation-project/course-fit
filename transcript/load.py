@@ -19,6 +19,10 @@ ROOT = Path(__file__).resolve().parent.parent
 DB_PATH = ROOT / "db" / "app.db"
 SCHEMA_PATH = ROOT / "db" / "schema.sql"
 
+# catalog/이수구분 어디에도 영역이 없으면 졸업규칙상 일반선택(catch-all)으로 환산.
+# 어떤 학생 성적표든 robust하게 적재되게 하는 일반화 장치 (catalog 완전성과 무관).
+FALLBACK_AREA = "일반선택"
+
 
 def connect(db_path=DB_PATH) -> sqlite3.Connection:
     conn = sqlite3.connect(str(db_path))
@@ -72,8 +76,9 @@ def load_transcript(
     best_input: dict[str, tuple[float, int]] = {}
     for c in result.courses:
         matched = bool(c.course_id and c.course_id in catalog)
-        # 매칭 과목의 영역은 catalog가 권위(이수구분보다 세분), 미매칭은 파서 제공값 유지
-        area = catalog[c.course_id] if matched else c.area
+        # 매칭 과목 영역은 catalog가 권위(이수구분보다 세분). 미매칭은 파서 제공값,
+        # 그것도 없으면 일반선택 fallback (졸업 catch-all, 어떤 성적표든 영역 결측 없이 적재).
+        area = catalog[c.course_id] if matched else (c.area or FALLBACK_AREA)
         conn.execute(
             """INSERT INTO student_course
                    (input_hash, course_id, course_name, category_raw, area,
