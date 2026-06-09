@@ -152,27 +152,27 @@ DA,사람인,https://...,공고 본문 전체...,2026-05-09T14:30:00
 - `raw_text`: 줄바꿈 포함 가능 → CSV 저장 시 quote 처리 필수 (`csv.QUOTE_ALL` 또는 pandas 기본)
 
 ## 7. `course_competency.csv`
-LLM 매핑 결과. **course_id별 weight 합 = 1.0 ± 0.01** 검증.
+정량 매핑 결과(TF-IDF + KoSBERT, `mapping/`). LLM은 과목 설명 생성(입력)에만 쓰고
+매핑 점수 산출엔 미사용. comp_id는 `competency.csv`의 10개만. 과목당 10행.
+**course_id별 weight 합 = 1.0 ± 0.01** 검증(`db/ingest.py`).
 
 ```
 course_id,comp_id,weight
-101503,PROG,0.6
-101503,MATH,0.4
-013312,PROG,0.8
-013312,MATH,0.2
+140316,DATA,0.373
+140316,ML,0.261
+140316,DB,0.078
+...   (PROG/VIZ/BIZ/FIN/MKT/OR/COMM 포함 총 10행, 합=1.0)
 ```
 
 ## 8. `job_competency.csv`
-LLM 매핑 결과. 0~1 스케일 (합 = 1 제약 없음, 직무별 독립).
+정량 매핑 결과. 0~1 스케일 (합 = 1 제약 없음, 직무별 독립 min-max). 직무당 10행.
 
 ```
 job_id,comp_id,required_level
-DA,PROG,0.7
-DA,STAT,0.9
-DA,ML,0.5
-DA,DB,0.6
-DA,COMM,0.7
-DA,DATAVIZ,0.8
+DA,VIZ,1.000
+DA,DATA,0.954
+DA,BIZ,0.948
+...   (PROG/ML/DB/FIN/MKT/OR/COMM 포함 총 10행)
 ```
 
 ---
