@@ -35,6 +35,7 @@ import os
 
 ROOT = Path(__file__).resolve().parent.parent
 COURSE_CSV = ROOT / "data" / "course.csv"
+COURSE_CRAWLED_CSV = ROOT / "data" / "course_crawled.csv"  # 다년도 catalog 보강분 (#18)
 DEPT_CSV = ROOT / "data" / "department.csv"
 OUT_CSV = ROOT / "data" / "course_descriptions.csv"
 PROMPT_FILE = ROOT / "mapping" / "prompts" / "course_description.txt"
@@ -48,8 +49,20 @@ def load_dept_names() -> dict[str, str]:
 
 
 def load_courses() -> list[dict]:
-    with COURSE_CSV.open(encoding="utf-8") as f:
-        return list(csv.DictReader(f))
+    """course.csv(커레이트) + course_crawled.csv(catalog 보강)를 합쳐 읽는다.
+
+    course_id 중복 시 커레이트(course.csv)를 우선해 area/dept가 정밀한 행을 남긴다.
+    DB의 course 테이블과 동일한 universe(전체 카탈로그)를 매핑 대상으로 삼아,
+    성적표의 타과 과목까지 역량을 갖게 한다. [[db-build-scope]]
+    """
+    courses: dict[str, dict] = {}
+    for path in (COURSE_CSV, COURSE_CRAWLED_CSV):
+        if not path.exists():
+            continue
+        with path.open(encoding="utf-8") as f:
+            for r in csv.DictReader(f):
+                courses.setdefault(r["course_id"], r)  # 먼저 들어온 course.csv 우선
+    return list(courses.values())
 
 
 def load_done() -> set[str]:
