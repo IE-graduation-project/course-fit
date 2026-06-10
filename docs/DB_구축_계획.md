@@ -13,7 +13,7 @@ ILP 기반 커리큘럼 추천용 SQLite DB(`db/schema.sql` → `db/app.db`) 적
 | `course` | `data/course.csv` + `data/course_crawled.csv` | CSV 직적재 | 커레이트 193 + 크롤 보강 3,111 = 3,304 (전체 카탈로그) |
 | `competency` | `data/competency.csv` | CSV 직적재 | taxonomy SOT, 10개 |
 | `job` | `data/job.csv` | CSV 직적재 | 6개 (DA/DE/DS/FIN/MKT/PM) |
-| `course_competency` | `data/course_competency.csv` | 역량 매핑 후 적재 ✅ | 매핑 산출물 1930행(193과목분). **전체 3,304 매핑 재실행 후속** |
+| `course_competency` | `data/course_competency.csv` | 역량 매핑 후 적재 ✅ | 매핑 산출물 **33,040행(3,304과목 × 10)**. relevance 가중 적용(합 ≤ 1) |
 | `job_competency` | `data/job_competency.csv` | 역량 매핑 후 적재 ✅ | 매핑 산출물 60행 |
 | `course_section` | `data/course_section.csv` | **적재 완료 ✅ (#18 후속)** | 2026-1 분반/시간표 986행. course 적재 후(FK). 16컬럼 중 11컬럼 저장 |
 | `recommendation_log` | — | 런타임 생성(빈 테이블) ✅ | |
@@ -21,7 +21,8 @@ ILP 기반 커리큘럼 추천용 SQLite DB(`db/schema.sql` → `db/app.db`) 적
 
 > `student_input`은 제거(2026-06-10). `student_course`에서 σ입력(matched∧passed∧¬superseded)을 파생할 수 있어 중복이었음. recommender가 student_course에서 직접 도출.
 
-**빌드 결과**: 역량 매핑 완료 후 `.venv/bin/python db/ingest.py --reset`로 7개 테이블 일괄 적재(2222행), 검증 통과(weight 합=1, FK 위반 0).
+**빌드 결과**: `.venv/bin/python db/ingest.py --reset`로 일괄 적재, 검증 통과(course_competency weight 합 ≤ 1, FK 위반 0).
+(초기 빌드 7개 테이블 2222행 → 이후 catalog 보강·course_section·전체 매핑·relevance 반영으로 갱신. 현행 수치는 위 표 참조.)
 참고: `docs/과목과직무_역량_매핑.md`, 적재 검증은 `db/ingest.py`.
 
 **실행 중 보정:**
