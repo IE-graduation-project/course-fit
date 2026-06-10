@@ -72,8 +72,6 @@ def solve_topk(candidates, score_by_course, need, *, U=18, L=12,
     x = {i: pulp.LpVariable(f"x_{i}", cat="Binary") for i in range(len(cands))}
     careerfit = pulp.lpSum(c.credit * score_by_course[c.course_id] * x[i]
                            for i, c in enumerate(cands))
-    gradprog = pulp.lpSum((1 if need.get(c.area, 0) > 0 else 0) * c.credit * x[i]
-                          for i, c in enumerate(cands))
     solver = pulp.PULP_CBC_CMD(msg=msg)
 
     # ── 1순위: 직무적합 최대화 → V*
@@ -85,8 +83,18 @@ def solve_topk(candidates, score_by_course, need, *, U=18, L=12,
         return [Result([], 0.0, 0.0, 0, pulp.LpStatus[p1.status])]
     vstar = pulp.value(careerfit)
 
-    # ── 2순위: 졸업진척 최대화 (직무적합 ≥ (1−ε)V* 유지) + k-best 루프
+    # ── 2순위: 졸업진척(need-cap) 최대화 (직무적합 ≥ (1−ε)V* 유지) + k-best 루프
+    # GradProgress = Σ_g min(need_g, 영역 g에 담은 학점). min은 보조변수 f_g로 선형화:
+    # f_g ≤ need_g, f_g ≤ 담은학점_g, 목적함수에 +f_g → 솔버가 f_g=min(...)으로 맞춤.
     p2 = pulp.LpProblem("gradprogress", pulp.LpMaximize)
+    need_areas = [a for a in {c.area for c in cands} if need.get(a, 0) > 0]
+    fvars = []
+    for j, a in enumerate(need_areas):
+        placed = pulp.lpSum(c.credit * x[i] for i, c in enumerate(cands) if c.area == a)
+        f = pulp.LpVariable(f"f_{j}", lowBound=0, upBound=need[a])  # f_g ≤ need_g
+        p2 += f <= placed, f"needcap_{j}"                          # f_g ≤ 담은학점_g
+        fvars.append(f)
+    gradprog = pulp.lpSum(fvars)
     p2 += gradprog
     _add_base_constraints(p2, x, cands, U, L)
     p2 += careerfit >= (1.0 - eps) * vstar - 1e-6, "careerfit_floor"  # 부동소수 여유

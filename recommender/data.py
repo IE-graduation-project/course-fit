@@ -159,6 +159,12 @@ def load_student(conn, input_hash: str) -> Student:
     )
 
 
+def load_job_name(conn, job_id: str) -> str:
+    """직무 한글명 (표시용). 없으면 job_id 그대로."""
+    r = conn.execute("SELECT job_name FROM job WHERE job_id=?", (job_id,)).fetchone()
+    return r["job_name"] if r else job_id
+
+
 def load_rho(conn, job_id: str) -> dict[str, float]:
     """ρ_k — 목표 직무의 역량 요구수준 (job_competency)."""
     rows = conn.execute(

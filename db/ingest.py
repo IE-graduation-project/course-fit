@@ -94,16 +94,16 @@ def validate(conn: sqlite3.Connection) -> list[str]:
     """무결성 검증. 에러 메시지 리스트 반환 (빈 리스트면 OK)."""
     errors: list[str] = []
 
-    # 검증 2: course_competency.weight 합 = 1.0 ± 0.01
+    # 검증 2: course_competency.weight 합 ≤ 1.0 (= r_c relevance, 무관 과목은 0에 가까움)
     cur = conn.execute("""
         SELECT course_id, ROUND(SUM(weight), 4) AS total
         FROM course_competency
         GROUP BY course_id
-        HAVING ABS(SUM(weight) - 1.0) > 0.01
+        HAVING SUM(weight) > 1.0 + 0.01
     """)
     for row in cur:
         errors.append(
-            f"course_competency: course_id={row[0]} weight 합={row[1]} (기대값 1.0)"
+            f"course_competency: course_id={row[0]} weight 합={row[1]} (기대 ≤ 1.0)"
         )
 
     # 검증 4: course.area ∈ enum

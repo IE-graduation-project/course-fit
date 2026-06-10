@@ -10,6 +10,7 @@ import argparse
 import sys
 
 from . import data, params
+from .explain import build_explanation, format_card
 from .recommend import DEFAULT_PREFERENCE, PREFERENCE_EPS, recommend
 
 
@@ -25,6 +26,7 @@ def main(argv=None) -> int:
                     help="추천 성향: gap(역량충실)/balanced(균형)/graduation(졸업·전공우선)")
     ap.add_argument("--eps", type=float, default=None, help="ε 직접 지정 (지정 시 --mode 무시)")
     ap.add_argument("--top-k", type=int, default=3, help="제시할 대안 시간표 개수 (기본 3)")
+    ap.add_argument("--explain", action="store_true", help="추천 근거 카드 출력 (왜 이 시간표인가)")
     args = ap.parse_args(argv)
 
     eps = args.eps if args.eps is not None else PREFERENCE_EPS[args.mode]
@@ -42,6 +44,13 @@ def main(argv=None) -> int:
     print(f"[학생] {rec.dept_id} {rec.admission_year}학번   [성향] {mode_label}(ε={eps})   [상태] {status}")
     if status != "Optimal":
         print("추천 시간표를 찾지 못했습니다 (제약 충돌 또는 후보 없음).")
+        return 0
+
+    if args.explain:
+        conn = data.connect(args.db)
+        job_name = data.load_job_name(conn, args.job)
+        conn.close()
+        print(format_card(build_explanation(rec, job_name)))
         return 0
 
     print(f"[대안 {len(rec.results)}개 제시]")

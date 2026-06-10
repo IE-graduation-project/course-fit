@@ -164,7 +164,8 @@ DA,사람인,https://...,공고 본문 전체...,2026-05-09T14:30:00
 ## 7. `course_competency.csv`
 정량 매핑 결과(TF-IDF + KoSBERT, `mapping/`). LLM은 과목 설명 생성(입력)에만 쓰고
 매핑 점수 산출엔 미사용. comp_id는 `competency.csv`의 10개만. 과목당 10행.
-**course_id별 weight 합 = 1.0 ± 0.01** 검증(`db/ingest.py`).
+**course_id별 weight 합 = relevance r_c ≤ 1.0** (데이터 무관 과목은 0에 가까움). `db/ingest.py`가 `합 ≤ 1.01` 검증.
+- r_c = 1−exp(−rawТ/τ): 정규화(합=1)가 무관 과목을 부풀려 진짜 데이터 과목을 추월하는 순위 역전을 막는 관련도 가중 (매핑 `05`).
 
 ```
 course_id,comp_id,weight
@@ -190,7 +191,7 @@ DA,BIZ,0.948
 ## 검증 규칙 (ingest.py가 자동 체크)
 
 1. 모든 FK가 부모 테이블에 존재
-2. `course_competency.weight`: course_id별 합 = 1.0 ± 0.01
+2. `course_competency.weight`: course_id별 합 ≤ 1.0 (= relevance r_c)
 3. `job_competency.required_level`: 0~1 범위
 4. `course.area` ∈ enum
 5. `course.area`가 해당 dept의 `graduation_requirement.area`에 존재 (없으면 warning)
