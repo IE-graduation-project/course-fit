@@ -12,7 +12,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from . import data, params
-from .model import Result, solve
+from .model import Result, solve_topk
 
 # 사용자 취향 → ε 프리셋 (설계 4.4). 낮을수록 부족역량 우선(교양 OK),
 # 높을수록 졸업·전공 비중. 포화 학생이 많은 3~4학년 타깃이라 balanced를 기본값으로.
@@ -26,18 +26,23 @@ DEFAULT_PREFERENCE = "balanced"
 
 @dataclass
 class Recommendation:
-    """추천 1건의 전체 산출물 (직렬화·표시용)."""
-    result: Result                  # 선택 분반·V*·졸업진척·총학점·상태
+    """추천 산출물 (직렬화·표시용). σ/gap/need는 시간표와 무관해 공통, 시간표만 top-k."""
+    results: list[Result]           # 상위 k개 시간표 (1등이 [0])
     sigma: dict[str, float]         # 학생 현재 역량 (10차원)
     gap: dict[str, float]           # 직무 대비 부족 방향
     need: dict[str, int]            # 영역별 졸업 부족학점
     dept_id: str
     admission_year: int
 
+    @property
+    def result(self) -> Result:
+        """1등 시간표 (하위호환)."""
+        return self.results[0]
+
 
 def recommend(input_hash, job_id, *, db_path=data.DB_PATH, U=18, L=12,
-              alpha=params.ALPHA_DEFAULT, eps=0.0) -> Recommendation:
-    """파라미터 사전계산(σ/gap/Score/need) → 2단계 ILP → Recommendation.
+              alpha=params.ALPHA_DEFAULT, eps=0.0, k=3) -> Recommendation:
+    """파라미터 사전계산(σ/gap/Score/need) → 2단계 ILP(top-k) → Recommendation.
 
     dept/입학년도는 student 테이블에서 읽으므로 인자로 받지 않는다.
     """
@@ -60,14 +65,14 @@ def recommend(input_hash, job_id, *, db_path=data.DB_PATH, U=18, L=12,
         if c.course_id not in score_by_course:
             score_by_course[c.course_id] = params.score_of(c.weights, gap, comp)
 
-    result = solve(
+    results = solve_topk(
         candidates, score_by_course, need,
         U=U, L=L,
         taken_ids=student.taken_ids,
         passed_ids=set(student.passed.keys()),
-        eps=eps,
+        eps=eps, k=k,
     )
     return Recommendation(
-        result=result, sigma=sigma, gap=gap, need=need,
+        results=results, sigma=sigma, gap=gap, need=need,
         dept_id=student.dept_id, admission_year=student.admission_year,
     )

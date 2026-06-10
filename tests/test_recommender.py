@@ -105,6 +105,26 @@ def test_already_taken_excluded():
     assert res.status == "no_candidates"
 
 
+def test_topk_returns_distinct_alternatives():
+    # 같은 과목 두 분반(시간만 다름) = 동등한 대안. k-best가 둘 다 반환해야.
+    A1 = _cand("a", "1", 3, "전공선택", (1,))
+    A2 = _cand("a", "2", 3, "전공선택", (2,))
+    res = model.solve_topk([A1, A2], {"a": 0.2}, {"전공선택": 6},
+                           U=3, L=3, taken_ids=set(), passed_ids=set(), k=3)
+    assert len(res) == 2                              # 분반택1이라 1·2분반 두 대안
+    assert {r.selected[0].section for r in res} == {"1", "2"}
+    assert all(r.gradprogress == 3 for r in res)      # 둘 다 동등 점수
+
+
+def test_topk_k1_equals_solve():
+    A = _cand("a", "1", 3, "전공선택", (1,))
+    one = model.solve([A], {"a": 0.2}, {"전공선택": 6}, U=3, L=3,
+                      taken_ids=set(), passed_ids=set())
+    topk = model.solve_topk([A], {"a": 0.2}, {"전공선택": 6}, U=3, L=3,
+                            taken_ids=set(), passed_ids=set(), k=1)
+    assert len(topk) == 1 and topk[0].selected[0].course_id == one.selected[0].course_id
+
+
 def test_lexicographic_gradprogress_breaks_tie():
     # 직무적합 동점일 때 졸업진척(need>0 영역)이 우선되는지
     # A·B 점수 동일, 슬롯 무충돌. credit 상한이 둘 다는 못 담게 → 졸업진척 큰 쪽
