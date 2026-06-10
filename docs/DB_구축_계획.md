@@ -17,7 +17,9 @@ ILP 기반 커리큘럼 추천용 SQLite DB(`db/schema.sql` → `db/app.db`) 적
 | `job_competency` | `data/job_competency.csv` | 역량 매핑 후 적재 ✅ | 매핑 산출물 60행 |
 | `course_section` | `data/course_section.csv` | **적재 완료 ✅ (#18 후속)** | 2026-1 분반/시간표 986행. course 적재 후(FK). 16컬럼 중 11컬럼 저장 |
 | `recommendation_log` | — | 런타임 생성(빈 테이블) ✅ | |
-| `student_input` | — | 런타임 생성(빈 테이블) ✅ | |
+| `student` / `student_course` | 성적표(#16) | 런타임 적재 | transcript 모듈이 적재. 추천 입력원 |
+
+> `student_input`은 제거(2026-06-10). `student_course`에서 σ입력(matched∧passed∧¬superseded)을 파생할 수 있어 중복이었음. recommender가 student_course에서 직접 도출.
 
 **빌드 결과**: 역량 매핑 완료 후 `.venv/bin/python db/ingest.py --reset`로 7개 테이블 일괄 적재(2222행), 검증 통과(weight 합=1, FK 위반 0).
 참고: `docs/과목과직무_역량_매핑.md`, 적재 검증은 `db/ingest.py`.
