@@ -1,0 +1,161 @@
+@import "tailwindcss";
+
+/* =========================================================================
+   course-fit 디자인 토큰 (단일 진실 공급원): Structured Warmth
+   계기판의 뼈대(밀도, 보더 카드, 데이터 직접 노출)는 유지하되 온도만 올린다.
+   warm-neutral 배경, warm gray(stone/zinc) 헤어라인, 한 톤 깊은 그린 액센트 1개.
+   모든 색 / 타이포 / radius 를 여기서만 정의합니다.
+   ========================================================================= */
+
+:root {
+  /* ----- 표면 / 배경 (warm near-white) ----- */
+  --background: oklch(0.992 0.004 85); /* 따뜻한 거의 백색 */
+  --surface: oklch(1 0.002 85);
+  --surface-muted: oklch(0.975 0.004 80);
+
+  /* ----- 전경 / 텍스트 (warm near-black) ----- */
+  --ink: oklch(0.245 0.006 70); /* near-black 본문, 미세 웜 */
+  --ink-muted: oklch(0.52 0.006 70);
+  --ink-subtle: oklch(0.66 0.007 72);
+
+  /* ----- 보더 / 입력 (warm gray 헤어라인, stone 계열) ----- */
+  --line: oklch(0.9 0.006 75);
+  --line-strong: oklch(0.83 0.008 74);
+
+  /* ----- 신호색 (단 하나: 한 톤 깊은 그린, 형광 제거) ----- */
+  --accent: oklch(0.55 0.12 152);
+  --accent-strong: oklch(0.48 0.13 152);
+  --accent-ink: oklch(0.99 0.01 152);
+  --accent-wash: oklch(0.955 0.03 152);
+
+  /* ----- 시간표 6과목 표면 (warm 명도 사다리) ----- */
+  --grade-1: oklch(0.976 0.006 80);
+  --grade-2: oklch(0.96 0.007 78);
+  --grade-3: oklch(0.944 0.008 76);
+  --grade-4: oklch(0.928 0.009 75);
+  --grade-5: oklch(0.912 0.01 74);
+  --grade-6: oklch(0.896 0.011 73);
+
+  /* ----- Radius (shape lock: 11px 한 스케일로 통일) ----- */
+  --radius: 0.6875rem; /* 11px */
+  --radius-sm: 0.5rem; /* 8px */
+}
+
+.dark {
+  /* warm 톤을 유지한 채 명도만 낮춘 다크 (발표 기본은 라이트) */
+  --background: oklch(0.205 0.006 75);
+  --surface: oklch(0.235 0.006 75);
+  --surface-muted: oklch(0.26 0.006 75);
+
+  --ink: oklch(0.95 0.005 80);
+  --ink-muted: oklch(0.72 0.006 76);
+  --ink-subtle: oklch(0.58 0.006 74);
+
+  --line: oklch(0.33 0.007 75);
+  --line-strong: oklch(0.42 0.008 74);
+
+  --accent: oklch(0.72 0.14 152);
+  --accent-strong: oklch(0.78 0.15 152);
+  --accent-ink: oklch(0.2 0.02 152);
+  --accent-wash: oklch(0.32 0.05 152);
+
+  --grade-1: oklch(0.275 0.006 75);
+  --grade-2: oklch(0.3 0.006 75);
+  --grade-3: oklch(0.325 0.006 75);
+  --grade-4: oklch(0.35 0.006 75);
+  --grade-5: oklch(0.375 0.006 75);
+  --grade-6: oklch(0.4 0.006 75);
+}
+
+/* =========================================================================
+   Tailwind theme 매핑: 위 CSS 변수를 유틸리티 클래스로 노출
+   ========================================================================= */
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+
+  /* 기존 컴포넌트 호환을 위해 ink 계열을 foreground 이름으로도 노출 */
+  --color-foreground: var(--ink);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-subtle: var(--ink-subtle);
+  --color-muted-foreground: var(--ink-muted);
+  --color-subtle-foreground: var(--ink-subtle);
+
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-border: var(--line);
+  --color-border-strong: var(--line-strong);
+
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-wash: var(--accent-wash);
+
+  --color-grade-1: var(--grade-1);
+  --color-grade-2: var(--grade-2);
+  --color-grade-3: var(--grade-3);
+  --color-grade-4: var(--grade-4);
+  --color-grade-5: var(--grade-5);
+  --color-grade-6: var(--grade-6);
+
+  --font-sans:
+    var(--font-pretendard), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono:
+    var(--font-geist-mono), ui-monospace, "SF Mono", "JetBrains Mono", monospace;
+
+  --radius: var(--radius);
+  --radius-sm: var(--radius-sm);
+}
+
+@layer base {
+  * {
+    border-color: var(--line);
+  }
+  body {
+    font-feature-settings: "ss01", "cv11";
+    letter-spacing: -0.011em;
+  }
+  /* 숫자 / 데이터 컨텍스트는 tabular */
+  .font-mono,
+  [class*="tabular"] {
+    font-feature-settings: "tnum";
+  }
+  ::selection {
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+}
+
+@layer utilities {
+  /* warm blueprint 그리드: 아주 옅은 36px 헤어라인 격자 + 가장자리 페이드 */
+  .bg-blueprint {
+    background-image:
+      linear-gradient(var(--line) 0.5px, transparent 0.5px),
+      linear-gradient(90deg, var(--line) 0.5px, transparent 0.5px);
+    background-size: 36px 36px;
+    opacity: 0.55;
+  }
+  /* 신호 포커스 링 (그린) */
+  .ring-focus {
+    outline: 2px solid transparent;
+    box-shadow:
+      0 0 0 2px var(--background),
+      0 0 0 4px var(--accent);
+  }
+  /* 카드에 아주 미세한 웜 그림자 (필요한 곳만) */
+  .shadow-card {
+    box-shadow: 0 1px 2px -1px oklch(0.5 0.02 70 / 0.06);
+  }
+}
+
+/* Recharts 텍스트 / 그리드가 토큰 색을 따르도록 */
+.recharts-text,
+.recharts-cartesian-axis-tick-value {
+  fill: var(--ink-muted);
+}
+.recharts-polar-grid-angle line,
+.recharts-polar-grid-concentric polygon {
+  stroke: var(--line);
+}
