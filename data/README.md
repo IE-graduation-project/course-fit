@@ -112,6 +112,16 @@ python3 crawlers/courses/validate_course_sections.py --sections data/course_sect
    - `033102`, `033103`은 다중 분반 존재
 3. `course_section.course_id`가 `course.csv.course_id`에 존재하는지 매칭률 출력
 
+**DB 적재 (`course_section` 테이블, 이슈 #18 후속)**
+- `db/ingest.py`가 `course` 전체 적재 후 적재(FK 의존). PK `(course_id, section, source_term)`.
+- CSV 16컬럼 중 **11컬럼만 저장**. 다음 5개는 미저장:
+  - `course_name`, `credit` → `course` 테이블에서 조인 (credit은 course와 100% 일치 검증됨)
+  - `dept_name` → `offering_dept`와 중복, `grade` → `course.allowed_years`와 중복, `source_url` → 전 행 상수
+- `time_slots_int` NULL(28분반) = 비대면/논문/실습 등 고정 시간 미지정 → ILP 시간충돌 제약에서 제외.
+- **추천 후보는 별도 테이블이 아니라 조인으로 도출**:
+  `course_section ⋈ course (dept_id IN ('IDE','BIZ','COMMON'))`
+  → 현재 280과목/986분반(IDE 39, BIZ 32, COMMON 209). `course`(전체 카탈로그 3,304)는 성적표 역량 매칭용 universe이고, 추천 후보는 26-1 분반이 있는 부분집합.
+
 ## 4. `competency.csv`
 역량 taxonomy 10개 -- 한국 NCS 기반 + 약간 변형
 
@@ -154,7 +164,8 @@ DA,사람인,https://...,공고 본문 전체...,2026-05-09T14:30:00
 ## 7. `course_competency.csv`
 정량 매핑 결과(TF-IDF + KoSBERT, `mapping/`). LLM은 과목 설명 생성(입력)에만 쓰고
 매핑 점수 산출엔 미사용. comp_id는 `competency.csv`의 10개만. 과목당 10행.
-**course_id별 weight 합 = 1.0 ± 0.01** 검증(`db/ingest.py`).
+**course_id별 weight 합 = relevance r_c ≤ 1.0** (데이터 무관 과목은 0에 가까움). `db/ingest.py`가 `합 ≤ 1.01` 검증.
+- r_c = 1−exp(−rawТ/τ): 정규화(합=1)가 무관 과목을 부풀려 진짜 데이터 과목을 추월하는 순위 역전을 막는 관련도 가중 (매핑 `05`).
 
 ```
 course_id,comp_id,weight
@@ -180,7 +191,7 @@ DA,BIZ,0.948
 ## 검증 규칙 (ingest.py가 자동 체크)
 
 1. 모든 FK가 부모 테이블에 존재
-2. `course_competency.weight`: course_id별 합 = 1.0 ± 0.01
+2. `course_competency.weight`: course_id별 합 ≤ 1.0 (= relevance r_c)
 3. `job_competency.required_level`: 0~1 범위
 4. `course.area` ∈ enum
 5. `course.area`가 해당 dept의 `graduation_requirement.area`에 존재 (없으면 warning)

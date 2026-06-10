@@ -26,6 +26,9 @@ env/
 db/app.db
 db/*.db-journal
 
+# Personal transcripts (성적표 원문 — 개인정보. 적재 결과는 db/app.db라 이미 ignore됨)
+transcripts/
+
 # Logs
 *.log
 logs/

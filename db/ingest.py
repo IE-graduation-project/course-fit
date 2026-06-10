@@ -27,6 +27,7 @@ LOAD_ORDER = [
     ("competency",             "competency.csv"),
     ("course",                 "course.csv"),
     ("course",                 "course_crawled.csv"),  # 다년도 시간표 보강분 (이슈 #18)
+    ("course_section",         "course_section.csv"),  # 2026-1 분반/시간표 (FK: course 적재 후)
     ("job",                    "job.csv"),
     ("course_competency",      "course_competency.csv"),
     ("job_competency",         "job_competency.csv"),
@@ -61,7 +62,15 @@ def load_csv(conn: sqlite3.Connection, table: str, csv_path: Path) -> int:
         print(f"  [SKIP] {csv_path.name} 비어있음")
         return 0
 
-    cols = list(rows[0].keys())
+    # 테이블에 실제 존재하는 컬럼만 적재 (CSV가 더 많은 컬럼을 가질 수 있음.
+    # 예: course_section.csv 16컬럼 → 테이블 11컬럼. provenance 컬럼은 미저장)
+    table_cols = {r[1] for r in conn.execute(f"PRAGMA table_info({table})")}
+    csv_cols = list(rows[0].keys())
+    cols = [c for c in csv_cols if c in table_cols]
+    dropped = [c for c in csv_cols if c not in table_cols]
+    if dropped:
+        print(f"  [INFO] {csv_path.name}: 테이블에 없는 컬럼 제외 → {dropped}")
+
     placeholders = ",".join(["?"] * len(cols))
     sql = f"INSERT INTO {table} ({','.join(cols)}) VALUES ({placeholders})"
 
@@ -85,16 +94,16 @@ def validate(conn: sqlite3.Connection) -> list[str]:
     """무결성 검증. 에러 메시지 리스트 반환 (빈 리스트면 OK)."""
     errors: list[str] = []
 
-    # 검증 2: course_competency.weight 합 = 1.0 ± 0.01
+    # 검증 2: course_competency.weight 합 ≤ 1.0 (= r_c relevance, 무관 과목은 0에 가까움)
     cur = conn.execute("""
         SELECT course_id, ROUND(SUM(weight), 4) AS total
         FROM course_competency
         GROUP BY course_id
-        HAVING ABS(SUM(weight) - 1.0) > 0.01
+        HAVING SUM(weight) > 1.0 + 0.01
     """)
     for row in cur:
         errors.append(
-            f"course_competency: course_id={row[0]} weight 합={row[1]} (기대값 1.0)"
+            f"course_competency: course_id={row[0]} weight 합={row[1]} (기대 ≤ 1.0)"
         )
 
     # 검증 4: course.area ∈ enum

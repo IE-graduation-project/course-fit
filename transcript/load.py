@@ -1,8 +1,10 @@
 """성적표 파싱 결과를 SQLite에 적재 (이슈 #16).
 
 - student:        학생 메타 1행
-- student_course: 성적표 전 과목 원본 (catalog 미매칭 포함 -> need_g 산출용)
-- student_input:  catalog 매칭 + 이수 과목만 (추천 엔진 σ_k / 이미수강 필터용)
+- student_course: 성적표 전 과목 원본 (catalog 미매칭 포함). σ·need_g·B1의 단일 진실원천.
+  · σ 입력  = matched ∧ passed ∧ ¬superseded
+  · need_g  = area별 passed ∧ ¬superseded 학점 집계
+  · B1      = 전체 course_id
 
 input_hash 기준 idempotent: 같은 해시의 기존 row를 삭제 후 재적재한다.
 """
@@ -44,7 +46,6 @@ def _catalog_areas(conn: sqlite3.Connection) -> dict[str, str]:
 
 def _delete_existing(conn: sqlite3.Connection, input_hash: str) -> None:
     conn.execute("DELETE FROM student_course WHERE input_hash = ?", (input_hash,))
-    conn.execute("DELETE FROM student_input  WHERE input_hash = ?", (input_hash,))
     conn.execute("DELETE FROM student        WHERE input_hash = ?", (input_hash,))
 
 
@@ -55,7 +56,7 @@ def load_transcript(
     created_at: str | None = None,
     source_file: str | None = None,
 ) -> str:
-    """TranscriptResult를 3개 테이블에 적재하고 input_hash를 반환한다."""
+    """TranscriptResult를 student/student_course에 적재하고 input_hash를 반환한다."""
     catalog = _catalog_areas(conn)
     h = result.input_hash
     created_at = created_at or datetime.now(timezone.utc).isoformat()
@@ -72,8 +73,7 @@ def load_transcript(
          m.admission_year, m.current_grade, m.total_earned, m.gpa, source_file, created_at),
     )
 
-    # student_course: 전 과목 / student_input 후보: 매칭 + 이수 + 비대체 과목 중 최고 성적
-    best_input: dict[str, tuple[float, int]] = {}
+    # student_course: 전 과목 원본. σ/need_g/B1은 소비자(recommender)가 이 테이블에서 필터로 도출.
     for c in result.courses:
         matched = bool(c.course_id and c.course_id in catalog)
         # 매칭 과목 영역은 catalog가 권위(이수구분보다 세분). 미매칭은 파서 제공값,
@@ -87,18 +87,6 @@ def load_transcript(
             (h, c.course_id, c.course_name, c.category_raw, area,
              c.credit, c.grade_letter, c.grade, int(c.is_pn), int(c.passed),
              int(c.superseded), c.term, int(matched)),
-        )
-        if matched and c.passed and not c.superseded:
-            # P/N은 평점이 없으므로 0.0으로 저장(소비자는 is_pn=1이면 grade 무시)
-            g = 0.0 if (c.is_pn or c.grade is None) else c.grade
-            prev = best_input.get(c.course_id)
-            if prev is None or g > prev[0]:
-                best_input[c.course_id] = (g, int(c.is_pn))
-
-    for course_id, (g, pn) in best_input.items():
-        conn.execute(
-            "INSERT INTO student_input (input_hash, course_id, grade, is_pn) VALUES (?, ?, ?, ?)",
-            (h, course_id, g, pn),
         )
 
     conn.commit()
