@@ -14,6 +14,15 @@ from dataclasses import dataclass
 from . import data, params
 from .model import Result, solve
 
+# 사용자 취향 → ε 프리셋 (설계 4.4). 낮을수록 부족역량 우선(교양 OK),
+# 높을수록 졸업·전공 비중. 포화 학생이 많은 3~4학년 타깃이라 balanced를 기본값으로.
+PREFERENCE_EPS = {
+    "gap": 0.0,          # 부족 역량 충실 — 교양이어도 갭 보완 우선
+    "balanced": 0.3,     # 균형 (기본)
+    "graduation": 0.6,   # 졸업·전공 우선
+}
+DEFAULT_PREFERENCE = "balanced"
+
 
 @dataclass
 class Recommendation:

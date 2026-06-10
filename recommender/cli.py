@@ -10,7 +10,7 @@ import argparse
 import sys
 
 from . import data, params
-from .recommend import recommend
+from .recommend import DEFAULT_PREFERENCE, PREFERENCE_EPS, recommend
 
 
 def main(argv=None) -> int:
@@ -21,20 +21,24 @@ def main(argv=None) -> int:
     ap.add_argument("--max-credits", type=int, default=18, help="학점 상한 U (기본 18)")
     ap.add_argument("--min-credits", type=int, default=12, help="학점 하한 L (기본 12)")
     ap.add_argument("--alpha", type=float, default=params.ALPHA_DEFAULT, help="σ 포화곡선 α")
-    ap.add_argument("--eps", type=float, default=0.0, help="1순위 완화 여유 ε")
+    ap.add_argument("--mode", choices=list(PREFERENCE_EPS), default=DEFAULT_PREFERENCE,
+                    help="추천 성향: gap(역량충실)/balanced(균형)/graduation(졸업·전공우선)")
+    ap.add_argument("--eps", type=float, default=None, help="ε 직접 지정 (지정 시 --mode 무시)")
     args = ap.parse_args(argv)
 
+    eps = args.eps if args.eps is not None else PREFERENCE_EPS[args.mode]
     try:
         rec = recommend(
             args.student, args.job, db_path=args.db,
-            U=args.max_credits, L=args.min_credits, alpha=args.alpha, eps=args.eps,
+            U=args.max_credits, L=args.min_credits, alpha=args.alpha, eps=eps,
         )
     except ValueError as e:
         print(f"ERROR: {e}", file=sys.stderr)
         return 1
 
     res = rec.result
-    print(f"[학생] {rec.dept_id} {rec.admission_year}학번   [상태] {res.status}")
+    mode_label = "직접지정" if args.eps is not None else args.mode
+    print(f"[학생] {rec.dept_id} {rec.admission_year}학번   [성향] {mode_label}(ε={eps})   [상태] {res.status}")
     if res.status != "Optimal":
         print("추천 시간표를 찾지 못했습니다 (제약 충돌 또는 후보 없음).")
         return 0
