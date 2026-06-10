@@ -107,25 +107,28 @@ def conn():
 def _sample_result() -> TranscriptResult:
     meta = StudentMeta(student_no="C012345", dept_id="IDE", admission_year=2023, total_earned=12)
     courses = [
-        # 매칭 + 이수 -> student_input 포함
+        # 매칭 + 이수 -> σ 입력(matched∧passed∧¬superseded) 포함
         TakenCourse(course_id="140316", course_name="데이터사이언스", category_raw="전공필수",
                     area="전공필수", credit=3, grade_letter="A+", grade=4.5, passed=True, term="2025-1"),
-        # 미매칭 교양 -> student_course만 (need_g 산출용)
+        # 미매칭 교양 -> matched=0 (need_g엔 fallback area로 집계, σ엔 제외)
         TakenCourse(course_id="990001", course_name="대학글쓰기", category_raw="교양필수",
                     area="교양필수", credit=2, grade_letter="B+", grade=3.5, passed=True, term="2023-1"),
-        # 낙제(재수강 전 시도) -> student_input 제외
+        # 낙제(재수강 전 시도) -> passed=0이라 σ 입력 제외
         TakenCourse(course_id="140316", course_name="데이터사이언스", category_raw="전공필수",
                     area="전공필수", credit=3, grade_letter="F", grade=0.0, passed=False, term="2024-1"),
     ]
     return TranscriptResult(input_hash="testhash00000001", meta=meta, courses=courses)
 
 
-def test_load_writes_three_tables(conn):
+def test_load_writes_tables(conn):
     load_transcript(_sample_result(), conn, source_file="t.pdf")
     assert conn.execute("SELECT COUNT(*) FROM student").fetchone()[0] == 1
     assert conn.execute("SELECT COUNT(*) FROM student_course").fetchone()[0] == 3
-    # student_input: 매칭+이수만 (140316 A+ 1건; F 제외, 미매칭 990001 제외)
-    rows = conn.execute("SELECT course_id, grade FROM student_input").fetchall()
+    # σ 입력 = matched ∧ passed ∧ ¬superseded (140316 A+ 1건; F 제외, 미매칭 990001 제외)
+    rows = conn.execute(
+        "SELECT course_id, grade FROM student_course "
+        "WHERE matched=1 AND passed=1 AND superseded=0"
+    ).fetchall()
     assert rows == [("140316", 4.5)]
 
 
@@ -141,7 +144,9 @@ def test_load_idempotent(conn):
     load_transcript(_sample_result(), conn)  # 같은 성적표 재적재
     assert conn.execute("SELECT COUNT(*) FROM student").fetchone()[0] == 1
     assert conn.execute("SELECT COUNT(*) FROM student_course").fetchone()[0] == 3
-    assert conn.execute("SELECT COUNT(*) FROM student_input").fetchone()[0] == 1
+    assert conn.execute(
+        "SELECT COUNT(*) FROM student_course WHERE matched=1 AND passed=1 AND superseded=0"
+    ).fetchone()[0] == 1
 
 
 def test_load_pn_course(conn):
@@ -157,8 +162,11 @@ def test_load_pn_course(conn):
                     is_pn=True, passed=True, term="2025-1"),
     ]
     load_transcript(TranscriptResult("h_pn_000000001", meta, courses), conn)
-    row = conn.execute("SELECT grade, is_pn FROM student_input WHERE course_id='140999'").fetchone()
-    assert row == (0.0, 1)   # P/N은 grade 0.0 + is_pn=1
+    # P/N 과목: student_course에 grade NULL + is_pn=1 원본 보존, σ 입력에도 포함(passed)
+    row = conn.execute(
+        "SELECT grade, is_pn, matched, passed, superseded FROM student_course WHERE course_id='140999'"
+    ).fetchone()
+    assert row == (None, 1, 1, 1, 0)
 
 
 # --- 전체성적조회 복붙 파서 (트랙 2) ----------------------------------------
@@ -196,13 +204,17 @@ def test_text_load_end_to_end(conn):
     load_transcript(r, conn)
 
     assert conn.execute("SELECT COUNT(*) FROM student_course").fetchone()[0] == 8
-    si = dict(conn.execute("SELECT course_id, grade FROM student_input").fetchall())
+    # σ 입력 = matched ∧ passed ∧ ¬superseded (student_course에서 도출)
+    si = dict(conn.execute(
+        "SELECT course_id, grade FROM student_course "
+        "WHERE matched=1 AND passed=1 AND superseded=0"
+    ).fetchall())
     assert set(si) == {"311001", "311002", "311003", "311004", "900001"}
     assert si["311003"] == 3.0       # 재수강 최종 B0이 유효본
-    assert si["900001"] == 0.0       # P/N은 0.0
+    assert si["900001"] is None      # P/N은 grade NULL (원본 보존)
     # 311003: 공란/재수강/B0 = student_course 3행
     assert conn.execute("SELECT COUNT(*) FROM student_course WHERE course_id='311003'").fetchone()[0] == 3
-    # 007777 미매칭 -> student_input 제외, student_course엔 matched=0 + 일반선택 fallback
+    # 007777 미매칭 -> σ 입력 제외, student_course엔 matched=0 + 일반선택 fallback
     assert conn.execute("SELECT matched, area FROM student_course WHERE course_id='007777'").fetchone() == (0, "일반선택")
     # 영역별 기수강학점 (need_g 산출분): 매칭+이수+비대체만
     area_credits = dict(conn.execute(
