@@ -1,0 +1,148 @@
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────────
+ * course-fit 디자인 토큰
+ * 계승: hongik-graduation-advisor 4월 프로토타입 토큰 체계
+ * 원칙: 한국어 우선 · light only · 글씨보다 형태로 말한다
+ * ───────────────────────────────────────────────────────────── */
+
+@theme {
+  --font-sans: "Pretendard Variable", "Pretendard", -apple-system, BlinkMacSystemFont,
+    system-ui, "Malgun Gothic", sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", "JetBrains Mono", monospace;
+
+  /* 한국어는 letter-spacing 0 */
+  --tracking-tight: 0em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0em;
+
+  --text-display: 2.75rem;
+  --text-h1: 2rem;
+  --text-h2: 1.5rem;
+  --text-h3: 1.25rem;
+  --text-body: 1rem;
+  --text-sm: 0.875rem;
+  --text-caption: 0.75rem;
+
+  --leading-display: 1.28;
+  --leading-h: 1.4;
+  --leading-body: 1.65;
+
+  /* brand — 잉크빛 남색. 학술 톤이되 차갑지 않게 */
+  --color-brand-50: oklch(97% 0.015 258);
+  --color-brand-100: oklch(94% 0.032 258);
+  --color-brand-200: oklch(88% 0.065 258);
+  --color-brand-300: oklch(79% 0.108 258);
+  --color-brand-400: oklch(67% 0.152 258);
+  --color-brand-500: oklch(57% 0.176 258);
+  --color-brand-600: oklch(48% 0.168 258);
+  --color-brand-700: oklch(39% 0.138 258);
+  --color-brand-800: oklch(31% 0.102 258);
+  --color-brand-900: oklch(24% 0.068 258);
+
+  /* 역량 축 색 — 갭/보유 대비용. 10축을 다 칠하지 않고 상태로만 쓴다 */
+  --color-gap: oklch(64% 0.185 38); /* 부족 — 따뜻한 주황 */
+  --color-have: oklch(62% 0.132 168); /* 보유 — 청록 */
+  --color-grad: oklch(58% 0.13 292); /* 졸업요건 — 보라 */
+
+  --color-success: oklch(60% 0.15 158);
+  --color-warning: oklch(74% 0.16 70);
+  --color-danger: oklch(58% 0.2 27);
+
+  /* surface — 종이 느낌의 웜 뉴트럴 */
+  --color-surface: oklch(100% 0 0);
+  --color-surface-2: oklch(98.2% 0.003 85);
+  --color-surface-3: oklch(95.6% 0.005 85);
+  --color-ink: oklch(20% 0.008 258);
+
+  --color-text: oklch(21% 0.006 60);
+  --color-text-muted: oklch(50% 0.008 60);
+  --color-text-soft: oklch(66% 0.006 60);
+
+  --color-border: oklch(91% 0.003 85);
+  --color-border-strong: oklch(84% 0.004 85);
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.875rem;
+  --radius-xl: 1.25rem;
+
+  --shadow-card: 0 1px 2px oklch(20% 0.01 258 / 0.04), 0 4px 16px oklch(20% 0.01 258 / 0.05);
+  --shadow-lift: 0 2px 6px oklch(20% 0.01 258 / 0.06), 0 12px 32px oklch(20% 0.01 258 / 0.09);
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    background: var(--color-surface-2);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    line-height: var(--leading-body);
+    word-break: keep-all; /* 한국어 어절 단위 줄바꿈 */
+    overflow-wrap: break-word;
+  }
+
+  /* 숫자는 항상 tabular — 표·점수가 흔들리지 않게 */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer utilities {
+  .card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+  }
+
+  .fade-up {
+    animation: fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .fade-in {
+    animation: fadeIn 0.4s ease both;
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes growX {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

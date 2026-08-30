@@ -1,0 +1,110 @@
+[
+  {
+    "job": "DA",
+    "mode": "gap",
+    "file": "DA_gap.json",
+    "nCourses": 6
+  },
+  {
+    "job": "DA",
+    "mode": "balanced",
+    "file": "DA_balanced.json",
+    "nCourses": 6
+  },
+  {
+    "job": "DA",
+    "mode": "graduation",
+    "file": "DA_graduation.json",
+    "nCourses": 6
+  },
+  {
+    "job": "DE",
+    "mode": "gap",
+    "file": "DE_gap.json",
+    "nCourses": 7
+  },
+  {
+    "job": "DE",
+    "mode": "balanced",
+    "file": "DE_balanced.json",
+    "nCourses": 6
+  },
+  {
+    "job": "DE",
+    "mode": "graduation",
+    "file": "DE_graduation.json",
+    "nCourses": 5
+  },
+  {
+    "job": "DS",
+    "mode": "gap",
+    "file": "DS_gap.json",
+    "nCourses": 6
+  },
+  {
+    "job": "DS",
+    "mode": "balanced",
+    "file": "DS_balanced.json",
+    "nCourses": 6
+  },
+  {
+    "job": "DS",
+    "mode": "graduation",
+    "file": "DS_graduation.json",
+    "nCourses": 6
+  },
+  {
+    "job": "FIN",
+    "mode": "gap",
+    "file": "FIN_gap.json",
+    "nCourses": 6
+  },
+  {
+    "job": "FIN",
+    "mode": "balanced",
+    "file": "FIN_balanced.json",
+    "nCourses": 6
+  },
+  {
+    "job": "FIN",
+    "mode": "graduation",
+    "file": "FIN_graduation.json",
+    "nCourses": 6
+  },
+  {
+    "job": "MKT",
+    "mode": "gap",
+    "file": "MKT_gap.json",
+    "nCourses": 6
+  },
+  {
+    "job": "MKT",
+    "mode": "balanced",
+    "file": "MKT_balanced.json",
+    "nCourses": 6
+  },
+  {
+    "job": "MKT",
+    "mode": "graduation",
+    "file": "MKT_graduation.json",
+    "nCourses": 6
+  },
+  {
+    "job": "PM",
+    "mode": "gap",
+    "file": "PM_gap.json",
+    "nCourses": 7
+  },
+  {
+    "job": "PM",
+    "mode": "balanced",
+    "file": "PM_balanced.json",
+    "nCourses": 6
+  },
+  {
+    "job": "PM",
+    "mode": "graduation",
+    "file": "PM_graduation.json",
+    "nCourses": 6
+  }
+]
