@@ -30,14 +30,24 @@ export default function JobFitBar({
     null,
   );
   const activeRef = useRef<HTMLButtonElement>(null);
+  const boxRef = useRef<HTMLDivElement>(null);
 
   // 좁은 화면에선 6개가 다 안 보인다 — 고른 것이 화면 밖이면 끌어온다.
+  //
+  // scrollIntoView 를 쓰면 안 된다. 그건 조상 스크롤러를 전부 미는데 거기엔
+  // 문서 자체가 포함돼서, 모바일에서 페이지가 216px 옆으로 밀렸다(사파리·크롬 둘 다).
+  // 컨테이너의 scrollLeft 만 직접 만진다.
   useEffect(() => {
-    activeRef.current?.scrollIntoView({ block: "nearest", inline: "nearest" });
+    const el = activeRef.current;
+    const box = boxRef.current;
+    if (!el || !box) return;
+    const target = el.offsetLeft - (box.clientWidth - el.clientWidth) / 2;
+    box.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
   }, [active]);
 
   return (
     <div
+      ref={boxRef}
       role="group"
       aria-label="목표 직무"
       className="scroll-fade-x flex gap-1 overflow-x-auto rounded-lg border border-border bg-surface p-1"
@@ -69,9 +79,14 @@ export default function JobFitBar({
               <CountUp value={f.fit} />
             </span>
             {best?.job === f.job && (
+              // relative 가 없으면 안의 sr-only(position:absolute)가 위치 기준 조상을
+              // 못 찾아 초기 컨테이닝 블록에 놓인다. 그러면 문서 스크롤 영역이 늘어나
+              // 모바일에서 페이지가 216px 옆으로 밀렸다. 실제로 그랬다.
               <span
                 title="지금 가장 잘 맞는 직무"
-                className={selected ? "text-white/70" : "text-success"}
+                className={
+                  "relative " + (selected ? "text-white/70" : "text-success")
+                }
               >
                 <span aria-hidden>★</span>
                 <span className="sr-only">가장 잘 맞음</span>
