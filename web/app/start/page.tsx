@@ -25,6 +25,7 @@ export default function StartPage() {
   const [courseCount, setCourseCount] = useState(0);
   const [deptLabel, setDeptLabel] = useState("경영학전공");
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -38,6 +39,7 @@ export default function StartPage() {
   async function handleTranscript(value: string) {
     if (!value.trim() || busy) return;
     setBusy(true);
+    setError(null);
     try {
       const res = await submitTranscript({
         text: value,
@@ -49,6 +51,10 @@ export default function StartPage() {
       setDeptLabel(res.deptId === "IDE" ? "산업데이터공학과" : "경영학전공");
       setText(value);
       setStep("job");
+    } catch (e) {
+      // 삼키면 사용자는 버튼을 눌렀는데 아무 일도 안 일어난 것으로 본다.
+      console.error(e);
+      setError("성적표를 읽는 중 문제가 생겼어요. 잠시 후 다시 눌러주세요.");
     } finally {
       setBusy(false);
     }
@@ -85,7 +91,14 @@ export default function StartPage() {
         </Bubble>
 
         {step === "transcript" && (
-          <TranscriptInput busy={busy} onSubmit={handleTranscript} />
+          <>
+            <TranscriptInput busy={busy} onSubmit={handleTranscript} />
+            {error && (
+              <p role="alert" className="text-sm font-semibold text-danger">
+                {error}
+              </p>
+            )}
+          </>
         )}
 
         {step !== "transcript" && (

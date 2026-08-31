@@ -25,6 +25,7 @@ export default function ResultClient() {
   const [loading, setLoading] = useState(true);
   /** 성적표를 낸 적 없이 /result 로 바로 들어왔나 */
   const [demo, setDemo] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchReference().then(setRef).catch(console.error);
@@ -36,6 +37,7 @@ export default function ResultClient() {
     const saved = sessionStorage.getItem("studentId");
     setDemo(saved === null);
     const studentId = saved ?? "746696b793744f17";
+    setError(null);
     fetchRecommendation({ studentId, job, mode })
       .then((r) => {
         if (cancelled) return;
@@ -44,7 +46,10 @@ export default function ResultClient() {
         setLoading(false);
       })
       .catch((e) => {
+        if (cancelled) return;
         console.error(e);
+        // 이전 결과는 남겨 둔다 — 화면이 통째로 비면 뭘 보고 있었는지 잃는다.
+        setError("추천을 불러오지 못했어요. 목표를 다시 눌러보세요.");
         setLoading(false);
       });
     return () => {
@@ -73,6 +78,15 @@ export default function ResultClient() {
           <span className="text-caption text-text-soft">프로토타입 · 고정 데이터</span>
         )}
       </header>
+
+      {error && (
+        <p
+          role="alert"
+          className="mb-6 rounded-lg border border-danger/30 bg-danger/8 px-4 py-3 text-sm font-semibold text-danger"
+        >
+          {error}
+        </p>
+      )}
 
       {demo && (
         <p className="mb-6 rounded-lg border border-border bg-surface-3 px-4 py-3 text-sm text-text-muted">

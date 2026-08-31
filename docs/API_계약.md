@@ -191,3 +191,27 @@ def api_recommend(req: RecommendRequest):
 `web/public/fixtures/*.json` 을 만든 로직을 그대로 옮기면 된다.
 
 **CORS**: 프론트가 Vercel 에 뜨면 도메인 허용 필요.
+
+### 실제로 돌려봤습니다 (2026-08-31)
+
+이 계약대로 FastAPI 스켈레톤을 짜서 프론트를 붙여봤습니다.
+**엔드포인트 3개 전부 동작했고 프론트 코드는 한 줄도 안 고쳤습니다** —
+`NEXT_PUBLIC_API_BASE` 만 채웠습니다. 직무를 바꾸면 ILP 가 실제로 다시 풀려서
+완전히 다른 시간표가 나옵니다.
+
+확인된 것:
+
+- `/api/transcript` 는 두 줄입니다.
+  ```python
+  result = parse_transcript_text(text, dept_id=dept, admission_year=year)
+  h = load_transcript(result, conn); conn.commit()
+  ```
+  ⚠️ `transcript/__init__.py` 독스트링에는 `parse_transcript_text(text, dept_id, admission_year)`
+  로 적혀 있는데 실제 시그니처는 **키워드 전용**입니다(`text` 만 위치인자).
+  독스트링이 낡았습니다 — 고쳐두시면 좋을 것 같습니다.
+- `/api/recommend` 는 `recommend.recommend()` 호출 + 직렬화가 전부입니다.
+  직렬화는 `web/scripts/dump_fixtures.py` 를 그대로 옮기면 됩니다.
+- `/api/reference` 는 job/competency 테이블 읽기 + `PREFERENCE_EPS`.
+
+스켈레톤 자체는 검증용이라 저장소에 넣지 않았습니다(백엔드는 소연님 레인).
+필요하시면 드리겠습니다.
