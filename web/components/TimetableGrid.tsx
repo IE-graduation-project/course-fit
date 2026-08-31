@@ -33,6 +33,24 @@ export default function TimetableGrid({ courses, activeId, onHover }: Props) {
 
   const unscheduled = courses.filter((c) => c.slots.length === 0);
 
+  // 「시간 충돌 0」이 이 앱의 간판이다. 그게 깨진 데이터가 오면 격자에서는
+  // 한 과목이 다른 과목을 덮어 조용히 사라진다 — 카드에는 6개가 그대로 있는데
+  // 격자에는 5개만 보이는 상태. 숨기지 말고 드러낸다.
+  const owners = new Map<number, Set<string>>();
+  for (const c of courses) {
+    for (const slot of c.slots) {
+      if (!owners.has(slot)) owners.set(slot, new Set());
+      owners.get(slot)!.add(courseKey(c));
+    }
+  }
+  const clashing = new Set<string>();
+  for (const keys of owners.values()) {
+    if (keys.size > 1) for (const k of keys) clashing.add(k);
+  }
+  const clashNames = courses
+    .filter((c) => clashing.has(courseKey(c)))
+    .map((c) => c.name);
+
   return (
     <div>
       <div
@@ -78,6 +96,7 @@ export default function TimetableGrid({ courses, activeId, onHover }: Props) {
         {blocks.map((b) => {
           const key = courseKey(b.course);
           const active = activeId === key;
+          const clash = clashing.has(key);
           const r = rowOf.get(b.start);
           if (r === undefined) return null;
 
@@ -95,11 +114,19 @@ export default function TimetableGrid({ courses, activeId, onHover }: Props) {
               <div
                 className={
                   "flex h-full w-full flex-col justify-center overflow-hidden rounded-sm px-2 py-1.5 transition-colors duration-150 " +
-                  (active ? "bg-brand-100 ring-1 ring-brand-400" : "bg-surface-3")
+                  (clash
+                    ? "bg-danger/10 ring-1 ring-danger"
+                    : active
+                      ? "bg-brand-100 ring-1 ring-brand-400"
+                      : "bg-surface-3")
                 }
                 style={{
                   borderLeft: `3px solid var(${
-                    active ? "--color-brand-500" : "--color-border-strong"
+                    clash
+                      ? "--color-danger"
+                      : active
+                        ? "--color-brand-500"
+                        : "--color-border-strong"
                   })`,
                 }}
               >
@@ -121,6 +148,13 @@ export default function TimetableGrid({ courses, activeId, onHover }: Props) {
           );
         })}
       </div>
+
+      {clashNames.length > 0 && (
+        <p role="alert" className="mt-3 text-caption font-semibold text-danger">
+          시간이 겹치는 과목이 있습니다 — {clashNames.join(" · ")}. 추천 결과에
+          문제가 있으니 그대로 신청하지 마세요.
+        </p>
+      )}
 
       {unscheduled.length > 0 && (
         <p className="mt-3 text-caption text-text-soft">

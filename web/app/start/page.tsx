@@ -74,7 +74,9 @@ export default function StartPage() {
   }
 
   return (
-    <main className="mx-auto min-h-dvh max-w-2xl px-5 py-8">
+    // relative: 안의 sr-only(absolute)가 위치 기준을 못 찾으면
+    // 초기 컨테이닝 블록에 놓여 문서 폭을 늘린다. JobFitBar 에서 실제로 그랬다.
+    <main className="relative mx-auto min-h-dvh max-w-2xl px-5 py-8">
       <header className="mb-8 flex items-center justify-between">
         <Link href="/" className="-ml-2 inline-flex min-h-11 items-center rounded-sm px-2 text-sm font-semibold text-text-muted hover:text-text">
           ← course-fit
