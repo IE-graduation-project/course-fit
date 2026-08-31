@@ -42,7 +42,7 @@ export default function CourseCard({
       onMouseEnter={() => onHover?.(key)}
       onMouseLeave={() => onHover?.(null)}
       className={
-        "rounded-lg border bg-surface p-4 transition-colors duration-150 " +
+        "print-keep rounded-lg border bg-surface p-4 transition-colors duration-150 " +
         (active ? "border-brand-400 bg-brand-50" : "border-border")
       }
     >

@@ -71,7 +71,7 @@ export default function ResultClient() {
 
   return (
     <main className="mx-auto max-w-5xl px-5 py-8 pb-24">
-      <header className="mb-8 flex flex-wrap items-center justify-between gap-3">
+      <header className="print-hide mb-8 flex flex-wrap items-center justify-between gap-3">
         <Link href="/" className="-ml-2 inline-flex min-h-11 items-center rounded-sm px-2 text-sm font-semibold text-text-muted hover:text-text">
           ← course-fit
         </Link>
@@ -113,14 +113,14 @@ export default function ResultClient() {
       </p>
 
       {/* 목표 — 6종을 한 줄에 놓고 적합도까지 같이 (switch and see) */}
-      <div className="mt-5">
+      <div className="print-hide mt-5">
         <JobFitBar fits={rec.fitByJob} active={job} onChange={setJob} />
         <p className="mt-1.5 text-caption text-text-soft">
           옆 숫자는 지금 성적으로 그 직무에 얼마나 맞는지 (0~100)
         </p>
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-3">
+      <div className="print-hide mt-4 flex flex-wrap items-center gap-x-3 gap-y-3">
         <span id="mode-label" className="text-sm text-text-muted">
           성향
         </span>
@@ -149,11 +149,12 @@ export default function ResultClient() {
       </div>
 
       <section
-        className="mt-6 grid gap-6 transition-opacity duration-200 lg:grid-cols-[1.35fr_1fr]"
+        className="print-stack mt-6 grid gap-6 transition-opacity duration-200 lg:grid-cols-[1.35fr_1fr]"
         style={{ opacity: loading ? 0.45 : 1 }}
         aria-busy={loading}
       >
         <div>
+          <div className="print-keep">
           {tt === null ? (
             <Infeasible mode={mode} onRelax={() => setMode("graduation")} />
           ) : (
@@ -167,11 +168,14 @@ export default function ResultClient() {
               </p>
             </>
           )}
+          </div>
 
-          {tt !== null && <CopyCodes courses={tt.courses} />}
+          <div className="print-hide">
+            {tt !== null && <CopyCodes courses={tt.courses} />}
+          </div>
 
           {rec.timetables.length > 1 && (
-            <div className="mt-4 flex flex-wrap items-center gap-2">
+            <div className="print-hide mt-4 flex flex-wrap items-center gap-2">
               <span className="text-caption text-text-soft">다른 안</span>
               {rec.timetables.map((t, i) => (
                 <button
@@ -235,7 +239,7 @@ export default function ResultClient() {
           <h2 className="text-h2 font-bold">왜 이 과목들일까요?</h2>
           <button
             onClick={() => setWhy((v) => !v)}
-            className="-mr-2 inline-flex min-h-11 items-center rounded-sm px-2 text-sm font-semibold text-brand-700 hover:underline"
+            className="print-hide -mr-2 inline-flex min-h-11 items-center rounded-sm px-2 text-sm font-semibold text-brand-700 hover:underline"
           >
             {why ? "계산식 접기" : "어떻게 계산했나요?"}
           </button>

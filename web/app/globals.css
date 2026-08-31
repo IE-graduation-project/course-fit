@@ -185,6 +185,48 @@
   100% { opacity: 1; transform: none; }
 }
 
+/* ── 인쇄 ────────────────────────────────────────────────────
+ * 학생은 이 화면을 뽑거나 PDF 로 저장해서 수강신청 때 옆에 둔다.
+ * 그때 필요한 건 시간표와 학수번호뿐이라 컨트롤은 전부 뺀다.
+ * (버튼을 종이에 찍는 건 잉크 낭비다.)
+ */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 14mm;
+  }
+
+  body {
+    background: #fff;
+  }
+
+  /* 컨트롤·장식은 종이에서 의미가 없다 */
+  .print-hide {
+    display: none !important;
+  }
+
+  /* 두 칸 배치를 한 줄로 편다 — 종이는 좁다 */
+  .print-stack {
+    display: block !important;
+  }
+
+  /* 페이지 중간에서 잘리면 못 읽는다 */
+  .print-keep {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* 브라우저 기본 배경 제거로 막대가 사라지는 걸 막는다 */
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  a[href]::after {
+    content: "";
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
