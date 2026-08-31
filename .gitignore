@@ -48,3 +48,6 @@ mapping/raw_outputs/
 *.gsheet
 *.gdoc
 *.gslides
+
+# 스크린샷은 repo 에 두지 않는다 — 배포본을 보면 된다 (2026-08-31)
+docs/screenshots/
