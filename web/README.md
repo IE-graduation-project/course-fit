@@ -13,6 +13,17 @@ npm run dev        # http://localhost:3000
 
 백엔드 없이 그냥 돈다. `public/fixtures/` 의 JSON 을 읽기 때문이다.
 
+## 배포
+
+프로덕션: **https://course-fit-seven.vercel.app**
+
+Vercel 프로젝트 `course-fit` (개인 스코프). Root Directory = `web/`.
+백엔드가 뜨면 Vercel 프로젝트 환경변수에 `NEXT_PUBLIC_API_BASE` 만 넣으면 실 API 로 넘어간다.
+
+```bash
+cd web && npx vercel --prod    # 수동 배포
+```
+
 ## 실 API 붙이기
 
 ```bash
