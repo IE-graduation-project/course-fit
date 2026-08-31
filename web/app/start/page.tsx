@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { fetchReference, submitTranscript } from "@/lib/api";
+import { countCourseLines, fetchReference, submitTranscript } from "@/lib/api";
 import { SAMPLE_TRANSCRIPT } from "@/lib/sample";
 import type { JobRef, ModeRef, Reference } from "@/lib/types";
 import { jobRank } from "@/lib/competency";
@@ -23,6 +23,7 @@ export default function StartPage() {
   const [job, setJob] = useState<JobRef | null>(null);
   const [mode, setMode] = useState<ModeRef | null>(null);
   const [courseCount, setCourseCount] = useState(0);
+  const [deptLabel, setDeptLabel] = useState("경영학전공");
   const [busy, setBusy] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
 
@@ -45,6 +46,7 @@ export default function StartPage() {
       });
       sessionStorage.setItem("studentId", res.studentId);
       setCourseCount(res.courseCount);
+      setDeptLabel(res.deptId === "IDE" ? "산업데이터공학과" : "경영학전공");
       setText(value);
       setStep("job");
     } finally {
@@ -68,7 +70,7 @@ export default function StartPage() {
   return (
     <main className="mx-auto min-h-dvh max-w-2xl px-5 py-8">
       <header className="mb-8 flex items-center justify-between">
-        <Link href="/" className="text-sm font-semibold text-text-muted hover:text-text">
+        <Link href="/" className="-ml-2 inline-flex min-h-11 items-center rounded-sm px-2 text-sm font-semibold text-text-muted hover:text-text">
           ← course-fit
         </Link>
         <StepDots step={step} />
@@ -91,7 +93,7 @@ export default function StartPage() {
             <UserBubble>성적표 붙여넣기 완료</UserBubble>
             <Bubble delay={0.1}>
               읽었어요. 이렇게 인식했습니다.
-              <RecognitionChips dept="경영학전공" year={2022} courses={courseCount} />
+              <RecognitionChips dept={deptLabel} year={2022} courses={courseCount} />
               어떤 일을 하고 싶으세요?
             </Bubble>
           </>
@@ -221,10 +223,11 @@ function TranscriptInput({
   onSubmit: (v: string) => void;
 }) {
   const [value, setValue] = useState("");
+  const found = countCourseLines(value);
 
   return (
     <div className="fade-up space-y-3" style={{ animationDelay: "0.3s" }}>
-      <details className="card overflow-hidden">
+      <details open className="card overflow-hidden">
         <summary className="cursor-pointer list-none px-4 py-3 text-sm font-semibold text-brand-700 hover:bg-surface-3">
           성적표 어디서 가져와요? ▾
         </summary>
@@ -251,13 +254,34 @@ function TranscriptInput({
         rows={6}
         spellCheck={false}
         placeholder="여기에 붙여넣기 (Ctrl+V)"
+        aria-describedby="paste-status"
         className="w-full resize-none rounded-lg border border-border bg-surface p-4 font-mono text-sm outline-none transition-colors placeholder:text-text-soft focus:border-brand-400"
       />
+
+      {/* 붙여넣자마자 몇 과목 잡혔는지 알려준다. 제출 뒤에 알면 늦다. */}
+      <p
+        id="paste-status"
+        aria-live="polite"
+        className={
+          "text-caption " +
+          (value.trim() === ""
+            ? "text-text-soft"
+            : found > 0
+              ? "text-success"
+              : "text-gap")
+        }
+      >
+        {value.trim() === ""
+          ? "붙여넣으면 여기에 인식 결과가 뜹니다."
+          : found > 0
+            ? `✓ ${found}과목 인식했어요.`
+            : "성적표 형식이 아닌 것 같아요. 표 전체를 Ctrl+A → Ctrl+C 로 복사했는지 확인해 주세요."}
+      </p>
 
       <div className="flex flex-wrap gap-2">
         <button
           onClick={() => onSubmit(value)}
-          disabled={!value.trim() || busy}
+          disabled={found === 0 || busy}
           className="rounded-md bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-35"
         >
           {busy ? "읽는 중…" : "이걸로 할게요"}

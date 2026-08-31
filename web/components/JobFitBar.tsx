@@ -5,8 +5,12 @@ import type { JobFit } from "@/lib/types";
 import { jobRank } from "@/lib/competency";
 
 /**
- * 직무 6종을 한 줄에 나란히 놓고 적합도를 같이 보여준다 — switch and see.
+ * 직무 6종을 한 줄에 놓고 적합도를 같이 보여준다 — switch and see.
  * (6월 프론트 `job-toggle-bar` 의 아이디어. 거기선 mock 이었고 여기선 실제 σ/ρ 산출이다.)
+ *
+ * role 은 tablist 가 아니다. tablist 는 옆에 tabpanel 을 여닫을 때 쓰는 것이고,
+ * 여기는 페이지 전체를 바꾸는 단일선택 필터라 aria-pressed 토글이 맞다.
+ * (tablist 로 두면 화살표 키 이동까지 구현해야 하는데 그건 이 UI 의 규약이 아니다.)
  *
  * 순서는 고정한다. 적합도 순으로 재정렬하면 누를 때마다 위치가 흔들려서
  * "아까 그 자리"가 사라진다. 대신 1등에만 표식을 둔다.
@@ -25,23 +29,29 @@ export default function JobFitBar({
     (m, f) => (m === null || f.fit > m.fit ? f : m),
     null,
   );
+  const activeRef = useRef<HTMLButtonElement>(null);
+
+  // 좁은 화면에선 6개가 다 안 보인다 — 고른 것이 화면 밖이면 끌어온다.
+  useEffect(() => {
+    activeRef.current?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }, [active]);
 
   return (
     <div
-      role="tablist"
+      role="group"
       aria-label="목표 직무"
-      className="flex gap-1 overflow-x-auto rounded-lg border border-border bg-surface p-1"
+      className="scroll-fade-x flex gap-1 overflow-x-auto rounded-lg border border-border bg-surface p-1"
     >
       {ordered.map((f) => {
         const selected = f.job === active;
         return (
           <button
             key={f.job}
-            role="tab"
-            aria-selected={selected}
+            ref={selected ? activeRef : undefined}
+            aria-pressed={selected}
             onClick={() => onChange(f.job)}
             className={
-              "flex shrink-0 items-center gap-2 whitespace-nowrap rounded-sm px-3 py-2 text-sm transition-colors " +
+              "flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-sm px-3 text-sm transition-colors " +
               (selected
                 ? "bg-ink text-white"
                 : "text-text-muted hover:bg-surface-3 hover:text-text")
@@ -60,11 +70,11 @@ export default function JobFitBar({
             </span>
             {best?.job === f.job && (
               <span
-                aria-label="가장 잘 맞음"
                 title="지금 가장 잘 맞는 직무"
                 className={selected ? "text-white/70" : "text-success"}
               >
-                ★
+                <span aria-hidden>★</span>
+                <span className="sr-only">가장 잘 맞음</span>
               </span>
             )}
           </button>

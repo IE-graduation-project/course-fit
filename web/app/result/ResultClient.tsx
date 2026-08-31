@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { fetchRecommendation, fetchReference, isMock } from "@/lib/api";
 import type { ModeId, Recommendation, Reference } from "@/lib/types";
 import TimetableGrid, { courseKey } from "@/components/TimetableGrid";
@@ -12,6 +12,7 @@ import JobFitBar from "@/components/JobFitBar";
 
 export default function ResultClient() {
   const params = useSearchParams();
+  const router = useRouter();
   const [job, setJob] = useState(params.get("job") ?? "DA");
   const [mode, setMode] = useState<ModeId>(
     (params.get("mode") ?? "balanced") as ModeId,
@@ -22,6 +23,8 @@ export default function ResultClient() {
   const [active, setActive] = useState<string | null>(null);
   const [why, setWhy] = useState(false);
   const [loading, setLoading] = useState(true);
+  /** 성적표를 낸 적 없이 /result 로 바로 들어왔나 */
+  const [demo, setDemo] = useState(false);
 
   useEffect(() => {
     fetchReference().then(setRef).catch(console.error);
@@ -30,7 +33,9 @@ export default function ResultClient() {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    const studentId = sessionStorage.getItem("studentId") ?? "746696b793744f17";
+    const saved = sessionStorage.getItem("studentId");
+    setDemo(saved === null);
+    const studentId = saved ?? "746696b793744f17";
     fetchRecommendation({ studentId, job, mode })
       .then((r) => {
         if (cancelled) return;
@@ -47,6 +52,10 @@ export default function ResultClient() {
     };
   }, [job, mode]);
 
+  useEffect(() => {
+    router.replace(`/result?job=${job}&mode=${mode}`, { scroll: false });
+  }, [job, mode, router]);
+
   if (loading && !rec) return <Analyzing />;
   if (!rec) return <Failed />;
 
@@ -57,13 +66,23 @@ export default function ResultClient() {
   return (
     <main className="mx-auto max-w-5xl px-5 py-8 pb-24">
       <header className="mb-8 flex flex-wrap items-center justify-between gap-3">
-        <Link href="/" className="text-sm font-semibold text-text-muted hover:text-text">
+        <Link href="/" className="-ml-2 inline-flex min-h-11 items-center rounded-sm px-2 text-sm font-semibold text-text-muted hover:text-text">
           ← course-fit
         </Link>
         {isMock() && (
           <span className="text-caption text-text-soft">프로토타입 · 고정 데이터</span>
         )}
       </header>
+
+      {demo && (
+        <p className="mb-6 rounded-lg border border-border bg-surface-3 px-4 py-3 text-sm text-text-muted">
+          성적표를 넣지 않고 들어오셔서 <b className="text-text">샘플 학생</b> 결과를
+          보고 계세요.{" "}
+          <Link href="/start" className="font-semibold text-brand-700 hover:underline">
+            내 성적표로 해보기 →
+          </Link>
+        </p>
+      )}
 
       <h1 className="text-h1 font-bold leading-h">이번 학기, 이렇게 들어보세요</h1>
       <p className="mt-2 text-sm text-text-muted">
@@ -80,28 +99,32 @@ export default function ResultClient() {
         </p>
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3">
-        <label className="flex items-center gap-2 text-sm">
-          <span className="text-text-muted">성향</span>
-          <span className="inline-flex rounded-md border border-border-strong bg-surface-3 p-0.5">
-            {(ref?.modes ?? []).map((m) => (
-              <button
-                key={m.id}
-                onClick={() => setMode(m.id)}
-                title={m.desc}
-                aria-pressed={m.id === mode}
-                className={
-                  "rounded-sm px-3 py-1.5 text-sm transition-colors " +
-                  (m.id === mode
-                    ? "bg-surface font-semibold text-text shadow-card"
-                    : "text-text-muted hover:text-text")
-                }
-              >
-                {m.label}
-              </button>
-            ))}
-          </span>
-        </label>
+      <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-3">
+        <span id="mode-label" className="text-sm text-text-muted">
+          성향
+        </span>
+        <div
+          role="group"
+          aria-labelledby="mode-label"
+          className="inline-flex rounded-md border border-border-strong bg-surface-3 p-0.5"
+        >
+          {(ref?.modes ?? []).map((m) => (
+            <button
+              key={m.id}
+              onClick={() => setMode(m.id)}
+              title={m.desc}
+              aria-pressed={m.id === mode}
+              className={
+                "min-h-11 rounded-sm px-4 text-sm transition-colors " +
+                (m.id === mode
+                  ? "bg-surface font-semibold text-text shadow-card"
+                  : "text-text-muted hover:text-text")
+              }
+            >
+              {m.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <section className="mt-6 grid gap-6 lg:grid-cols-[1.35fr_1fr]">
@@ -123,7 +146,7 @@ export default function ResultClient() {
                   onClick={() => setAlt(i)}
                   aria-pressed={i === alt}
                   className={
-                    "rounded-sm border px-3 py-1.5 text-caption transition-colors " +
+                    "min-h-11 rounded-sm border px-4 text-caption transition-colors " +
                     (i === alt
                       ? "border-brand-400 bg-brand-50 font-semibold text-brand-700"
                       : "border-border text-text-muted hover:bg-surface-3")
@@ -179,7 +202,7 @@ export default function ResultClient() {
           <h2 className="text-h2 font-bold">왜 이 과목들일까요?</h2>
           <button
             onClick={() => setWhy((v) => !v)}
-            className="text-sm font-semibold text-brand-700 hover:underline"
+            className="-mr-2 inline-flex min-h-11 items-center rounded-sm px-2 text-sm font-semibold text-brand-700 hover:underline"
           >
             {why ? "계산식 접기" : "어떻게 계산했나요?"}
           </button>

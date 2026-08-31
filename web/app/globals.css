@@ -102,6 +102,33 @@
   .tnum {
     font-variant-numeric: tabular-nums;
   }
+
+  /* 키보드 포커스는 전역으로 한 번만 정의한다.
+     컨트롤마다 붙이면 빠뜨리는 게 생긴다 — 실제로 13종이 안 보이는 상태였다.
+     :focus-visible 이라 마우스 클릭에는 안 뜬다. */
+  :focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* 가로 스크롤 영역의 끝을 흐려서 "더 있다"를 알린다 (모바일 직무 바) */
+  .scroll-fade-x {
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 12px,
+      #000 calc(100% - 20px),
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 12px,
+      #000 calc(100% - 20px),
+      transparent 100%
+    );
+  }
 }
 
 @layer utilities {

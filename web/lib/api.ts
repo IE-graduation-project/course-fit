@@ -38,14 +38,14 @@ export async function submitTranscript(
   req: TranscriptRequest,
 ): Promise<TranscriptResponse> {
   if (isMock()) {
-    const lines = req.text.split("\n").filter((l) => /^\s*\d{6}[\s\t]/.test(l));
+    const n = countCourseLines(req.text);
     await delay(400);
     return {
       studentId: "746696b793744f17",
       deptId: req.dept,
       admissionYear: req.admissionYear,
-      courseCount: lines.length || 45,
-      matchedCount: lines.length || 45,
+      courseCount: n,
+      matchedCount: n,
       semesters: [],
     };
   }
@@ -76,3 +76,12 @@ export async function fetchRecommendation(
 }
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * 붙여넣은 텍스트에서 성적표 행이 몇 개인지 센다.
+ * 클래스넷 전체성적조회는 `학수번호(6자리)<TAB>과목명 ...` 으로 시작한다.
+ * 검증과 미리보기가 같은 기준을 쓰도록 여기 한 곳에만 둔다.
+ */
+export function countCourseLines(text: string): number {
+  return text.split("\n").filter((l) => /^\s*\d{6}[\s\t]/.test(l)).length;
+}
