@@ -59,7 +59,7 @@ export default function ResultClient() {
   if (loading && !rec) return <Analyzing />;
   if (!rec) return <Failed />;
 
-  const tt = rec.timetables[alt] ?? rec.timetables[0];
+  const tt = rec.timetables[alt] ?? rec.timetables[0] ?? null;
   const need = Object.entries(rec.need).sort((a, b) => b[1] - a[1]);
   const needMax = Math.max(1, ...Object.values(rec.need));
 
@@ -87,8 +87,14 @@ export default function ResultClient() {
       <h1 className="text-h1 font-bold leading-h">이번 학기, 이렇게 들어보세요</h1>
       <p className="mt-2 text-sm text-text-muted">
         {rec.student.deptId} {rec.student.admissionYear}학번 ·{" "}
-        <span className="tnum">{tt.totalCredit}학점</span> ·{" "}
-        <span className="tnum">{tt.courses.length}과목</span>
+        {tt === null ? (
+          <span>추천 가능한 시간표 없음</span>
+        ) : (
+          <>
+            <span className="tnum">{tt.totalCredit}학점</span> ·{" "}
+            <span className="tnum">{tt.courses.length}과목</span>
+          </>
+        )}
       </p>
 
       {/* 목표 — 6종을 한 줄에 놓고 적합도까지 같이 (switch and see) */}
@@ -127,15 +133,25 @@ export default function ResultClient() {
         </div>
       </div>
 
-      <section className="mt-6 grid gap-6 lg:grid-cols-[1.35fr_1fr]">
+      <section
+        className="mt-6 grid gap-6 transition-opacity duration-200 lg:grid-cols-[1.35fr_1fr]"
+        style={{ opacity: loading ? 0.45 : 1 }}
+        aria-busy={loading}
+      >
         <div>
-          <TimetableGrid courses={tt.courses} activeId={active} onHover={setActive} />
+          {tt === null ? (
+            <Infeasible mode={mode} onRelax={() => setMode("graduation")} />
+          ) : (
+            <>
+              <TimetableGrid courses={tt.courses} activeId={active} onHover={setActive} />
 
-          {/* 제약 — 항상 참인 hard 제약이라 초록 배지 셋이 아니라 한 줄이다 */}
-          <p className="mt-2.5 flex items-center gap-1.5 text-caption text-text-muted">
-            <span className="text-success" aria-hidden>✓</span>
-            시간 충돌 없음 · 기수강 제외 · 선수과목 충족
-          </p>
+              {/* 제약 — 항상 참인 hard 제약이라 초록 배지 셋이 아니라 한 줄이다 */}
+              <p className="mt-2.5 flex items-center gap-1.5 text-caption text-text-muted">
+                <span className="text-success" aria-hidden>✓</span>
+                시간 충돌 없음 · 기수강 제외 · 선수과목 충족
+              </p>
+            </>
+          )}
 
           {rec.timetables.length > 1 && (
             <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -227,7 +243,7 @@ export default function ResultClient() {
         )}
 
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
-          {tt.courses.map((c) => (
+          {(tt?.courses ?? []).map((c) => (
             <CourseCard
               key={courseKey(c)}
               course={c}
@@ -242,6 +258,36 @@ export default function ResultClient() {
         홍익대학교 산업데이터공학과 졸업프로젝트 6조 · 유영준 · 박소연
       </footer>
     </main>
+  );
+}
+
+/**
+ * ILP 가 못 푼 경우. 계약상 500 이 아니라 timetables: [] 로 온다 —
+ * "서비스 고장" 과 "조건이 빡세다" 는 학생에게 완전히 다른 말이라 화면도 달라야 한다.
+ */
+function Infeasible({
+  mode,
+  onRelax,
+}: {
+  mode: ModeId;
+  onRelax: () => void;
+}) {
+  return (
+    <div className="rounded-lg border border-border bg-surface p-8 text-center">
+      <p className="text-h3 font-semibold">조건에 맞는 시간표가 없어요</p>
+      <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-text-muted">
+        학점 범위·시간 충돌·선수과목을 모두 만족하는 조합을 못 찾았습니다.
+        남은 과목이 적거나 개설 분반이 겹칠 때 이렇게 됩니다.
+      </p>
+      {mode !== "graduation" && (
+        <button
+          onClick={onRelax}
+          className="mt-5 inline-flex min-h-11 items-center rounded-md bg-brand-600 px-5 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
+        >
+          졸업 우선으로 바꿔서 다시 찾기
+        </button>
+      )}
+    </div>
   );
 }
 
