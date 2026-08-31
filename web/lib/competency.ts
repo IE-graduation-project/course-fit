@@ -1,32 +1,27 @@
-import type { CompId } from "./types";
-
 /**
- * 역량 10축의 고정 색상(oklch hue).
+ * 역량·직무 표시 규칙.
  *
- * 한 역량은 화면 어디서든 같은 색이다 — 진단 차트의 라벨 점과 과목 카드의 근거 막대가
- * 같은 색을 쓰기 때문에, "데이터베이스가 부족하다 → 이 과목이 그 색을 크게 물고 있다" 가
- * 글씨를 읽지 않고도 연결된다. (소연님 6/10 요청: 글씨 최대한 줄이고 UI 로 표현)
+ * 역량별 고정 색을 두지 않는다. 진단 막대에는 축 이름이 이미 적혀 있어서 색이
+ * 식별을 하지 않고, 10축에 hue 를 주면 색각 이상에서 구분이 무너진다
+ * (실측: 비즈니스↔데이터시각화 ΔE 0.8, 최적화↔마케팅은 정상 시야에서도 6.2).
+ * 그래서 색은 「보유 / 부족」 두 역할만 나르고, 정체는 글자가 나른다.
  */
-export const COMP_HUE: Record<CompId, number> = {
-  PROG: 258,
-  DATA: 205,
-  ML: 295,
-  DB: 170,
-  VIZ: 45,
-  BIZ: 130,
-  FIN: 95,
-  MKT: 345,
-  OR: 320,
-  COMM: 20,
-};
 
-export const compColor = (id: CompId, l = 60, c = 0.14) =>
-  `oklch(${l}% ${c} ${COMP_HUE[id] ?? 258})`;
-
-/** 직무 표시 순서 — 데이터/제품/비즈니스 묶음 순. job.csv 는 id 사전순이라 여기서 다시 세운다. */
+/** 직무 표시 순서 — 데이터 · 제품 · 비즈니스 묶음 순. job.csv 는 id 사전순이라 여기서 다시 세운다. */
 export const JOB_ORDER = ["DA", "DS", "DE", "PM", "MKT", "FIN"];
 
 export const jobRank = (id: string) => {
   const i = JOB_ORDER.indexOf(id);
   return i === -1 ? 99 : i;
 };
+
+/** gap 으로 볼지 「충족」으로 볼지 가르는 선. 이 아래는 반올림하면 0 이라 노이즈다. */
+export const GAP_EPSILON = 0.03;
+
+/**
+ * 근거 막대 세그먼트 색 — share 는 정체가 아니라 크기다.
+ * 그래서 hue 를 돌리지 않고 한 hue 를 진하기로만 3단 쓴다(순차 램프).
+ */
+const SEQ = ["var(--color-seq-1)", "var(--color-seq-2)", "var(--color-seq-3)"];
+
+export const seqColor = (rank: number) => SEQ[Math.min(rank, SEQ.length - 1)];

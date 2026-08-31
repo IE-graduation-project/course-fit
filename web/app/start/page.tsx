@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { fetchReference, submitTranscript } from "@/lib/api";
 import { SAMPLE_TRANSCRIPT } from "@/lib/sample";
-import type { JobRef, ModeId, ModeRef, Reference } from "@/lib/types";
+import type { JobRef, ModeRef, Reference } from "@/lib/types";
 import { jobRank } from "@/lib/competency";
 
 type Step = "transcript" | "job" | "mode" | "done";
@@ -75,7 +75,7 @@ export default function StartPage() {
       </header>
 
       <div className="space-y-5 pb-24">
-        <Bubble>안녕하세요! 다음 학기 시간표를 같이 짜볼게요 👋</Bubble>
+        <Bubble>안녕하세요! 다음 학기 시간표를 같이 짜볼게요.</Bubble>
         <Bubble delay={0.15}>
           먼저 지금까지 뭘 들었는지 알아야 해요.
           <br />
@@ -272,7 +272,7 @@ function JobPicker({
         <button
           key={j.id}
           onClick={() => onPick(j)}
-          className="card group flex flex-col items-center gap-2.5 px-3 py-5 transition-all hover:-translate-y-0.5 hover:shadow-lift"
+          className="group flex flex-col items-center gap-2.5 rounded-lg border border-border bg-surface px-3 py-5 transition-colors hover:border-brand-400 hover:bg-brand-50"
         >
           <span className="text-text-soft transition-colors group-hover:text-brand-600">
             {JOB_ICON[j.id]}
@@ -283,12 +283,6 @@ function JobPicker({
     </div>
   );
 }
-
-const MODE_ART: Record<ModeId, { fill: number }> = {
-  gap: { fill: 0.15 },
-  balanced: { fill: 0.5 },
-  graduation: { fill: 0.85 },
-};
 
 function ModePicker({
   modes,
@@ -303,19 +297,11 @@ function ModePicker({
         <button
           key={m.id}
           onClick={() => onPick(m)}
-          className="card flex w-full items-center gap-4 px-4 py-3.5 text-left transition-all hover:-translate-y-0.5 hover:shadow-lift"
+          className="w-full rounded-lg border border-border bg-surface px-4 py-3.5 text-left transition-colors hover:border-brand-400 hover:bg-brand-50"
         >
-          <span className="relative h-2 w-20 shrink-0 overflow-hidden rounded-full bg-have">
-            <span
-              className="absolute inset-y-0 right-0 bg-grad"
-              style={{ width: `${MODE_ART[m.id].fill * 100}%` }}
-            />
-          </span>
-          <span className="min-w-0">
-            <span className="block text-sm font-semibold">{m.label}</span>
-            <span className="block text-caption leading-snug text-text-muted">
-              {m.desc}
-            </span>
+          <span className="block text-sm font-semibold">{m.label}</span>
+          <span className="mt-0.5 block text-caption leading-snug text-text-muted">
+            {m.desc}
           </span>
         </button>
       ))}

@@ -1,100 +1,71 @@
 "use client";
 
 import type { RecommendedCourse } from "@/lib/types";
-import { compColor } from "@/lib/competency";
-import { courseHue, courseKey } from "./TimetableGrid";
+import { seqColor } from "@/lib/competency";
+import { courseKey } from "./TimetableGrid";
 
 /**
  * 과목 하나가 왜 추천됐는지.
- *  - 위: 무슨 과목인가 (이름·학점·시간·교수)
- *  - 아래: 왜 (역량 갭 기여 비중 막대 + 졸업요건 기여)
- * share 는 Score_c 의 축별 분해 비중이라 합이 1이다 — 그래서 한 줄 누적 막대로 그린다.
+ *
+ * 카드가 나르는 사실은 둘뿐이다 — 무슨 과목인가, 어느 갭을 채우나.
+ * 그래서 장식도 둘로 줄였다: 근거 막대 하나, 강조 상태 하나.
+ * (좌측 컬러바·학수번호 칩·점 범례·졸업요건 알약은 걷어냈다. 졸업요건은
+ *  「졸업까지 남은 것」 절이 이미 말하고 있어서 카드마다 반복하면 중복이다.)
+ *
+ * 막대 색은 hue 를 돌리지 않는다 — share 는 정체가 아니라 크기라서 한 hue 3단이다.
  */
 export default function CourseCard({
   course,
-  index,
   active,
   onHover,
 }: {
   course: RecommendedCourse;
-  index: number;
   active: boolean;
   onHover?: (id: string | null) => void;
 }) {
-  const hue = courseHue(index);
   const key = courseKey(course);
-  const reasons = course.careerReason.filter((r) => r.share >= 0.02);
-  const grad = course.gradReason;
+  const reasons = course.careerReason.filter((r) => r.share >= 0.05);
+
+  const meta = [
+    `${course.credit}학점`,
+    course.area,
+    course.timeRaw,
+    course.professor,
+  ].filter(Boolean);
 
   return (
     <div
       onMouseEnter={() => onHover?.(key)}
       onMouseLeave={() => onHover?.(null)}
-      className="card p-4 transition-all duration-200"
-      style={{
-        borderLeft: `4px solid oklch(60% 0.15 ${hue})`,
-        boxShadow: active ? "var(--shadow-lift)" : undefined,
-        transform: active ? "translateY(-2px)" : undefined,
-      }}
+      className={
+        "rounded-lg border bg-surface p-4 transition-colors duration-150 " +
+        (active ? "border-brand-400 bg-brand-50" : "border-border")
+      }
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <h4 className="truncate text-h3 font-semibold leading-snug">
-            {course.name}
-          </h4>
-          <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-caption text-text-soft">
-            <span className="tnum">{course.credit}학점</span>
-            <span aria-hidden>·</span>
-            <span>{course.area}</span>
-            {course.timeRaw && (
-              <>
-                <span aria-hidden>·</span>
-                <span className="tnum">{course.timeRaw}</span>
-              </>
-            )}
-            {course.professor && (
-              <>
-                <span aria-hidden>·</span>
-                <span>{course.professor}</span>
-              </>
-            )}
-          </p>
-        </div>
-        <span
-          className="shrink-0 rounded-sm px-2 py-1 text-caption font-semibold"
-          style={{
-            background: `oklch(96.5% 0.026 ${hue})`,
-            color: `oklch(37% 0.105 ${hue})`,
-          }}
-        >
-          {course.courseId}-{course.section}
-        </span>
-      </div>
+      <h4 className="text-h3 font-semibold leading-snug">{course.name}</h4>
+      <p className="mt-1 text-caption text-text-soft">
+        {meta.join(" · ")}
+      </p>
 
-      {/* 왜 — 역량 기여 분해 */}
       {reasons.length > 0 && (
         <div className="mt-3.5">
-          <div className="flex h-2.5 gap-0.5 overflow-hidden rounded-sm">
-            {reasons.map((r) => (
+          <div className="flex h-2 gap-0.5">
+            {reasons.map((r, i) => (
               <div
                 key={r.comp}
-                title={`${r.compKo} ${Math.round(r.share * 100)}%`}
                 className="rounded-sm"
                 style={{
                   width: `${r.share * 100}%`,
-                  background: compColor(r.comp),
+                  background: seqColor(i),
                 }}
               />
             ))}
           </div>
-          <p className="mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-sm text-text-muted">
-            {reasons.map((r) => (
-              <span key={r.comp} className="inline-flex items-center gap-1.5">
-                <span
-                  className="h-2 w-2 shrink-0 rounded-full"
-                  style={{ background: compColor(r.comp) }}
-                />
-                <span className="font-semibold text-text">{r.compKo}</span>
+          <p className="mt-2 text-sm text-text-muted">
+            {reasons.map((r, i) => (
+              <span key={r.comp}>
+                {i > 0 && <span className="text-text-soft"> · </span>}
+                <span className="text-text">{r.compKo}</span>{" "}
                 <span className="tnum text-text-soft">
                   {Math.round(r.share * 100)}%
                 </span>
@@ -102,16 +73,6 @@ export default function CourseCard({
             ))}
           </p>
         </div>
-      )}
-
-      {grad.remaining > 0 && (
-        <p className="mt-2 inline-flex items-center gap-1.5 rounded-sm bg-surface-3 px-2 py-1 text-caption text-text-muted">
-          <span className="h-2 w-2 rounded-full bg-grad" />
-          <span>
-            <span className="font-semibold text-text">{grad.area}</span> 졸업요건{" "}
-            <span className="tnum">{grad.remaining}학점</span> 남음
-          </span>
-        </p>
       )}
     </div>
   );
