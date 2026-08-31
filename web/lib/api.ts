@@ -79,9 +79,22 @@ const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /**
  * 붙여넣은 텍스트에서 성적표 행이 몇 개인지 센다.
- * 클래스넷 전체성적조회는 `학수번호(6자리)<TAB>과목명 ...` 으로 시작한다.
- * 검증과 미리보기가 같은 기준을 쓰도록 여기 한 곳에만 둔다.
+ *
+ * **서버 파서(transcript/parse_text.py `_split_fields` + `_COURSE_ID_RE`)와
+ * 같은 규칙이어야 한다.** 화면이 "N과목 인식했어요" 라고 해놓고 서버가 0개를
+ * 파싱하면 그건 거짓말이다. 실제로 어긋나 있었다 — 1칸 공백으로 구분된
+ * 붙여넣기를 화면은 받아주는데 서버는 통째로 거부했다.
+ *
+ * 서버 규칙: 탭이 있으면 탭으로, 없으면 2칸 이상 공백으로 나누고,
+ * 첫 필드가 정확히 6자리 숫자여야 한다.
  */
+function isCourseLine(line: string): boolean {
+  const fields = line.includes("\t")
+    ? line.split("\t").map((f) => f.trim())
+    : line.trim().split(/\s{2,}/).map((f) => f.trim());
+  return /^\d{6}$/.test(fields[0] ?? "");
+}
+
 export function countCourseLines(text: string): number {
-  return text.split("\n").filter((l) => /^\s*\d{6}[\s\t]/.test(l)).length;
+  return text.split("\n").filter(isCourseLine).length;
 }
