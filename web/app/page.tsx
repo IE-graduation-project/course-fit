@@ -65,7 +65,7 @@ function Pillar({
   return (
     <div className="card fade-up p-5">
       <div className="text-brand-600">{icon}</div>
-      <h3 className="mt-3 font-semibold">{title}</h3>
+      <h2 className="mt-3 text-body font-semibold">{title}</h2>
       <p className="mt-1.5 text-sm leading-relaxed text-text-muted">{body}</p>
     </div>
   );

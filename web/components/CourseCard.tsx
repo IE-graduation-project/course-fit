@@ -46,7 +46,7 @@ export default function CourseCard({
         (active ? "border-brand-400 bg-brand-50" : "border-border")
       }
     >
-      <h4 className="text-h3 font-semibold leading-snug">{course.name}</h4>
+      <h3 className="text-h3 font-semibold leading-snug">{course.name}</h3>
       <p className="mt-1 text-caption text-text-soft">
         <span className="tnum font-semibold text-text-muted">{meta[0]}</span>
         {" · "}

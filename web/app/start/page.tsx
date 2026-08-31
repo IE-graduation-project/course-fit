@@ -82,6 +82,8 @@ export default function StartPage() {
         <StepDots step={step} />
       </header>
 
+      <h1 className="sr-only">성적표 입력</h1>
+
       <div className="space-y-5 pb-24">
         <Bubble>안녕하세요! 다음 학기 시간표를 같이 짜볼게요.</Bubble>
         <Bubble delay={0.15}>
