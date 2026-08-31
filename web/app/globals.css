@@ -150,6 +150,14 @@
   }
 }
 
+/* 인식 칩 — 붙여넣은 텍스트에서 떠올라 자리를 잡는다. 6월 프론트의 「토큰 비행」을
+   CSS 로만 옮긴 것: 아래에서 살짝 올라오며 커졌다 제자리. */
+@keyframes chipIn {
+  0%   { opacity: 0; transform: translateY(8px) scale(.94); }
+  60%  { opacity: 1; transform: translateY(-2px) scale(1.02); }
+  100% { opacity: 1; transform: none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

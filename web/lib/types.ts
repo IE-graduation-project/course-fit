@@ -86,6 +86,12 @@ export interface RecommendRequest {
 export interface Recommendation {
   student: { deptId: string; admissionYear: number };
   job: JobRef;
+  /**
+   * 직무 6종 각각의 적합도(0~100). σ 는 직무와 무관해서 한 번에 다 낼 수 있고,
+   * 시간표·성향(ε)에 흔들리지 않는다 — 목표를 고르기 전에 비교하라고 있는 값이다.
+   * fit = 1 − Σ_k ρ_k·gap_k / Σ_k ρ_k
+   */
+  fitByJob: JobFit[];
   params: {
     mode: ModeId;
     eps: number;
@@ -105,6 +111,12 @@ export interface Recommendation {
     excludeTaken: boolean;
     prereqSatisfied: boolean;
   };
+}
+
+export interface JobFit {
+  job: string;
+  name: string;
+  fit: number;
 }
 
 export interface Diagnosis {

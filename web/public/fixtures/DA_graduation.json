@@ -3,6 +3,38 @@
     "deptId": "BIZ",
     "admissionYear": 2022
   },
+  "fitByJob": [
+    {
+      "job": "DA",
+      "name": "데이터 분석가",
+      "fit": 93.7
+    },
+    {
+      "job": "DE",
+      "name": "데이터 엔지니어",
+      "fit": 89.0
+    },
+    {
+      "job": "DS",
+      "name": "데이터 사이언티스트",
+      "fit": 96.9
+    },
+    {
+      "job": "FIN",
+      "name": "재무 분석가",
+      "fit": 97.5
+    },
+    {
+      "job": "MKT",
+      "name": "마케팅 매니저",
+      "fit": 98.8
+    },
+    {
+      "job": "PM",
+      "name": "프로덕트 매니저",
+      "fit": 99.9
+    }
+  ],
   "job": {
     "id": "DA",
     "name": "데이터 분석가"

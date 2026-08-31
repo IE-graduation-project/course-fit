@@ -41,6 +41,21 @@ def load_section_meta() -> dict:
     return meta
 
 
+def job_fit(sigma: dict, rho: dict, comp_ids) -> float:
+    """직무 적합도 0~100 — 학생의 지금 σ 가 이 직무의 ρ 를 얼마나 채우나.
+
+    fit = 1 − Σ_k ρ_k·gap_k / Σ_k ρ_k   (gap = max(0, ρ−σ))
+
+    갭을 ρ 로 가중하는 이유: 그 직무가 중시하지 않는 축(ρ≈0)의 부족은
+    적합도를 깎으면 안 된다. 시간표와 무관한 값이라 성향(ε)에 흔들리지 않는다.
+    """
+    denom = sum(rho.get(k, 0.0) for k in comp_ids)
+    if denom <= 0:
+        return 0.0
+    penalty = sum(rho.get(k, 0.0) * max(0.0, rho.get(k, 0.0) - sigma[k]) for k in comp_ids)
+    return round(max(0.0, min(1.0, 1 - penalty / denom)) * 100, 1)
+
+
 def main() -> int:
     input_hash, out_dir = sys.argv[1], Path(sys.argv[2])
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -113,8 +128,17 @@ def main() -> int:
                     "courses": courses,
                 })
 
+            conn = data.connect(str(ROOT / "db" / "app.db"))
+            fit_by_job = [
+                {"job": jid, "name": jname,
+                 "fit": job_fit(rec.sigma, data.load_rho(conn, jid), comp_ids)}
+                for jid, jname in jobs
+            ]
+            conn.close()
+
             payload = {
                 "student": {"deptId": rec.dept_id, "admissionYear": rec.admission_year},
+                "fitByJob": fit_by_job,
                 "job": {"id": job_id, "name": job_name},
                 "params": {"mode": mode, "eps": eps, "alpha": params.ALPHA_DEFAULT,
                            "maxCredits": 18, "minCredits": 12, "topK": 3},

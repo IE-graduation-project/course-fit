@@ -5,10 +5,10 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { fetchRecommendation, fetchReference, isMock } from "@/lib/api";
 import type { ModeId, Recommendation, Reference } from "@/lib/types";
-import { jobRank } from "@/lib/competency";
 import TimetableGrid, { courseKey } from "@/components/TimetableGrid";
 import CompetencyChart from "@/components/CompetencyChart";
 import CourseCard from "@/components/CourseCard";
+import JobFitBar from "@/components/JobFitBar";
 
 export default function ResultClient() {
   const params = useSearchParams();
@@ -53,7 +53,6 @@ export default function ResultClient() {
   const tt = rec.timetables[alt] ?? rec.timetables[0];
   const need = Object.entries(rec.need).sort((a, b) => b[1] - a[1]);
   const needMax = Math.max(1, ...Object.values(rec.need));
-  const jobs = [...(ref?.jobs ?? [])].sort((a, b) => jobRank(a.id) - jobRank(b.id));
 
   return (
     <main className="mx-auto max-w-5xl px-5 py-8 pb-24">
@@ -73,23 +72,15 @@ export default function ResultClient() {
         <span className="tnum">{tt.courses.length}과목</span>
       </p>
 
-      {/* 컨트롤 — 목표는 select(6개), 성향은 segmented(3개) */}
-      <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-3">
-        <label className="flex items-center gap-2 text-sm">
-          <span className="text-text-muted">목표</span>
-          <select
-            value={job}
-            onChange={(e) => setJob(e.target.value)}
-            className="rounded-md border border-border-strong bg-surface px-3 py-2 text-sm font-semibold outline-none focus:border-brand-400"
-          >
-            {jobs.map((j) => (
-              <option key={j.id} value={j.id}>
-                {j.name}
-              </option>
-            ))}
-          </select>
-        </label>
+      {/* 목표 — 6종을 한 줄에 놓고 적합도까지 같이 (switch and see) */}
+      <div className="mt-5">
+        <JobFitBar fits={rec.fitByJob} active={job} onChange={setJob} />
+        <p className="mt-1.5 text-caption text-text-soft">
+          옆 숫자는 지금 성적으로 그 직무에 얼마나 맞는지 (0~100)
+        </p>
+      </div>
 
+      <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3">
         <label className="flex items-center gap-2 text-sm">
           <span className="text-text-muted">성향</span>
           <span className="inline-flex rounded-md border border-border-strong bg-surface-3 p-0.5">

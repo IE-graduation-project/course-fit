@@ -100,6 +100,11 @@
 {
   "student": { "deptId": "BIZ", "admissionYear": 2022 },
   "job": { "id": "DA", "name": "데이터 분석가" },
+
+  // 직무 6종 적합도 — σ 는 직무 무관이라 한 번에 다 낸다. ε 에 안 흔들린다.
+  // fit = 1 − Σ_k ρ_k·gap_k / Σ_k ρ_k  (0~100)
+  "fitByJob": [{ "job": "DA", "name": "데이터 분석가", "fit": 93.7 }],
+
   "params": { "mode": "balanced", "eps": 0.3, "alpha": 1.5,
               "maxCredits": 18, "minCredits": 12, "topK": 3 },
 
@@ -149,6 +154,7 @@
 | 과목 근거 막대 | `careerReason[].share` · `compKo` · `comp` |
 | 제약 배지 | `constraints` |
 | 대안 탭 | `timetables[].rank` · `totalCredit` |
+| 직무 비교 바 | `fitByJob[].fit` · `name` |
 
 `slots` 가 비면(`[]`) 프론트는 그리드 밖 "시간 미지정" 으로 뺀다 — 500 내지 말고 빈 배열로 주면 된다.
 

@@ -88,12 +88,10 @@ export default function StartPage() {
 
         {step !== "transcript" && (
           <>
-            <UserBubble>
-              성적표 붙여넣기 완료 · <span className="tnum">{courseCount}과목</span>
-            </UserBubble>
+            <UserBubble>성적표 붙여넣기 완료</UserBubble>
             <Bubble delay={0.1}>
-              <span className="tnum font-semibold">{courseCount}과목</span> 읽었어요.
-              <br />
+              읽었어요. 이렇게 인식했습니다.
+              <RecognitionChips dept="경영학전공" year={2022} courses={courseCount} />
               어떤 일을 하고 싶으세요?
             </Bubble>
           </>
@@ -131,6 +129,36 @@ export default function StartPage() {
 }
 
 // ── 조각들 ─────────────────────────────────────────────────────
+
+/**
+ * 성적표에서 뽑아낸 것을 칩으로 띄운다.
+ * 6월 프론트의 「토큰 비행」을 가볍게 옮긴 것 — 붙여넣은 글자가 그냥 사라지지 않고
+ * 인식 결과로 바뀌었다는 걸 눈으로 잇는다. 순서대로 하나씩 떠오른다.
+ */
+function RecognitionChips({
+  dept,
+  year,
+  courses,
+}: {
+  dept: string;
+  year: number;
+  courses: number;
+}) {
+  const chips = [dept, `${year}학번`, `${courses}과목`];
+  return (
+    <span className="my-2.5 flex flex-wrap gap-1.5">
+      {chips.map((c, i) => (
+        <span
+          key={c}
+          className="tnum rounded-sm bg-surface-3 px-2.5 py-1 text-caption font-semibold text-text"
+          style={{ animation: `chipIn .45s cubic-bezier(.16,1,.3,1) ${0.12 * i}s both` }}
+        >
+          {c}
+        </span>
+      ))}
+    </span>
+  );
+}
 
 function Bubble({
   children,
