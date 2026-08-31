@@ -8,6 +8,7 @@ import type { ModeId, Recommendation, Reference } from "@/lib/types";
 import TimetableGrid, { courseKey } from "@/components/TimetableGrid";
 import CompetencyChart from "@/components/CompetencyChart";
 import CourseCard from "@/components/CourseCard";
+import CopyCodes from "@/components/CopyCodes";
 import JobFitBar from "@/components/JobFitBar";
 
 export default function ResultClient() {
@@ -166,6 +167,8 @@ export default function ResultClient() {
               </p>
             </>
           )}
+
+          {tt !== null && <CopyCodes courses={tt.courses} />}
 
           {rec.timetables.length > 1 && (
             <div className="mt-4 flex flex-wrap items-center gap-2">

@@ -26,7 +26,11 @@ export default function CourseCard({
   const key = courseKey(course);
   const reasons = course.careerReason.filter((r) => r.share >= 0.05);
 
+  // 학수번호-분반이 맨 앞이다. 이 화면을 본 학생이 다음에 하는 일은
+  // 수강신청 창에 이 번호를 치는 것이라, 화면에서 제일 실용적인 값이다.
+  // (리팩터 때 칩을 장식으로 보고 걷어냈다가 이 값까지 같이 사라졌었다.)
   const meta = [
+    `${course.courseId}-${course.section}`,
     `${course.credit}학점`,
     course.area,
     course.timeRaw,
@@ -44,7 +48,9 @@ export default function CourseCard({
     >
       <h4 className="text-h3 font-semibold leading-snug">{course.name}</h4>
       <p className="mt-1 text-caption text-text-soft">
-        {meta.join(" · ")}
+        <span className="tnum font-semibold text-text-muted">{meta[0]}</span>
+        {" · "}
+        {meta.slice(1).join(" · ")}
       </p>
 
       {reasons.length > 0 && (
