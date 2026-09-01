@@ -103,8 +103,7 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* 키보드 포커스는 전역으로 한 번만 정의한다.
-     컨트롤마다 붙이면 빠뜨리는 게 생긴다 — 실제로 13종이 안 보이는 상태였다.
+  /* 키보드 포커스는 전역에 한 번만 정의한다. 컨트롤마다 붙이면 빠뜨린다.
      :focus-visible 이라 마우스 클릭에는 안 뜬다. */
   :focus-visible {
     outline: 2px solid var(--color-brand-500);
@@ -177,8 +176,7 @@
   }
 }
 
-/* 인식 칩 — 붙여넣은 텍스트에서 떠올라 자리를 잡는다. 6월 프론트의 「토큰 비행」을
-   CSS 로만 옮긴 것: 아래에서 살짝 올라오며 커졌다 제자리. */
+/* 인식 칩 — 붙여넣은 텍스트가 인식 결과로 바뀌었다는 걸 눈으로 잇는다. */
 @keyframes chipIn {
   0%   { opacity: 0; transform: translateY(8px) scale(.94); }
   60%  { opacity: 1; transform: translateY(-2px) scale(1.02); }

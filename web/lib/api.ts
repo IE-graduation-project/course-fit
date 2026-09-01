@@ -80,12 +80,11 @@ const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 /**
  * 붙여넣은 텍스트에서 성적표 행이 몇 개인지 센다.
  *
- * **서버 파서(transcript/parse_text.py `_split_fields` + `_COURSE_ID_RE`)와
- * 같은 규칙이어야 한다.** 화면이 "N과목 인식했어요" 라고 해놓고 서버가 0개를
- * 파싱하면 그건 거짓말이다. 실제로 어긋나 있었다 — 1칸 공백으로 구분된
- * 붙여넣기를 화면은 받아주는데 서버는 통째로 거부했다.
+ * 서버 파서(`transcript/parse_text.py` 의 `_split_fields` + `_COURSE_ID_RE`)와
+ * 같은 규칙이어야 한다. 화면이 "N과목 인식했어요" 라고 해놓고 서버가 0개를
+ * 파싱하면 그건 거짓말이다.
  *
- * 서버 규칙: 탭이 있으면 탭으로, 없으면 2칸 이상 공백으로 나누고,
+ * 규칙: 탭이 있으면 탭으로, 없으면 2칸 이상 공백으로 나누고,
  * 첫 필드가 정확히 6자리 숫자여야 한다.
  */
 function isCourseLine(line: string): boolean {

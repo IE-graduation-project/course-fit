@@ -8,10 +8,7 @@ import { courseKey } from "./TimetableGrid";
  * 과목 하나가 왜 추천됐는지.
  *
  * 카드가 나르는 사실은 둘뿐이다 — 무슨 과목인가, 어느 갭을 채우나.
- * 그래서 장식도 둘로 줄였다: 근거 막대 하나, 강조 상태 하나.
- * (좌측 컬러바·학수번호 칩·점 범례·졸업요건 알약은 걷어냈다. 졸업요건은
- *  「졸업까지 남은 것」 절이 이미 말하고 있어서 카드마다 반복하면 중복이다.)
- *
+ * 졸업요건은 「졸업까지 남은 것」 절이 말하므로 카드에서 반복하지 않는다.
  * 막대 색은 hue 를 돌리지 않는다 — share 는 정체가 아니라 크기라서 한 hue 3단이다.
  */
 export default function CourseCard({
@@ -27,8 +24,7 @@ export default function CourseCard({
   const reasons = course.careerReason.filter((r) => r.share >= 0.05);
 
   // 학수번호-분반이 맨 앞이다. 이 화면을 본 학생이 다음에 하는 일은
-  // 수강신청 창에 이 번호를 치는 것이라, 화면에서 제일 실용적인 값이다.
-  // (리팩터 때 칩을 장식으로 보고 걷어냈다가 이 값까지 같이 사라졌었다.)
+  // 수강신청 창에 이 번호를 치는 것이다.
   const meta = [
     `${course.courseId}-${course.section}`,
     `${course.credit}학점`,

@@ -8,7 +8,7 @@ import { GAP_EPSILON } from "@/lib/competency";
  *   막대 = σ · 눈금 = ρ · 빗금 = gap
  *
  * 색은 두 역할만 나른다 — 쌓인 양 하나, 모자란 만큼 하나. 역량 정체는 글자가 나른다.
- * 부족한 축만 진하게 두고 충족은 눌러서, 강조로 읽히게 한다(색을 늘리지 않는 방법).
+ * 부족한 축만 진하게 두고 충족은 눌러 강조로 읽히게 한다.
  * 숫자는 항상 text 토큰이다 — 데이터 색을 글자에 입히지 않는다.
  */
 export default function CompetencyChart({
@@ -27,7 +27,7 @@ export default function CompetencyChart({
     .filter((k) => diagnosis.rho[k] > 0.05)
     .sort((a, b) => diagnosis.gap[b] - diagnosis.gap[a] || diagnosis.rho[b] - diagnosis.rho[a]);
 
-  // 충족한 축은 막대가 전부 같은 모양이라 8줄을 그리면 노이즈만 는다.
+  // 충족한 축은 막대 모양이 전부 같아 여러 줄을 그리면 노이즈만 는다.
   // 부족한 것만 펼치고 나머지는 한 줄로 접는다.
   const rows = asked.filter((k) => diagnosis.gap[k] > GAP_EPSILON);
   const met = asked.filter((k) => diagnosis.gap[k] <= GAP_EPSILON);

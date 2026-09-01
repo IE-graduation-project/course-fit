@@ -33,9 +33,8 @@ export default function TimetableGrid({ courses, activeId, onHover }: Props) {
 
   const unscheduled = courses.filter((c) => c.slots.length === 0);
 
-  // 「시간 충돌 0」이 이 앱의 간판이다. 그게 깨진 데이터가 오면 격자에서는
-  // 한 과목이 다른 과목을 덮어 조용히 사라진다 — 카드에는 6개가 그대로 있는데
-  // 격자에는 5개만 보이는 상태. 숨기지 말고 드러낸다.
+  // 「시간 충돌 0」이 이 앱이 보증하는 것이다. 그게 깨진 데이터가 오면 격자에서
+  // 한 과목이 다른 과목을 덮어 조용히 사라지므로, 숨기지 말고 드러낸다.
   const owners = new Map<number, Set<string>>();
   for (const c of courses) {
     for (const slot of c.slots) {

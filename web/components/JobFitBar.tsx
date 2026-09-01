@@ -33,9 +33,7 @@ export default function JobFitBar({
   const boxRef = useRef<HTMLDivElement>(null);
 
   // 좁은 화면에선 6개가 다 안 보인다 — 고른 것이 화면 밖이면 끌어온다.
-  //
-  // scrollIntoView 를 쓰면 안 된다. 그건 조상 스크롤러를 전부 미는데 거기엔
-  // 문서 자체가 포함돼서, 모바일에서 페이지가 216px 옆으로 밀렸다(사파리·크롬 둘 다).
+  // scrollIntoView 는 조상 스크롤러를 전부 밀어 문서까지 움직인다.
   // 컨테이너의 scrollLeft 만 직접 만진다.
   useEffect(() => {
     const el = activeRef.current;
@@ -79,9 +77,8 @@ export default function JobFitBar({
               <CountUp value={f.fit} />
             </span>
             {best?.job === f.job && (
-              // relative 가 없으면 안의 sr-only(position:absolute)가 위치 기준 조상을
-              // 못 찾아 초기 컨테이닝 블록에 놓인다. 그러면 문서 스크롤 영역이 늘어나
-              // 모바일에서 페이지가 216px 옆으로 밀렸다. 실제로 그랬다.
+              // relative 가 없으면 안의 sr-only(absolute)가 위치 기준 조상을 못 찾아
+              // 초기 컨테이닝 블록에 놓이고, 문서 스크롤 영역이 가로로 늘어난다.
               <span
                 title="지금 가장 잘 맞는 직무"
                 className={

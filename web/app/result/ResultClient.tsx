@@ -49,7 +49,7 @@ export default function ResultClient() {
       .catch((e) => {
         if (cancelled) return;
         console.error(e);
-        // 이전 결과는 남겨 둔다 — 화면이 통째로 비면 뭘 보고 있었는지 잃는다.
+        // 이전 결과는 남긴다 — 화면이 통째로 비면 뭘 보고 있었는지 잃는다.
         setError("추천을 불러오지 못했어요. 목표를 다시 눌러보세요.");
         setLoading(false);
       });
