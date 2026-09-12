@@ -1,0 +1,235 @@
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────────
+ * course-fit 디자인 토큰
+ * 계승: hongik-graduation-advisor 4월 프로토타입 토큰 체계
+ * 원칙: 한국어 우선 · light only · 글씨보다 형태로 말한다
+ * ───────────────────────────────────────────────────────────── */
+
+@theme {
+  --font-sans: "Pretendard Variable", "Pretendard", -apple-system, BlinkMacSystemFont,
+    system-ui, "Malgun Gothic", sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", "JetBrains Mono", monospace;
+
+  /* 한국어는 letter-spacing 0 */
+  --tracking-tight: 0em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0em;
+
+  --text-display: 2.75rem;
+  --text-h1: 2rem;
+  --text-h2: 1.5rem;
+  --text-h3: 1.25rem;
+  --text-body: 1rem;
+  --text-sm: 0.875rem;
+  --text-caption: 0.75rem;
+
+  --leading-display: 1.28;
+  --leading-h: 1.4;
+  --leading-body: 1.65;
+
+  /* brand — 잉크빛 남색. 학술 톤이되 차갑지 않게 */
+  --color-brand-50: oklch(97% 0.015 258);
+  --color-brand-100: oklch(94% 0.032 258);
+  --color-brand-200: oklch(88% 0.065 258);
+  --color-brand-300: oklch(79% 0.108 258);
+  --color-brand-400: oklch(67% 0.152 258);
+  --color-brand-500: oklch(57% 0.176 258);
+  --color-brand-600: oklch(48% 0.168 258);
+  --color-brand-700: oklch(39% 0.138 258);
+  --color-brand-800: oklch(31% 0.102 258);
+  --color-brand-900: oklch(24% 0.068 258);
+
+  /* ── 데이터 색 ──────────────────────────────────────────────
+   * 카테고리 팔레트를 두지 않는다. 축·블록에 이름이 이미 적혀 있어서
+   * 색이 식별을 하지 않고, 8색을 넘기면 CVD 에서 구분이 무너진다.
+   * 남는 건 넷뿐 — 보유(σ) · 부족(gap) · 졸업 · 강조.
+   * 값 텍스트는 절대 이 색을 입지 않는다(text 토큰만 쓴다).
+   */
+  --color-have: oklch(56% 0.09 245);   /* σ — 쌓인 양. 한 hue, 순차 램프의 중간 */
+  --color-have-soft: oklch(84% 0.04 245);
+  --color-gap: oklch(66% 0.16 52);     /* gap — 모자람. 상태(주의)라 status 계열 */
+  --color-gap-soft: oklch(90% 0.06 52);
+  --color-grad: oklch(60% 0.10 285);   /* 졸업요건 진척 */
+
+  /* 근거 막대용 순차 3단 — share 는 identity 가 아니라 magnitude 다 */
+  --color-seq-1: oklch(50% 0.13 245);
+  --color-seq-2: oklch(63% 0.10 245);
+  --color-seq-3: oklch(76% 0.07 245);
+
+  --color-success: oklch(58% 0.14 150);
+  --color-warning: oklch(72% 0.15 70);
+  --color-danger: oklch(58% 0.2 27);
+
+  /* surface — 종이 느낌의 웜 뉴트럴 */
+  --color-surface: oklch(100% 0 0);
+  --color-surface-2: oklch(98.2% 0.003 85);
+  --color-surface-3: oklch(95.6% 0.005 85);
+  --color-ink: oklch(20% 0.008 258);
+
+  --color-text: oklch(21% 0.006 60);
+  --color-text-muted: oklch(50% 0.008 60);
+  --color-text-soft: oklch(66% 0.006 60);
+
+  --color-border: oklch(91% 0.003 85);
+  --color-border-strong: oklch(84% 0.004 85);
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.875rem;
+  --radius-xl: 1.25rem;
+
+  --shadow-card: 0 1px 2px oklch(20% 0.01 258 / 0.04), 0 4px 16px oklch(20% 0.01 258 / 0.05);
+  --shadow-lift: 0 2px 6px oklch(20% 0.01 258 / 0.06), 0 12px 32px oklch(20% 0.01 258 / 0.09);
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    background: var(--color-surface-2);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    line-height: var(--leading-body);
+    word-break: keep-all; /* 한국어 어절 단위 줄바꿈 */
+    overflow-wrap: break-word;
+  }
+
+  /* 숫자는 항상 tabular — 표·점수가 흔들리지 않게 */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* 키보드 포커스는 전역에 한 번만 정의한다. 컨트롤마다 붙이면 빠뜨린다.
+     :focus-visible 이라 마우스 클릭에는 안 뜬다. */
+  :focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* 가로 스크롤 영역의 끝을 흐려서 "더 있다"를 알린다 (모바일 직무 바) */
+  .scroll-fade-x {
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 12px,
+      #000 calc(100% - 20px),
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 12px,
+      #000 calc(100% - 20px),
+      transparent 100%
+    );
+  }
+}
+
+@layer utilities {
+  .card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+  }
+
+  .fade-up {
+    animation: fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .fade-in {
+    animation: fadeIn 0.4s ease both;
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes growX {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* 인식 칩 — 붙여넣은 텍스트가 인식 결과로 바뀌었다는 걸 눈으로 잇는다. */
+@keyframes chipIn {
+  0%   { opacity: 0; transform: translateY(8px) scale(.94); }
+  60%  { opacity: 1; transform: translateY(-2px) scale(1.02); }
+  100% { opacity: 1; transform: none; }
+}
+
+/* ── 인쇄 ────────────────────────────────────────────────────
+ * 학생은 이 화면을 뽑거나 PDF 로 저장해서 수강신청 때 옆에 둔다.
+ * 그때 필요한 건 시간표와 학수번호뿐이라 컨트롤은 전부 뺀다.
+ * (버튼을 종이에 찍는 건 잉크 낭비다.)
+ */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 14mm;
+  }
+
+  body {
+    background: #fff;
+  }
+
+  /* 컨트롤·장식은 종이에서 의미가 없다 */
+  .print-hide {
+    display: none !important;
+  }
+
+  /* 두 칸 배치를 한 줄로 편다 — 종이는 좁다 */
+  .print-stack {
+    display: block !important;
+  }
+
+  /* 페이지 중간에서 잘리면 못 읽는다 */
+  .print-keep {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* 브라우저 기본 배경 제거로 막대가 사라지는 걸 막는다 */
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  a[href]::after {
+    content: "";
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

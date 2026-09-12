@@ -1,0 +1,112 @@
+{
+  "jobs": [
+    {
+      "id": "DA",
+      "name": "데이터 분석가"
+    },
+    {
+      "id": "DE",
+      "name": "데이터 엔지니어"
+    },
+    {
+      "id": "DS",
+      "name": "데이터 사이언티스트"
+    },
+    {
+      "id": "FIN",
+      "name": "재무 분석가"
+    },
+    {
+      "id": "MKT",
+      "name": "마케팅 매니저"
+    },
+    {
+      "id": "PM",
+      "name": "프로덕트 매니저"
+    }
+  ],
+  "competencies": [
+    {
+      "id": "PROG",
+      "nameKo": "프로그래밍",
+      "nameEn": "Programming & Software Development"
+    },
+    {
+      "id": "DATA",
+      "nameKo": "데이터분석",
+      "nameEn": "Data Analysis & Statistical Methods"
+    },
+    {
+      "id": "ML",
+      "nameKo": "머신러닝",
+      "nameEn": "AI & Machine Learning"
+    },
+    {
+      "id": "DB",
+      "nameKo": "데이터베이스",
+      "nameEn": "Database & Data Engineering"
+    },
+    {
+      "id": "VIZ",
+      "nameKo": "데이터시각화",
+      "nameEn": "Data Visualization & Reporting"
+    },
+    {
+      "id": "BIZ",
+      "nameKo": "비즈니스",
+      "nameEn": "Business Strategy & Management"
+    },
+    {
+      "id": "FIN",
+      "nameKo": "재무",
+      "nameEn": "Finance & Accounting"
+    },
+    {
+      "id": "MKT",
+      "nameKo": "마케팅",
+      "nameEn": "Marketing & Consumer Insight"
+    },
+    {
+      "id": "OR",
+      "nameKo": "최적화",
+      "nameEn": "Operations Research & Optimization"
+    },
+    {
+      "id": "COMM",
+      "nameKo": "커뮤니케이션",
+      "nameEn": "Communication & Collaboration"
+    }
+  ],
+  "modes": [
+    {
+      "id": "gap",
+      "eps": 0.0,
+      "label": "역량 우선",
+      "desc": "부족한 역량을 채우는 걸 최우선. 교양이어도 갭을 메우면 추천."
+    },
+    {
+      "id": "balanced",
+      "eps": 0.3,
+      "label": "균형",
+      "desc": "역량과 졸업 진척을 함께. 기본값."
+    },
+    {
+      "id": "graduation",
+      "eps": 0.6,
+      "label": "졸업 우선",
+      "desc": "졸업요건·전공 학점을 먼저 채움. 역량은 그 다음."
+    }
+  ],
+  "areas": [
+    "교양필수",
+    "특성화교양",
+    "SW데이터활용역량",
+    "공통교양",
+    "전공기초영어",
+    "전공필수",
+    "전공선택",
+    "일반선택",
+    "MSC",
+    "전공기초"
+  ]
+}
