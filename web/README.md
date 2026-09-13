@@ -17,12 +17,9 @@ npm run dev        # http://localhost:3000
 
 프로덕션: **https://course-fit-seven.vercel.app**
 
-Vercel 프로젝트 `course-fit` (개인 스코프). Root Directory = `web/`.
-백엔드가 뜨면 Vercel 프로젝트 환경변수에 `NEXT_PUBLIC_API_BASE` 만 넣으면 실 API 로 넘어간다.
+GitHub Actions로 **자동 배포**됩니다. `main` 브랜치에 `web/**` 코드가 푸시되거나 PR이 머지되면 워크플로우가 돌아 1분 내에 Vercel 프로덕션에 자동 배포됩니다.
+(수동 배포 필요 시: GitHub Actions 탭에서 `Deploy Frontend to Vercel` 수동 실행 or 로컬에서 `cd web && npx vercel --prod`)
 
-```bash
-cd web && npx vercel --prod    # 수동 배포
-```
 
 ## 실 API 붙이기
 
