@@ -29,8 +29,15 @@ export default function StartPage() {
   const [error, setError] = useState<string | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
 
+  // 실패를 삼키면 화면이 그냥 비어 버린다 — 사용자는 뭘 눌러야 할지도 모른 채 멈춘다.
+  // (CORS 차단은 서버에 200으로 기록되기까지 해서, 화면에 안 띄우면 원인을 찾을 수 없다.)
   useEffect(() => {
-    fetchReference().then(setRef).catch(console.error);
+    fetchReference()
+      .then(setRef)
+      .catch((e) => {
+        console.error(e);
+        setError("서버에 연결하지 못했어요. 잠시 후 다시 시도해 주세요.");
+      });
   }, []);
 
   useEffect(() => {
@@ -92,6 +99,12 @@ export default function StartPage() {
           <br />
           <b>어느 학과 몇 학번이세요?</b>
         </Bubble>
+
+        {step === "program" && error && (
+          <p role="alert" className="text-sm font-semibold text-danger">
+            {error}
+          </p>
+        )}
 
         {step === "program" && ref && (
           <ProgramPicker

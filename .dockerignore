@@ -1,0 +1,55 @@
+# 빌드 컨텍스트에서 제외할 것.
+#
+# ⚠️ 개인정보를 이미지에 넣지 않는 것이 이 파일의 첫 번째 목적이다.
+# Docker 레이어는 불변이라, COPY 로 들어간 뒤 RUN 으로 지워도 앞 레이어에 그대로 남아
+# `docker history`/`docker save` 로 꺼낼 수 있다. 그래서 "지우기"가 아니라 "안 넣기"로 막는다.
+#
+# ⚠️ 문법 주의: 줄 맨 앞의 # 만 주석이다. 패턴 뒤에 주석을 달면 그 문장까지 패턴의
+# 일부가 되어 아무것도 매칭하지 않는다(2026-09-13에 실제로 겪음). 주석은 항상 별도 줄로.
+
+# ── 개인정보 ────────────────────────────────────────────────
+# transcripts/ = 실제 성적표 원문, db/app.db = 적재된 학생 성적.
+# DB는 이미지 안에서 ingest.py 가 CSV로부터 새로 만든다.
+transcripts/
+db/app.db
+db/*.db-journal
+.env
+.env.*
+
+# ── 오프라인 전용 (런타임에 불필요) ─────────────────────────
+# 크롤링·LLM 매핑의 결과는 이미 data/*.csv 에 있다. 프론트는 Vercel 이 배포한다.
+crawlers/
+mapping/
+docs/
+tests/
+web/
+
+# ── data/ 는 화이트리스트 ───────────────────────────────────
+# db/ingest.py 의 LOAD_ORDER 가 읽는 9개만 넣는다. 블랙리스트로 두면 새 중간 산출물이
+# 생길 때마다 조용히 이미지에 실린다 — job_posting.csv(12MB, 크롤한 공고 원문)가 그런 경우다.
+data/*
+!data/department.csv
+!data/graduation_requirement.csv
+!data/competency.csv
+!data/course.csv
+!data/course_crawled.csv
+!data/course_section.csv
+!data/job.csv
+!data/course_competency.csv
+!data/job_competency.csv
+
+# ── 개발 환경 ───────────────────────────────────────────────
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.git/
+.github/
+.claude/
+.omc/
+node_modules/
+.DS_Store
+*.log
+Dockerfile
+.dockerignore

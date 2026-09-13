@@ -21,7 +21,12 @@ from .errors import ApiError, api_error_handler
 from .schemas import RecommendRequest, TranscriptRequest
 from .serialize import build_payload, build_reference, load_ref_data
 
-DEFAULT_ORIGINS = "https://course-fit-seven.vercel.app,http://localhost:3000"
+# localhost 와 127.0.0.1 은 브라우저에게 서로 다른 오리진이다. 개발 중 어느 쪽으로
+# 열든 되게 둘 다 넣는다 — 한쪽만 넣으면 요청은 200으로 나가는데 화면만 빈다.
+DEFAULT_ORIGINS = (
+    "https://course-fit-seven.vercel.app,"
+    "http://localhost:3000,http://127.0.0.1:3000"
+)
 
 # CBC 1회 풀이 상한(초). 로컬 실측 0.6초라 여유가 크지만, 탐색이 폭발하는 입력에
 # 워커가 영구히 물리는 것만 막으면 된다(결정 ⑤).
