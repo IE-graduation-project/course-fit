@@ -85,7 +85,13 @@ def load_weights(conn, course_ids) -> dict[str, dict[str, float]]:
 
 
 def load_candidates(conn, dept_id: str) -> list[Candidate]:
-    """후보집합 C. 학생 dept 전공 + COMMON 교양, 일반선택 제외."""
+    """후보집합 C. 학생 dept 전공 + COMMON 교양, 일반선택 제외.
+
+    ORDER BY 필수 — 이 순서가 ILP 결정변수 x_0..x_N의 번호를 정한다. 순서가 흔들리면
+    동점 최적해 중 CBC가 고르는 해가 바뀌어 같은 입력에 다른 시간표가 나온다.
+    ORDER BY 없는 SQL 결과 순서는 표준상 미보장이고, 인덱스 추가·VACUUM·DB 재생성으로
+    실제로 바뀔 수 있다(컨테이너는 빌드마다 DB를 새로 만든다).
+    """
     depts = ["COMMON"] if dept_id == "COMMON" else [dept_id, "COMMON"]
     dep_q = ",".join("?" * len(depts))
     excl_q = ",".join("?" * len(EXCLUDED_CAND_AREAS))
@@ -96,6 +102,7 @@ def load_candidates(conn, dept_id: str) -> list[Candidate]:
         FROM course_section s
         JOIN course c ON c.course_id = s.course_id
         WHERE c.dept_id IN ({dep_q}) AND c.area NOT IN ({excl_q})
+        ORDER BY s.course_id, s.section
         """,
         (*depts, *EXCLUDED_CAND_AREAS),
     ).fetchall()
@@ -176,17 +183,49 @@ def load_rho(conn, job_id: str) -> dict[str, float]:
     return {r["comp_id"]: r["required_level"] for r in rows}
 
 
+def effective_year(conn, dept_id: str, admission_year: int) -> int | None:
+    """이 학생에게 적용될 교육과정 개정 연도. 없으면 None.
+
+    `graduation_requirement.admission_year`는 "그 연도 입학생만"이 아니라 **"그 연도부터
+    다음 개정 전까지 적용"**이다(배포 설계 결정 ⑨). 대학의 실제 규칙이 그렇다 —
+    경영 2022 교육과정은 22학번부터 계속 적용되고, 산데공 2026 과정은 26학번부터다.
+    그래서 입학년도 **이하** 중 가장 최신 개정을 고른다.
+    """
+    r = conn.execute(
+        "SELECT MAX(admission_year) FROM graduation_requirement "
+        "WHERE dept_id=? AND admission_year<=?",
+        (dept_id, admission_year),
+    ).fetchone()
+    return r[0] if r and r[0] is not None else None
+
+
+def earliest_year(conn, dept_id: str) -> int | None:
+    """이 학과가 지원하는 가장 이른 입학년도 (안내 메시지용). 없으면 None."""
+    r = conn.execute(
+        "SELECT MIN(admission_year) FROM graduation_requirement WHERE dept_id=?",
+        (dept_id,),
+    ).fetchone()
+    return r[0] if r and r[0] is not None else None
+
+
 def load_min_credits(conn, dept_id: str, admission_year: int) -> dict[str, int]:
     """영역별 최소학점. min_credits NULL(교양총합 cap)은 제외.
+
+    적용 연도는 effective_year가 고른다(결정 ⑨).
 
     특성화교양·SW데이터활용역량은 매핑 과목이 0개라 후보에 없으므로 GradProgress에서
     자연히 무시된다(설계 3.5). 그래서 별도 필터 없이 둬도 무해하다.
     """
+    year = effective_year(conn, dept_id, admission_year)
+    if year is None:
+        earliest = earliest_year(conn, dept_id)
+        hint = (f"{earliest}학번부터 지원합니다" if earliest is not None
+                else "졸업요건이 정의되지 않은 학과입니다")
+        raise ValueError(
+            f"졸업요건 없음: dept={dept_id}, year={admission_year} — {hint}")
     rows = conn.execute(
         """SELECT area, min_credits FROM graduation_requirement
            WHERE dept_id=? AND admission_year=? AND min_credits IS NOT NULL""",
-        (dept_id, admission_year),
+        (dept_id, year),
     ).fetchall()
-    if not rows:
-        raise ValueError(f"졸업요건 없음: dept={dept_id}, year={admission_year}")
     return {r["area"]: r["min_credits"] for r in rows}

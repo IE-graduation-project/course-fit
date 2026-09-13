@@ -1,38 +1,39 @@
 {
   "student": {
     "deptId": "BIZ",
-    "admissionYear": 2022
+    "admissionYear": 2022,
+    "requirementYear": 2022
   },
   "fitByJob": [
     {
       "job": "DA",
       "name": "데이터 분석가",
-      "fit": 93.7
+      "fit": 92.3
     },
     {
       "job": "DE",
       "name": "데이터 엔지니어",
-      "fit": 89.0
+      "fit": 87.7
     },
     {
       "job": "DS",
       "name": "데이터 사이언티스트",
-      "fit": 96.9
+      "fit": 96.5
     },
     {
       "job": "FIN",
       "name": "재무 분석가",
-      "fit": 97.5
+      "fit": 96.9
     },
     {
       "job": "MKT",
       "name": "마케팅 매니저",
-      "fit": 98.8
+      "fit": 97.8
     },
     {
       "job": "PM",
       "name": "프로덕트 매니저",
-      "fit": 99.9
+      "fit": 99.8
     }
   ],
   "job": {
@@ -49,16 +50,16 @@
   },
   "diagnosis": {
     "sigma": {
-      "BIZ": 0.9971,
-      "COMM": 0.9845,
-      "DATA": 0.9439,
-      "DB": 0.675,
-      "FIN": 0.9339,
-      "MKT": 0.969,
-      "ML": 0.9143,
-      "OR": 0.9124,
-      "PROG": 0.8736,
-      "VIZ": 0.8468
+      "BIZ": 0.9957,
+      "COMM": 0.9824,
+      "DATA": 0.9289,
+      "DB": 0.6352,
+      "FIN": 0.9194,
+      "MKT": 0.9448,
+      "ML": 0.9033,
+      "OR": 0.9003,
+      "PROG": 0.8662,
+      "VIZ": 0.8286
     },
     "rho": {
       "BIZ": 0.5661,
@@ -78,7 +79,7 @@
       "DATA": 0.0,
       "DB": 0.0,
       "FIN": 0.0,
-      "MKT": 0.031,
+      "MKT": 0.0552,
       "ML": 0.0,
       "OR": 0.0,
       "PROG": 0.0,
@@ -88,66 +89,67 @@
       {
         "comp": "BIZ",
         "compKo": "비즈니스",
-        "sigma": 0.9971
+        "sigma": 0.9957
       },
       {
         "comp": "COMM",
         "compKo": "커뮤니케이션",
-        "sigma": 0.9845
+        "sigma": 0.9824
       },
       {
         "comp": "DATA",
         "compKo": "데이터분석",
-        "sigma": 0.9439
+        "sigma": 0.9289
       },
       {
         "comp": "FIN",
         "compKo": "재무",
-        "sigma": 0.9339
+        "sigma": 0.9194
       },
       {
         "comp": "ML",
         "compKo": "머신러닝",
-        "sigma": 0.9143
+        "sigma": 0.9033
       },
       {
         "comp": "OR",
         "compKo": "최적화",
-        "sigma": 0.9124
+        "sigma": 0.9003
       },
       {
         "comp": "PROG",
         "compKo": "프로그래밍",
-        "sigma": 0.8736
+        "sigma": 0.8662
       },
       {
         "comp": "VIZ",
         "compKo": "데이터시각화",
-        "sigma": 0.8468
+        "sigma": 0.8286
       },
       {
         "comp": "DB",
         "compKo": "데이터베이스",
-        "sigma": 0.675
+        "sigma": 0.6352
       }
     ],
     "gaps": [
       {
         "comp": "MKT",
         "compKo": "마케팅",
-        "gap": 0.031
+        "gap": 0.0552
       }
     ]
   },
   "need": {
     "SW데이터활용역량": 9,
     "전공선택": 12,
+    "전공필수": 3,
     "특성화교양": 3
   },
   "timetables": [
     {
       "rank": 1,
-      "careerfit": 0.2447,
+      "careerfit": 0.4354,
       "gradProgress": 3.0,
       "totalCredit": 18,
       "status": "Optimal",
@@ -164,12 +166,12 @@
           "timeRaw": null,
           "offeringDept": "법학과",
           "category": "교선",
-          "score": 0.0197,
+          "score": 0.035,
           "careerReason": [
             {
               "comp": "MKT",
               "compKo": "마케팅",
-              "value": 0.0197,
+              "value": 0.035,
               "share": 1.0
             }
           ],
@@ -198,12 +200,12 @@
           "timeRaw": "금234",
           "offeringDept": "경영학전공",
           "category": "교선\n사회와경제",
-          "score": 0.0155,
+          "score": 0.0276,
           "careerReason": [
             {
               "comp": "MKT",
               "compKo": "마케팅",
-              "value": 0.0155,
+              "value": 0.0276,
               "share": 1.0
             }
           ],
@@ -232,12 +234,12 @@
           "timeRaw": "목678",
           "offeringDept": "교양과(서울)",
           "category": "교선",
-          "score": 0.0138,
+          "score": 0.0246,
           "careerReason": [
             {
               "comp": "MKT",
               "compKo": "마케팅",
-              "value": 0.0138,
+              "value": 0.0246,
               "share": 1.0
             }
           ],
@@ -266,12 +268,12 @@
           "timeRaw": "목234",
           "offeringDept": "회화과",
           "category": "교선",
-          "score": 0.0131,
+          "score": 0.0234,
           "careerReason": [
             {
               "comp": "MKT",
               "compKo": "마케팅",
-              "value": 0.0131,
+              "value": 0.0234,
               "share": 1.0
             }
           ],
@@ -300,12 +302,12 @@
           "timeRaw": "금678",
           "offeringDept": "산학협력단(서울)",
           "category": "교선",
-          "score": 0.0108,
+          "score": 0.0192,
           "careerReason": [
             {
               "comp": "MKT",
               "compKo": "마케팅",
-              "value": 0.0108,
+              "value": 0.0192,
               "share": 1.0
             }
           ],
@@ -334,12 +336,12 @@
           "timeRaw": "화234",
           "offeringDept": "경영학전공",
           "category": "전선",
-          "score": 0.0086,
+          "score": 0.0154,
           "careerReason": [
             {
               "comp": "MKT",
               "compKo": "마케팅",
-              "value": 0.0086,
+              "value": 0.0154,
               "share": 1.0
             }
           ],
@@ -352,7 +354,7 @@
     },
     {
       "rank": 2,
-      "careerfit": 0.2447,
+      "careerfit": 0.4354,
       "gradProgress": 3.0,
       "totalCredit": 18,
       "status": "Optimal",
@@ -369,12 +371,12 @@
           "timeRaw": null,
           "offeringDept": "법학과",
           "category": "교선",
-          "score": 0.0197,
+          "score": 0.035,
           "careerReason": [
             {
               "comp": "MKT",
               "compKo": "마케팅",
-              "value": 0.0197,
+              "value": 0.035,
               "share": 1.0
             }
           ],
@@ -403,12 +405,12 @@
           "timeRaw": "금234",
           "offeringDept": "경영학전공",
           "category": "교선\n사회와경제",
-          "score": 0.0155,
+          "score": 0.0276,
           "careerReason": [
             {
               "comp": "MKT",
               "compKo": "마케팅",
-              "value": 0.0155,
+              "value": 0.0276,
               "share": 1.0
             }
           ],
@@ -437,12 +439,12 @@
           "timeRaw": "목678",
           "offeringDept": "교양과(서울)",
           "category": "교선",
-          "score": 0.0138,
+          "score": 0.0246,
           "careerReason": [
             {
               "comp": "MKT",
               "compKo": "마케팅",
-              "value": 0.0138,
+              "value": 0.0246,
               "share": 1.0
             }
           ],
@@ -471,12 +473,12 @@
           "timeRaw": "목234",
           "offeringDept": "회화과",
           "category": "교선",
-          "score": 0.0131,
+          "score": 0.0234,
           "careerReason": [
             {
               "comp": "MKT",
               "compKo": "마케팅",
-              "value": 0.0131,
+              "value": 0.0234,
               "share": 1.0
             }
           ],
@@ -505,12 +507,12 @@
           "timeRaw": "금678",
           "offeringDept": "산학협력단(서울)",
           "category": "교선",
-          "score": 0.0108,
+          "score": 0.0192,
           "careerReason": [
             {
               "comp": "MKT",
               "compKo": "마케팅",
-              "value": 0.0108,
+              "value": 0.0192,
               "share": 1.0
             }
           ],
@@ -539,12 +541,12 @@
           "timeRaw": "화678",
           "offeringDept": "경영학전공",
           "category": "전선",
-          "score": 0.0086,
+          "score": 0.0154,
           "careerReason": [
             {
               "comp": "MKT",
               "compKo": "마케팅",
-              "value": 0.0086,
+              "value": 0.0154,
               "share": 1.0
             }
           ],

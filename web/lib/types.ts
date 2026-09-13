@@ -16,6 +16,20 @@ export interface Reference {
   competencies: CompetencyRef[];
   modes: ModeRef[];
   areas: string[];
+  programs: ProgramRef[];
+}
+
+/**
+ * 지원 학과와 **적용 시작 연도**. department ⋈ graduation_requirement.
+ *
+ * `fromYear` 는 "그 연도 입학생만"이 아니라 **그 연도부터 다음 개정 전까지** 적용된다.
+ * 그래서 고를 수 있는 입학년도는 `fromYear ~ 올해` 다. 연도 목록이 아니라 시작 연도를
+ * 받는 이유는, 교육과정이 개정될 때마다 프론트를 고치지 않기 위해서다.
+ */
+export interface ProgramRef {
+  dept: string; // IDE | BIZ
+  name: string;
+  fromYear: number;
 }
 
 /** data/job.csv */
@@ -50,7 +64,8 @@ export type ModeId = "gap" | "balanced" | "graduation";
 /** POST /api/transcript — 클래스넷 '전체성적조회' 복붙 텍스트 */
 export interface TranscriptRequest {
   text: string;
-  dept: "IDE" | "BIZ";
+  /** 유효값은 reference.programs 가 정한다 — 리터럴로 박으면 학과가 늘 때 프론트를 고쳐야 한다 */
+  dept: string;
   admissionYear: number;
 }
 
@@ -84,7 +99,8 @@ export interface RecommendRequest {
 
 /** POST /api/recommend 응답 = recommender.explain.build_explanation 확장판 */
 export interface Recommendation {
-  student: { deptId: string; admissionYear: number };
+  /** requirementYear = 실제 적용된 교육과정 개정 연도. 입학년도와 다를 수 있어 화면에 밝힌다 */
+  student: { deptId: string; admissionYear: number; requirementYear: number };
   job: JobRef;
   /**
    * 직무 6종 각각의 적합도(0~100). σ 는 직무와 무관해서 한 번에 다 낼 수 있고,

@@ -33,6 +33,7 @@ class Recommendation:
     need: dict[str, int]            # 영역별 졸업 부족학점
     dept_id: str
     admission_year: int
+    requirement_year: int           # 실제 적용된 교육과정 개정 연도 (결정 ⑨). 화면 고지용
 
     @property
     def result(self) -> Result:
@@ -41,7 +42,8 @@ class Recommendation:
 
 
 def recommend(input_hash, job_id, *, db_path=data.DB_PATH, U=18, L=12,
-              alpha=params.ALPHA_DEFAULT, eps=0.0, k=3) -> Recommendation:
+              alpha=params.ALPHA_DEFAULT, eps=0.0, k=3,
+              time_limit: float | None = None) -> Recommendation:
     """파라미터 사전계산(σ/gap/Score/need) → 2단계 ILP(top-k) → Recommendation.
 
     dept/입학년도는 student 테이블에서 읽으므로 인자로 받지 않는다.
@@ -53,6 +55,8 @@ def recommend(input_hash, job_id, *, db_path=data.DB_PATH, U=18, L=12,
         rho = data.load_rho(conn, job_id)
         candidates = data.load_candidates(conn, student.dept_id)
         min_credits = data.load_min_credits(conn, student.dept_id, student.admission_year)
+        # 입학년도와 다를 수 있다 — 2025학번 경영은 2022 교육과정을 따른다(결정 ⑨).
+        req_year = data.effective_year(conn, student.dept_id, student.admission_year)
     finally:
         conn.close()
 
@@ -70,9 +74,10 @@ def recommend(input_hash, job_id, *, db_path=data.DB_PATH, U=18, L=12,
         U=U, L=L,
         taken_ids=student.taken_ids,
         passed_ids=set(student.passed.keys()),
-        eps=eps, k=k,
+        eps=eps, k=k, time_limit=time_limit,
     )
     return Recommendation(
         results=results, sigma=sigma, gap=gap, need=need,
         dept_id=student.dept_id, admission_year=student.admission_year,
+        requirement_year=req_year,
     )

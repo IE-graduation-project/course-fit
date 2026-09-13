@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS department (
 CREATE TABLE IF NOT EXISTS graduation_requirement (
     req_id          INTEGER PRIMARY KEY AUTOINCREMENT,
     dept_id         TEXT    NOT NULL,
-    admission_year  INTEGER NOT NULL,
+    admission_year  INTEGER NOT NULL,   -- 적용 시작 입학년도 (이 연도부터 다음 개정 전까지)
     area            TEXT    NOT NULL,
     min_credits     INTEGER,           -- NULL = 하한 없음 (예: '교양총합'은 상한만)
     max_credits     INTEGER,           -- NULL = 상한 없음 (대부분 floor 요건)

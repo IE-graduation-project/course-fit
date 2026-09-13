@@ -8,12 +8,25 @@
 - 프론트는 `NEXT_PUBLIC_API_BASE` 가 비어 있으면 픽스처를, 채워져 있으면 이 API 를 쓴다.
   즉 **백엔드가 뜨면 프론트 코드 수정 없이 환경변수만 바꾸면 된다.**
 
+> **구현 완료 (2026-09-13)** — `api/` 패키지. 배포 설계는 `docs/배포_설계.md`.
+> 응답을 만드는 코드(`api/serialize.py`)를 픽스처 생성기가 그대로 쓰므로
+> **픽스처 == 실 API 응답**이 코드로 보장된다(테스트로 확인).
+
 ---
 
 ## 0. 공통
 
 - 인코딩 `application/json; charset=utf-8`
-- 에러 `{ "error": "...", "detail": "..." }` + 적절한 4xx/5xx
+- 에러 `{ "error": "...", "detail": "..." }` + 적절한 4xx/5xx. `error` 는 기계용 코드,
+  `detail` 은 사용자에게 그대로 보여줄 수 있는 한국어 문장이다.
+
+| `error` | 코드 | 언제 |
+|---|---|---|
+| `unsupported_dept` | 400 | 졸업요건이 없는 학과 |
+| `unsupported_year` | 400 | 그 학과의 지원 시작 연도 이전 학번 |
+| `empty_transcript` | 400 | 성적표에서 0과목 파싱 |
+| `student_not_found` | 404 | 없는 `studentId` (TTL 만료 포함) |
+| `unknown_job` / `unknown_mode` / `bad_credit_bounds` | 400 | 요청 값 오류 |
 - 인증 없음 (프로토타입). 학생 식별은 `studentId` = `transcript` 의 `input_hash`.
 
 ---
@@ -31,9 +44,18 @@
   "modes": [
     { "id": "balanced", "eps": 0.3, "label": "균형", "desc": "역량과 졸업 진척을 함께. 기본값." }
   ],
-  "areas": ["교양필수", "전공선택", "..."]
+  "areas": ["교양필수", "전공선택", "..."],
+  "programs": [
+    { "dept": "BIZ", "name": "경영학과", "fromYear": 2022 },
+    { "dept": "IDE", "name": "산업데이터공학과", "fromYear": 2026 }
+  ]
 }
 ```
+
+`programs` 는 **지원 학과와 적용 시작 연도**다. `fromYear` 는 교육과정 **개정 연도**이며
+그 이후 학번은 모두 같은 요건을 따른다 — 경영 2022 과정은 22~26학번 전부에 적용된다.
+프론트는 `fromYear ~ 올해` 로 입학년도 드롭다운을 채운다. 연도 목록이 아니라 시작 연도를
+주므로 교육과정이 개정돼도 **프론트를 고칠 필요가 없다**(배포 설계 결정 ⑨).
 
 | 필드 | 출처 |
 |---|---|
@@ -53,8 +75,9 @@
 { "text": "전체성적조회<\n2022학년도 1학년 1학기\n학수번호\t과목명\t...", "dept": "BIZ", "admissionYear": 2022 }
 ```
 
-- `dept` 는 `IDE` 또는 `BIZ` 만 (department 테이블).
-- `admissionYear` 는 졸업요건이 정의된 조합만 유효 — 현재 **IDE→2026, BIZ→2022**.
+- `dept` · `admissionYear` 의 유효 범위는 `GET /api/reference` 의 `programs` 가 정한다.
+  현재 **BIZ→2022 이상, IDE→2026 이상**. 범위 밖이면 `unsupported_year` 로 **입력 시점에**
+  거절한다 — 추천 단계까지 미루면 사용자가 성적표를 다 붙여넣고 다음 화면에서 에러를 만난다.
 
 **응답**
 ```json
@@ -98,7 +121,10 @@
 
 ```jsonc
 {
-  "student": { "deptId": "BIZ", "admissionYear": 2022 },
+  "student": { "deptId": "BIZ", "admissionYear": 2022,
+               // 실제 적용된 교육과정 개정 연도. 입학년도와 다를 수 있다
+               // (2025학번 경영 → 2022). 결과 화면에 "2022학년도 교육과정 기준"으로 고지한다.
+               "requirementYear": 2022 },
   "job": { "id": "DA", "name": "데이터 분석가" },
 
   // 직무 6종 적합도 — σ 는 직무 무관이라 한 번에 다 낸다. ε 에 안 흔들린다.

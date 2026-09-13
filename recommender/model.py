@@ -58,12 +58,17 @@ def _add_base_constraints(prob, x, cands, U, L):
 
 
 def solve_topk(candidates, score_by_course, need, *, U=18, L=12,
-               taken_ids, passed_ids, eps=0.0, k=3, msg=False) -> list[Result]:
+               taken_ids, passed_ids, eps=0.0, k=3, msg=False,
+               time_limit: float | None = None) -> list[Result]:
     """상위 k개 시간표를 반환 (1등이 [0]). k-best via no-good cut.
 
     1순위(CareerFit)로 V*를 고정한 뒤, 2순위(GradProgress)를 풀고 → 그 해를 배제하는
     no-good cut을 추가 → 재풀이를 k번 반복한다. 재풀이도 전체 ILP라 모든 hard 제약
     (시간충돌·분반·학점)을 다시 만족하므로 나오는 대안은 전부 유효한 시간표다.
+
+    time_limit(초)은 CBC 1회 풀이의 상한이다. None이면 무제한(CLI·테스트 기본). 웹 서버는
+    반드시 지정해야 한다 — 탐색이 폭발하는 입력이 오면 요청이 무한정 물린다. 상한에 걸리면
+    CBC가 그때까지의 최선해를 반환하므로 status가 Optimal이 아닐 수 있다.
     """
     cands = filter_candidates(candidates, taken_ids, passed_ids)
     if not cands:
@@ -72,7 +77,7 @@ def solve_topk(candidates, score_by_course, need, *, U=18, L=12,
     x = {i: pulp.LpVariable(f"x_{i}", cat="Binary") for i in range(len(cands))}
     careerfit = pulp.lpSum(c.credit * score_by_course[c.course_id] * x[i]
                            for i, c in enumerate(cands))
-    solver = pulp.PULP_CBC_CMD(msg=msg)
+    solver = pulp.PULP_CBC_CMD(msg=msg, timeLimit=time_limit)
 
     # ── 1순위: 직무적합 최대화 → V*
     p1 = pulp.LpProblem("careerfit", pulp.LpMaximize)
@@ -87,7 +92,10 @@ def solve_topk(candidates, score_by_course, need, *, U=18, L=12,
     # GradProgress = Σ_g min(need_g, 영역 g에 담은 학점). min은 보조변수 f_g로 선형화:
     # f_g ≤ need_g, f_g ≤ 담은학점_g, 목적함수에 +f_g → 솔버가 f_g=min(...)으로 맞춤.
     p2 = pulp.LpProblem("gradprogress", pulp.LpMaximize)
-    need_areas = [a for a in {c.area for c in cands} if need.get(a, 0) > 0]
+    # sorted 필수 — set 순회 순서는 PYTHONHASHSEED에 따라 프로세스마다 달라진다.
+    # f_g 변수 순서가 흔들리면 동점 최적해 중 CBC가 고르는 해가 바뀌어, 같은 입력에
+    # 매 실행 다른 시간표가 나온다(2026-09-13 확인). 정렬로 변수 순서를 고정한다.
+    need_areas = sorted(a for a in {c.area for c in cands} if need.get(a, 0) > 0)
     fvars = []
     for j, a in enumerate(need_areas):
         placed = pulp.lpSum(c.credit * x[i] for i, c in enumerate(cands) if c.area == a)
@@ -120,9 +128,10 @@ def solve_topk(candidates, score_by_course, need, *, U=18, L=12,
 
 
 def solve(candidates, score_by_course, need, *, U=18, L=12,
-          taken_ids, passed_ids, eps=0.0, msg=False) -> Result:
+          taken_ids, passed_ids, eps=0.0, msg=False, time_limit: float | None = None) -> Result:
     """단일 최적 시간표 (solve_topk k=1의 첫 해)."""
     return solve_topk(
         candidates, score_by_course, need, U=U, L=L,
         taken_ids=taken_ids, passed_ids=passed_ids, eps=eps, k=1, msg=msg,
+        time_limit=time_limit,
     )[0]
