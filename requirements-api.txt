@@ -1,0 +1,12 @@
+# API 서버 런타임 의존성 — 이것만으로 api/ · recommender/ · transcript/ 가 돈다.
+#
+# requirements.txt(크롤·LLM 매핑·분석용)와 분리한 이유:
+# recommender·transcript가 import하는 외부 패키지는 pulp 하나뿐이고 나머지는 표준
+# 라이브러리다. sentence-transformers·selenium·pandas·openai는 전부 오프라인 전용이라
+# 서버 이미지에 넣을 이유가 없다(≈120MB vs 수 GB). 배포 설계 §2.1.
+#
+# pulp는 플랫폼별 CBC 바이너리를 번들한다(linux/i64 7.0MB). 별도 설치 불필요.
+
+fastapi==0.141.1
+uvicorn[standard]==0.52.4
+PuLP==3.3.1

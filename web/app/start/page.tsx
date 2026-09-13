@@ -5,10 +5,10 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { countCourseLines, fetchReference, submitTranscript } from "@/lib/api";
 import { SAMPLE_TRANSCRIPT } from "@/lib/sample";
-import type { JobRef, ModeRef, Reference } from "@/lib/types";
+import type { JobRef, ModeRef, ProgramRef, Reference } from "@/lib/types";
 import { jobRank } from "@/lib/competency";
 
-type Step = "transcript" | "job" | "mode" | "done";
+type Step = "program" | "transcript" | "job" | "mode" | "done";
 
 /**
  * 성적표 입력 — 대화형.
@@ -18,12 +18,13 @@ type Step = "transcript" | "job" | "mode" | "done";
 export default function StartPage() {
   const router = useRouter();
   const [ref, setRef] = useState<Reference | null>(null);
-  const [step, setStep] = useState<Step>("transcript");
+  const [step, setStep] = useState<Step>("program");
+  const [program, setProgram] = useState<ProgramRef | null>(null);
+  const [year, setYear] = useState<number | null>(null);
   const [text, setText] = useState("");
   const [job, setJob] = useState<JobRef | null>(null);
   const [mode, setMode] = useState<ModeRef | null>(null);
   const [courseCount, setCourseCount] = useState(0);
-  const [deptLabel, setDeptLabel] = useState("경영학전공");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
@@ -37,18 +38,17 @@ export default function StartPage() {
   }, [step]);
 
   async function handleTranscript(value: string) {
-    if (!value.trim() || busy) return;
+    if (!value.trim() || busy || !program || year === null) return;
     setBusy(true);
     setError(null);
     try {
       const res = await submitTranscript({
         text: value,
-        dept: "BIZ",
-        admissionYear: 2022,
+        dept: program.dept,
+        admissionYear: year,
       });
       sessionStorage.setItem("studentId", res.studentId);
       setCourseCount(res.courseCount);
-      setDeptLabel(res.deptId === "IDE" ? "산업데이터공학과" : "경영학전공");
       setText(value);
       setStep("job");
     } catch (e) {
@@ -88,10 +88,38 @@ export default function StartPage() {
       <div className="space-y-5 pb-24">
         <Bubble>안녕하세요! 다음 학기 시간표를 같이 짜볼게요.</Bubble>
         <Bubble delay={0.15}>
-          먼저 지금까지 뭘 들었는지 알아야 해요.
+          졸업요건은 학과와 입학년도마다 달라요.
           <br />
-          <b>성적표를 그대로 붙여넣어 주세요.</b>
+          <b>어느 학과 몇 학번이세요?</b>
         </Bubble>
+
+        {step === "program" && ref && (
+          <ProgramPicker
+            programs={ref.programs}
+            picked={program}
+            onPickProgram={(p) => {
+              setProgram(p);
+              setYear(null);
+            }}
+            onPickYear={(y) => {
+              setYear(y);
+              setStep("transcript");
+            }}
+          />
+        )}
+
+        {step !== "program" && program && year !== null && (
+          <>
+            <UserBubble>
+              {program.name} {year}학번
+            </UserBubble>
+            <Bubble delay={0.1}>
+              이제 지금까지 뭘 들었는지 알아야 해요.
+              <br />
+              <b>성적표를 그대로 붙여넣어 주세요.</b>
+            </Bubble>
+          </>
+        )}
 
         {step === "transcript" && (
           <>
@@ -104,12 +132,12 @@ export default function StartPage() {
           </>
         )}
 
-        {step !== "transcript" && (
+        {step !== "program" && step !== "transcript" && program && year !== null && (
           <>
             <UserBubble>성적표 붙여넣기 완료</UserBubble>
             <Bubble delay={0.1}>
               읽었어요. 이렇게 인식했습니다.
-              <RecognitionChips dept={deptLabel} year={2022} courses={courseCount} />
+              <RecognitionChips dept={program.name} year={year} courses={courseCount} />
               어떤 일을 하고 싶으세요?
             </Bubble>
           </>
@@ -213,7 +241,7 @@ function Dot({ d = 0 }: { d?: number }) {
 }
 
 function StepDots({ step }: { step: Step }) {
-  const order: Step[] = ["transcript", "job", "mode", "done"];
+  const order: Step[] = ["program", "transcript", "job", "mode", "done"];
   const i = order.indexOf(step);
   return (
     <div className="flex gap-1.5">
@@ -313,6 +341,13 @@ function TranscriptInput({
           샘플로 먼저 볼래요
         </button>
       </div>
+
+      {/* 결정 ⑧ — 구조가 이러하므로 사실인 문장만 쓴다. 학번·이름은 '전체성적조회'
+          화면에 없어 파서가 가져올 수조차 없고, 적재분은 24시간 뒤 삭제된다. */}
+      <p className="text-caption leading-relaxed text-text-soft">
+        붙여넣은 성적표는 추천 계산에만 쓰이고 <b>24시간 후 자동 삭제</b>됩니다.
+        로그인이 없어 학번·이름은 수집하지 않습니다.
+      </p>
     </div>
   );
 }
@@ -326,6 +361,74 @@ const JOB_ICON: Record<string, React.ReactNode> = {
   MKT: <IconMegaphone />,
   FIN: <IconTrend />,
 };
+
+/**
+ * 학과 · 입학년도 선택.
+ *
+ * 고를 수 있는 연도는 `fromYear ~ 올해` 다. fromYear 는 교육과정 **개정 연도**라
+ * 그 이후 학번은 모두 같은 요건을 따른다(경영 2022 과정 = 22~26학번).
+ * 지원하지 않는 조합은 애초에 화면에 없으므로 사용자가 에러를 만날 일이 없다.
+ */
+function ProgramPicker({
+  programs,
+  picked,
+  onPickProgram,
+  onPickYear,
+}: {
+  programs: ProgramRef[];
+  picked: ProgramRef | null;
+  onPickProgram: (p: ProgramRef) => void;
+  onPickYear: (y: number) => void;
+}) {
+  const thisYear = new Date().getFullYear();
+  const years = picked
+    ? Array.from(
+        { length: Math.max(1, thisYear - picked.fromYear + 1) },
+        (_, i) => picked.fromYear + i,
+      )
+    : [];
+
+  return (
+    <div className="fade-up space-y-4">
+      <div className="grid grid-cols-2 gap-2">
+        {programs.map((p) => {
+          const on = picked?.dept === p.dept;
+          return (
+            <button
+              key={p.dept}
+              onClick={() => onPickProgram(p)}
+              aria-pressed={on}
+              className={`rounded-lg border px-3 py-4 text-sm font-semibold transition-colors ${
+                on
+                  ? "border-brand-400 bg-brand-50 text-brand-700"
+                  : "border-border bg-surface hover:border-brand-400 hover:bg-brand-50"
+              }`}
+            >
+              {p.name}
+            </button>
+          );
+        })}
+      </div>
+
+      {picked && (
+        <div className="fade-up space-y-2">
+          <p className="text-sm text-text-muted">몇 학번이세요?</p>
+          <div className="flex flex-wrap gap-2">
+            {years.map((y) => (
+              <button
+                key={y}
+                onClick={() => onPickYear(y)}
+                className="tnum min-h-11 rounded-lg border border-border bg-surface px-4 text-sm font-semibold transition-colors hover:border-brand-400 hover:bg-brand-50"
+              >
+                {y}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function JobPicker({
   jobs,

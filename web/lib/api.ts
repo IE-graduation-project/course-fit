@@ -41,7 +41,8 @@ export async function submitTranscript(
     const n = countCourseLines(req.text);
     await delay(400);
     return {
-      studentId: "746696b793744f17",
+      // 픽스처를 만든 학생. mock 의 추천 응답도 이 학생 것이라 화면이 일관된다.
+      studentId: "412813643e89d53f",
       deptId: req.dept,
       admissionYear: req.admissionYear,
       courseCount: n,

@@ -108,5 +108,17 @@
     "일반선택",
     "MSC",
     "전공기초"
+  ],
+  "programs": [
+    {
+      "dept": "BIZ",
+      "name": "경영학과",
+      "fromYear": 2022
+    },
+    {
+      "dept": "IDE",
+      "name": "산업데이터공학과",
+      "fromYear": 2026
+    }
   ]
 }

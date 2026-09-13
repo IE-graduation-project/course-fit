@@ -209,6 +209,11 @@ export default function ResultClient() {
           {need.length > 0 && (
             <section>
               <h2 className="text-h3 font-semibold">졸업까지 남은 것</h2>
+              {/* 어느 교육과정을 기준으로 셌는지 밝힌다. 입학년도와 다를 수 있다 —
+                  2025학번 경영은 2022 교육과정을 따른다. 학생이 직접 확인할 수 있어야 한다. */}
+              <p className="mt-1 text-caption text-text-soft">
+                {rec.student.requirementYear}학년도 교육과정 기준
+              </p>
               <ul className="mt-3.5 space-y-2.5">
                 {need.map(([area, credits]) => (
                   <li
