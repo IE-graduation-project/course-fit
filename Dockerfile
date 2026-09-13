@@ -30,6 +30,8 @@ ENV COURSE_FIT_SEED_DB=/app/db/app.db \
     COURSE_FIT_TTL_HOURS=24 \
     PYTHONUNBUFFERED=1
 
-# 7860 = Hugging Face Spaces 규약
+# 포트는 플랫폼이 정한다 — Render 는 PORT 환경변수로 알려주고, 없으면 7860(로컬 기본).
+# shell form 이라 ${PORT} 치환이 되고, exec 를 붙여 uvicorn 이 PID 1 이 되게 한다
+# (안 붙이면 sh 가 PID 1 이라 SIGTERM 이 전달되지 않아 종료가 느려진다).
 EXPOSE 7860
-CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "7860", "--workers", "2"]
+CMD exec uvicorn api.main:app --host 0.0.0.0 --port ${PORT:-7860} --workers 2
