@@ -5,7 +5,7 @@ export default function Landing() {
     <main className="mx-auto flex min-h-dvh max-w-3xl flex-col justify-center px-6 py-16">
       <div className="fade-up">
         <span className="inline-flex items-center gap-2 rounded-sm bg-surface-3 px-3 py-1.5 text-caption text-text-muted">
-          홍익대학교 산업데이터공학과 졸업프로젝트
+          역량 기반 수강 추천
         </span>
 
         <h1 className="mt-7 text-display font-bold leading-display tracking-tight">

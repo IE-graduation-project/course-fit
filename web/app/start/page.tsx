@@ -12,8 +12,8 @@ type Step = "program" | "transcript" | "job" | "mode" | "done";
 
 /**
  * 성적표 입력 — 대화형.
- * 소연님 제안(6/10): "성적표 넣는 과정을 채팅처럼 재밌게, 시간표 결과는 정적으로".
- * 그래서 입력만 대화로 받고, 결과는 /result 에서 한 화면에 정적으로 보여준다.
+ * 입력만 대화로 받고, 결과는 /result 에서 한 화면에 정적으로 보여준다.
+ * 긴 폼 하나를 마주하는 것보다 세 번 물어보는 쪽이 이탈이 적다.
  */
 export default function StartPage() {
   const router = useRouter();

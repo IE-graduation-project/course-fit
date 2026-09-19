@@ -155,9 +155,16 @@ export default function TimetableGrid({ courses, activeId, onHover }: Props) {
         </p>
       )}
 
+      {/* 격자 칸 수와 과목 수가 어긋나 보이는 원인이다(9/14 피드백 ②).
+          흐린 한 줄로 두면 칸만 세고 「과목이 모자라다」고 읽는다 — 이유까지 적는다. */}
       {unscheduled.length > 0 && (
-        <p className="mt-3 text-caption text-text-soft">
-          시간 미지정 · {unscheduled.map((c) => c.name).join(" · ")}
+        <p className="mt-3 rounded-md border border-border bg-surface-3 px-3 py-2 text-caption text-text-muted">
+          <b className="text-text">
+            시간 미지정 {unscheduled.length}과목
+          </b>{" "}
+          — {unscheduled.map((c) => c.name).join(" · ")}. 정해진 교시가 없는
+          분반(비대면·논문·실습 등)이라 격자에는 자리가 없지만,{" "}
+          <b className="text-text">추천에는 포함된 과목</b>입니다.
         </p>
       )}
     </div>
