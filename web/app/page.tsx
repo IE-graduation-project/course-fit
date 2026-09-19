@@ -1,8 +1,11 @@
 import Link from "next/link";
+import WarmUp from "@/components/WarmUp";
 
 export default function Landing() {
   return (
     <main className="mx-auto flex min-h-dvh max-w-3xl flex-col justify-center px-6 py-16">
+      {/* 백엔드를 미리 깨운다. 콜드스타트를 이 화면 읽는 시간에 흡수시킨다 */}
+      <WarmUp />
       <div className="fade-up">
         <span className="inline-flex items-center gap-2 rounded-sm bg-surface-3 px-3 py-1.5 text-caption text-text-muted">
           역량 기반 수강 추천
