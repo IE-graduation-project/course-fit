@@ -239,5 +239,5 @@ def api_recommend(req: RecommendRequest):
   직렬화는 `web/scripts/dump_fixtures.py` 를 그대로 옮기면 됩니다.
 - `/api/reference` 는 job/competency 테이블 읽기 + `PREFERENCE_EPS`.
 
-스켈레톤 자체는 검증용이라 저장소에 넣지 않았습니다(백엔드는 소연님 레인).
-필요하시면 드리겠습니다.
+스켈레톤 자체는 계약 검증용이었으므로 저장소에 넣지 않았다.
+실제 구현은 `api/` 에 있다.
