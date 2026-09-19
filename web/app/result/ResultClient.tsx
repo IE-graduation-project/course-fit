@@ -26,6 +26,8 @@ export default function ResultClient() {
   const [loading, setLoading] = useState(true);
   /** 성적표를 낸 적 없이 /result 로 바로 들어왔나 */
   const [demo, setDemo] = useState(false);
+  /** 성적표가 없어서 애초에 물어볼 수가 없는 상태 (실 API 일 때만) */
+  const [needTranscript, setNeedTranscript] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -34,9 +36,21 @@ export default function ResultClient() {
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
     const saved = sessionStorage.getItem("studentId");
     setDemo(saved === null);
+
+    // 성적표 없이 /result 로 바로 들어온 경우. 픽스처 시절에는 고정 id 로 샘플을
+    // 보여줄 수 있었지만, 실 API 에는 그 학생이 없어서 요청이 반드시 404 로 죽는다.
+    // 실패할 걸 알면서 던지면 「추천을 불러오지 못했어요」라는 막다른 길이 된다 —
+    // 링크를 직접 열거나 세션이 끊긴 사람이 그대로 여기 갇힌다.
+    if (saved === null && !isMock()) {
+      setNeedTranscript(true);
+      setLoading(false);
+      return;
+    }
+    setNeedTranscript(false);
+
+    setLoading(true);
     const studentId = saved ?? "746696b793744f17";
     setError(null);
     fetchRecommendation({ studentId, job, mode })
@@ -62,6 +76,7 @@ export default function ResultClient() {
     router.replace(`/result?job=${job}&mode=${mode}`, { scroll: false });
   }, [job, mode, router]);
 
+  if (needTranscript) return <NeedTranscript />;
   if (loading && !rec) return <Analyzing />;
   if (!rec) return <Failed />;
 
@@ -499,6 +514,28 @@ function Infeasible({
         </button>
       )}
     </div>
+  );
+}
+
+/**
+ * 성적표 없이 결과 주소로 바로 들어온 경우.
+ * 「고장났다」가 아니라 「아직 넣은 게 없다」이므로 실패 화면과 말이 달라야 한다.
+ */
+function NeedTranscript() {
+  return (
+    <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center px-6 text-center">
+      <p className="text-h3 font-semibold">먼저 성적표를 넣어주세요</p>
+      <p className="mt-2 text-sm leading-relaxed text-text-muted">
+        추천은 성적표에서 계산하기 때문에, 넣은 것이 없으면 보여드릴 결과가 없어요.
+        붙여넣기만 하면 되고 약 1분 걸립니다.
+      </p>
+      <Link
+        href="/start"
+        className="mx-auto mt-6 inline-flex min-h-11 items-center rounded-md bg-brand-600 px-6 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
+      >
+        시작하기
+      </Link>
+    </main>
   );
 }
 
