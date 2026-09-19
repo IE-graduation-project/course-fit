@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { fetchRecommendation, fetchReference, isMock } from "@/lib/api";
-import type { ModeId, Recommendation, Reference } from "@/lib/types";
+import type { ModeId, Recommendation, Reference, Timetable } from "@/lib/types";
 import TimetableGrid, { courseKey } from "@/components/TimetableGrid";
 import CompetencyChart from "@/components/CompetencyChart";
 import CourseCard from "@/components/CourseCard";
@@ -69,6 +69,36 @@ export default function ResultClient() {
   const need = Object.entries(rec.need).sort((a, b) => b[1] - a[1]);
   const needMax = Math.max(1, ...Object.values(rec.need));
 
+  /** 격자에 자리가 없는 과목 — 비대면·논문·실습 분반은 시간 슬롯이 없다.
+   *  헤드라인 과목 수와 격자 칸 수가 어긋나 보이는 원인이라 분해해서 적는다(9/14 피드백 ②). */
+  const unscheduled = tt?.courses.filter((c) => c.slots.length === 0) ?? [];
+  const currentMode = ref?.modes.find((m) => m.id === mode) ?? null;
+
+  /** 대안 셋이 같은 조합이면 버튼을 그리지 않는다 — 눌러도 화면이 안 바뀐다.
+   *  분반까지 봐야 한다. 과목명만 비교하면 「같은 과목 다른 시간」을 같은 안으로 읽는다. */
+  const hasDistinctAlternatives =
+    new Set(
+      rec.timetables.map((t) =>
+        t.courses
+          .map((c) => `${c.courseId}-${c.section}`)
+          .sort()
+          .join("|"),
+      ),
+    ).size > 1;
+
+  /** 과목 구성은 같고 분반만 다른 경우. 이때 버튼 라벨(과목 수·적합)이 전부 같아 보여서
+   *  무엇을 고르는 건지 알 수 없다 — 다른 게 시간이라는 걸 말해 준다. */
+  const alternativesShareCourses =
+    rec.timetables.length > 1 &&
+    new Set(
+      rec.timetables.map((t) =>
+        t.courses
+          .map((c) => c.courseId)
+          .sort()
+          .join("|"),
+      ),
+    ).size === 1;
+
   return (
     <main className="mx-auto max-w-5xl px-5 py-8 pb-24">
       <header className="print-hide mb-8 flex flex-wrap items-center justify-between gap-3">
@@ -108,6 +138,16 @@ export default function ResultClient() {
           <>
             <span className="tnum">{tt.totalCredit}학점</span> ·{" "}
             <span className="tnum">{tt.courses.length}과목</span>
+            {unscheduled.length > 0 && (
+              <span className="text-text-soft">
+                {" "}
+                (격자에{" "}
+                <span className="tnum">
+                  {tt.courses.length - unscheduled.length}
+                </span>
+                , 시간 미지정 <span className="tnum">{unscheduled.length}</span>)
+              </span>
+            )}
           </>
         )}
       </p>
@@ -146,6 +186,12 @@ export default function ResultClient() {
             </button>
           ))}
         </div>
+        {/* 설명이 title 에만 있으면 마우스를 올려야 보인다 — 무엇을 고른 건지 항상 읽히게 둔다. */}
+        {currentMode && (
+          <p className="basis-full text-caption text-text-soft">
+            {currentMode.desc}
+          </p>
+        )}
       </div>
 
       <section
@@ -161,11 +207,12 @@ export default function ResultClient() {
             <>
               <TimetableGrid courses={tt.courses} activeId={active} onHover={setActive} />
 
-              {/* 제약 — 항상 참인 hard 제약이라 초록 배지 셋이 아니라 한 줄이다 */}
-              <p className="mt-2.5 flex items-center gap-1.5 text-caption text-text-muted">
-                <span className="text-success" aria-hidden>✓</span>
-                시간 충돌 없음 · 기수강 제외 · 선수과목 충족
-              </p>
+              {/* 제약 — 응답의 constraints 를 실제로 읽는다. 우리가 보증한다고 내건 것이라
+                  고정 문자열로 두면 백엔드가 false 를 줘도 화면은 계속 충족했다고 말한다. */}
+              <ConstraintLine constraints={rec.constraints} />
+
+              {/* 성향을 바꾸면 무엇이 달라지는지 — 응답에 오는 두 목적함수 값을 그대로 쓴다 */}
+              <TimetableMeters tt={tt} />
             </>
           )}
           </div>
@@ -174,22 +221,33 @@ export default function ResultClient() {
             {tt !== null && <CopyCodes courses={tt.courses} />}
           </div>
 
-          {rec.timetables.length > 1 && (
+          {/* 대안이 서로 같으면 버튼을 안 그린다 — 눌러도 아무 일도 안 일어나는 버튼은 두지 않는다.
+              무엇이 다른지 못 고르면 「안 1/2/3」은 라벨일 뿐이라 과목 수와 적합도를 같이 적는다. */}
+          {rec.timetables.length > 1 && hasDistinctAlternatives && (
             <div className="print-hide mt-4 flex flex-wrap items-center gap-2">
-              <span className="text-caption text-text-soft">다른 안</span>
+              <span className="text-caption text-text-soft">
+                {alternativesShareCourses ? "같은 과목, 다른 시간" : "다른 안"}
+              </span>
               {rec.timetables.map((t, i) => (
                 <button
                   key={t.rank}
                   onClick={() => setAlt(i)}
                   aria-pressed={i === alt}
                   className={
-                    "min-h-11 rounded-sm border px-4 text-caption transition-colors " +
+                    "flex min-h-11 flex-col items-start justify-center rounded-sm border px-3 py-1 text-caption leading-tight transition-colors " +
                     (i === alt
                       ? "border-brand-400 bg-brand-50 font-semibold text-brand-700"
                       : "border-border text-text-muted hover:bg-surface-3")
                   }
                 >
-                  안 {t.rank}
+                  <span>안 {t.rank}</span>
+                  {/* 과목이 같으면 이 값도 셋 다 같다 — 같은 수를 세 번 적으면 노이즈다 */}
+                  {!alternativesShareCourses && (
+                    <span className="text-text-soft">
+                      <span className="tnum">{t.courses.length}</span>과목 · 적합{" "}
+                      <span className="tnum">{fitIndex(t)}</span>
+                    </span>
+                  )}
                 </button>
               ))}
             </div>
@@ -250,6 +308,14 @@ export default function ResultClient() {
           </button>
         </div>
 
+        {/* 토글 안에만 두면 아무도 안 편다. 한 줄 요약은 항상 보이게 두고 식은 접어 둔다. */}
+        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-text-muted">
+          목표 직무가 요구하는 역량 중 <b className="text-text">지금 모자란 것</b>을 크게
+          채우는 과목부터 고르고, 시간 충돌·학점 범위·기수강·선수과목을 제약으로 걸어
+          풀었습니다. 카드의 비율은 그 과목이{" "}
+          <b className="text-text">어느 역량 갭을 채우는지</b>입니다.
+        </p>
+
         {why && (
           <div className="mt-3 space-y-2 rounded-lg bg-surface-3 p-5 text-sm leading-relaxed text-text-muted">
             <p>
@@ -281,9 +347,128 @@ export default function ResultClient() {
       </section>
 
       <footer className="mt-16 border-t border-border pt-6 text-caption text-text-soft">
-        홍익대학교 산업데이터공학과 졸업프로젝트 6조 · 유영준 · 박소연
+        개설 강의와 졸업요건 데이터를 바탕으로 계산한 추천입니다. 신청 전에 학사 공지와
+        최종 개설 여부를 함께 확인하세요.
       </footer>
     </main>
+  );
+}
+
+/**
+ * 직무 적합 지수 (0~100).
+ *
+ * careerfit = Σ credit·Score 라 학점 수에 딸려 커진다. 학점으로 나누면 「고른 과목들의
+ * 학점당 평균 갭 보완도」가 되고, Score_c = Σ_k gap_k·w_{c,k} 는 gap·w 가 각각 0~1 이라
+ * 사실상 0~1 범위다. 그래서 100 을 곱해 그대로 읽을 수 있는 수가 된다.
+ * 절대 눈금이 아니라 성향·대안을 견주는 상대 지표로만 쓴다.
+ */
+function fitIndex(t: Timetable) {
+  if (t.totalCredit <= 0) return 0;
+  return Math.round((t.careerfit / t.totalCredit) * 100);
+}
+
+const CONSTRAINT_LABEL: Record<keyof Recommendation["constraints"], string> = {
+  noTimeConflict: "시간 충돌 없음",
+  creditBounds: "학점 범위 준수",
+  excludeTaken: "기수강 제외",
+  prereqSatisfied: "선수과목 충족",
+};
+
+/** 만족한 제약은 한 줄로, 깨진 제약은 경고로. 간판으로 내건 보증이라 실제 값을 읽는다. */
+function ConstraintLine({
+  constraints,
+}: {
+  constraints: Recommendation["constraints"];
+}) {
+  const entries = Object.entries(constraints) as [
+    keyof Recommendation["constraints"],
+    boolean,
+  ][];
+  const unmet = entries.filter(([, ok]) => !ok);
+
+  if (unmet.length > 0) {
+    return (
+      <p
+        role="alert"
+        className="mt-2.5 flex items-start gap-1.5 text-caption font-semibold text-danger"
+      >
+        <span aria-hidden>⚠</span>
+        <span>
+          만족하지 못한 조건 —{" "}
+          {unmet.map(([k]) => CONSTRAINT_LABEL[k]).join(" · ")}. 그대로 신청하지 마세요.
+        </span>
+      </p>
+    );
+  }
+
+  return (
+    <p className="mt-2.5 flex items-center gap-1.5 text-caption text-text-muted">
+      <span className="text-success" aria-hidden>
+        ✓
+      </span>
+      {entries.map(([k]) => CONSTRAINT_LABEL[k]).join(" · ")}
+    </p>
+  );
+}
+
+/**
+ * 성향을 바꾸면 무엇이 달라지는가.
+ *
+ * 응답에는 두 목적함수 값이 오는데 화면이 안 그리고 있었다 — 그래서 「역량 우선」과
+ * 「졸업 우선」이 같은 화면으로 보였다(9/14 피드백 ⑧). 둘을 같은 0~100 눈금에
+ * 나란히 두면 이 성향이 무엇을 얻고 무엇을 내줬는지 한눈에 읽힌다.
+ */
+function TimetableMeters({ tt }: { tt: Timetable }) {
+  const fit = fitIndex(tt);
+  const gradPct =
+    tt.totalCredit > 0
+      ? Math.round((tt.gradProgress / tt.totalCredit) * 100)
+      : 0;
+
+  const rows = [
+    {
+      label: "직무 적합",
+      hint: "고른 과목이 목표 직무의 부족한 역량을 얼마나 채우는지",
+      value: fit,
+      color: "var(--color-gap)",
+      right: <span className="tnum">{fit}</span>,
+    },
+    {
+      label: "졸업 반영",
+      hint: `${tt.totalCredit}학점 중 졸업요건에 실제로 꽂히는 학점`,
+      value: gradPct,
+      color: "var(--color-grad)",
+      right: (
+        <span className="tnum">
+          {tt.gradProgress}/{tt.totalCredit}
+        </span>
+      ),
+    },
+  ];
+
+  return (
+    <dl className="mt-4 space-y-2.5">
+      {rows.map((r) => (
+        <div
+          key={r.label}
+          className="grid grid-cols-[5rem_1fr_3.25rem] items-center gap-3"
+        >
+          <dt className="text-sm text-text-muted" title={r.hint}>
+            {r.label}
+          </dt>
+          <dd className="h-1.5 overflow-hidden rounded-full bg-surface-3">
+            <span
+              className="block h-full rounded-full transition-[width] duration-300"
+              style={{
+                width: `${Math.max(0, Math.min(100, r.value))}%`,
+                background: r.color,
+              }}
+            />
+          </dd>
+          <dd className="text-right text-sm text-text-muted">{r.right}</dd>
+        </div>
+      ))}
+    </dl>
   );
 }
 

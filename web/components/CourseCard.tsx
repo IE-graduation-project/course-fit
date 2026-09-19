@@ -7,8 +7,9 @@ import { courseKey } from "./TimetableGrid";
 /**
  * 과목 하나가 왜 추천됐는지.
  *
- * 카드가 나르는 사실은 둘뿐이다 — 무슨 과목인가, 어느 갭을 채우나.
- * 졸업요건은 「졸업까지 남은 것」 절이 말하므로 카드에서 반복하지 않는다.
+ * 카드가 나르는 사실은 셋이다 — 무슨 과목인가, 어느 역량 갭을 채우나, 졸업요건 어디에 꽂히나.
+ * 졸업 기여는 원래 「졸업까지 남은 것」 절에 맡기고 카드에서 뺐는데, 그러면 과목을 보는
+ * 자리에서 추천 이유가 절반만 보인다(9/14 피드백 ①). 응답의 gradReason 을 그대로 쓴다.
  * 막대 색은 hue 를 돌리지 않는다 — share 는 정체가 아니라 크기라서 한 hue 3단이다.
  */
 export default function CourseCard({
@@ -75,6 +76,22 @@ export default function CourseCard({
             ))}
           </p>
         </div>
+      )}
+
+      {course.gradReason && (
+        <p className="mt-3 border-t border-border pt-2.5 text-caption text-text-soft">
+          졸업요건{" "}
+          <span className="text-text-muted">{course.gradReason.area}</span>에
+          들어갑니다
+          {course.gradReason.remaining > 0 && (
+            <>
+              {" · "}그 영역 남은 학점{" "}
+              <span className="tnum text-text-muted">
+                {course.gradReason.remaining}
+              </span>
+            </>
+          )}
+        </p>
       )}
     </div>
   );
