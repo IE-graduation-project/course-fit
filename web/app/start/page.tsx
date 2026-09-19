@@ -106,6 +106,10 @@ export default function StartPage() {
           </p>
         )}
 
+        {/* 참조 데이터를 기다리는 동안 버튼 자리가 통째로 비어 화면이 멈춘 것처럼 보였다.
+            무료 호스팅 콜드스타트라 20~30초까지 가므로, 기다리는 중이라고 말해 준다. */}
+        {step === "program" && !ref && !error && <WaitingForServer />}
+
         {step === "program" && ref && (
           <ProgramPicker
             programs={ref.programs}
@@ -240,6 +244,29 @@ function UserBubble({ children }: { children: React.ReactNode }) {
   return (
     <div className="fade-up ml-auto w-fit max-w-[85%] rounded-xl rounded-tr-sm bg-brand-600 px-4 py-3 text-white">
       {children}
+    </div>
+  );
+}
+
+/**
+ * 참조 데이터를 기다리는 동안 보여 줄 자리.
+ *
+ * 그냥 비워 두면 「버튼이 안 뜬다」가 아니라 「고장났다」로 읽힌다.
+ * 첫 호출이 오래 걸릴 수 있다는 사실까지 적어야 기다릴 마음이 생긴다.
+ */
+function WaitingForServer() {
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      className="fade-up flex w-fit items-center gap-2.5 rounded-xl rounded-tl-sm bg-surface-3 px-4 py-3 text-sm text-text-muted"
+    >
+      <span className="flex gap-1" aria-hidden>
+        <Dot />
+        <Dot d={0.2} />
+        <Dot d={0.4} />
+      </span>
+      학과 목록을 불러오는 중이에요. 처음 열 때는 조금 걸릴 수 있어요.
     </div>
   );
 }

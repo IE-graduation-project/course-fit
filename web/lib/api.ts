@@ -22,10 +22,51 @@ async function getJson<T>(path: string): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-/** GET /api/reference */
+/**
+ * GET /api/reference
+ *
+ * 참조 데이터는 런타임에 안 바뀐다(API 계약 §1). 탭이 사는 동안 한 번만 받아 두면
+ * 화면을 옮겨다닐 때마다 다시 기다릴 이유가 없다 — 무료 호스팅이라 첫 호출이
+ * 콜드스타트로 20~30초 걸리는데, 그게 학과 선택 화면을 통째로 비워 둔다.
+ */
+const REF_CACHE_KEY = "course-fit:reference";
+
 export async function fetchReference(): Promise<Reference> {
-  if (isMock()) return getJson<Reference>("/fixtures/reference.json");
-  return getJson<Reference>(`${API_BASE}/api/reference`);
+  if (typeof window !== "undefined") {
+    const hit = window.sessionStorage.getItem(REF_CACHE_KEY);
+    if (hit) {
+      try {
+        return JSON.parse(hit) as Reference;
+      } catch {
+        // 캐시가 깨졌으면 그냥 다시 받는다. 여기서 죽을 이유는 없다.
+        window.sessionStorage.removeItem(REF_CACHE_KEY);
+      }
+    }
+  }
+
+  const ref = isMock()
+    ? await getJson<Reference>("/fixtures/reference.json")
+    : await getJson<Reference>(`${API_BASE}/api/reference`);
+
+  if (typeof window !== "undefined") {
+    try {
+      window.sessionStorage.setItem(REF_CACHE_KEY, JSON.stringify(ref));
+    } catch {
+      // 용량 초과 등. 캐시는 편의일 뿐이라 실패해도 그대로 진행한다.
+    }
+  }
+  return ref;
+}
+
+/**
+ * 백엔드를 미리 깨운다. 랜딩에서 한 번 부르면, 사용자가 안내를 읽고
+ * 「시작하기」를 누르는 동안 콜드스타트가 끝나 있다.
+ *
+ * 실패는 삼킨다 — 예열은 보조 장치라, 안 되면 원래대로 /start 에서 기다릴 뿐이다.
+ */
+export function warmUp(): void {
+  if (isMock()) return;
+  void fetchReference().catch(() => {});
 }
 
 /**
