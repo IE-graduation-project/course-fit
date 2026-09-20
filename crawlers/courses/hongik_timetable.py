@@ -124,6 +124,26 @@ class TimetableCrawlerError(RuntimeError):
     """Raised when the official timetable workflow cannot be parsed."""
 
 
+_TERM_RE = re.compile(r"^(\d{4})-([12])$")
+
+
+def term_label_of(term: str) -> str:
+    """`"2026-2"` -> `"2026학년도 2학기"`.
+
+    정규학기(1·2)만 받는다. 드롭다운에는 계절학기도 있지만(`2026학년도 하계계절학기`)
+    라벨 규칙이 달라 이 규칙으로는 만들 수 없고 추천 대상도 아니다. 여기서 막지 않으면
+    `2026-3` 이 `2026학년도 3학기` 라는 없는 라벨이 되어 `_extract_option_value` 에서
+    "Could not find term option label" 로 죽는다 — 입력 오류가 크롤 실패로 위장된다.
+
+    crawl_catalog.build_terms 의 f"{y}학년도 {s}" 와 같은 규칙이다.
+    """
+    match = _TERM_RE.match(term)
+    if not match:
+        raise ValueError(f"학기 형식이 잘못됐습니다: {term!r} (예: 2026-2 — 정규학기 1·2만)")
+    year, semester = match.groups()
+    return f"{year}학년도 {semester}학기"
+
+
 def _normalize_text(value: str) -> str:
     value = html.unescape(value)
     value = value.replace("\xa0", " ")
@@ -232,7 +252,17 @@ def fetch_department_detail(
     return response.text
 
 
-def parse_detail_rows(page: str, department: DepartmentRequest) -> list[dict[str, str]]:
+def parse_detail_rows(
+    page: str,
+    department: DepartmentRequest,
+    source_term: str = SOURCE_TERM,
+) -> list[dict[str, str]]:
+    """상세 페이지 한 장을 행으로 판다.
+
+    `source_term` 은 반드시 인자로 받는다. 모듈 전역을 읽으면 `--term` 을 다른 지점에만
+    배선했을 때 2026-2 실데이터에 `2026-1` 이 찍히고, 행수도 과목명도 정상이라
+    예외 없이 통과한다. 기본값을 남기는 이유는 crawl_catalog 가 2인자로 부르기 때문이다.
+    """
     rows: list[dict[str, str]] = []
     tr_blocks = re.findall(r"<tr\b[^>]*>(.*?)</tr>", page, flags=re.I | re.S)
     for tr in tr_blocks:
@@ -256,7 +286,7 @@ def parse_detail_rows(page: str, department: DepartmentRequest) -> list[dict[str
             "credit": _cell_text(td_blocks[6]),
             "grade": _cell_text(td_blocks[0]),
             "category": _cell_text(td_blocks[3]),
-            "source_term": SOURCE_TERM,
+            "source_term": source_term,
             "source_url": BASE_URL,
             "source_dept_code": department.source_dept_code,
             "source_dept_name": department.source_dept_name,
@@ -304,7 +334,17 @@ def _merge_duplicate_sections(rows: list[dict[str, str]]) -> list[dict[str, str]
     return out
 
 
-def crawl_sections(departments: Iterable[DepartmentRequest] = TARGET_DEPARTMENTS) -> list[dict[str, str]]:
+def crawl_sections(
+    departments: Iterable[DepartmentRequest] = TARGET_DEPARTMENTS,
+    term: str = SOURCE_TERM,
+) -> list[dict[str, str]]:
+    """한 학기의 분반·시간표를 전부 긁는다. **단일 학기 전제**다.
+
+    `_merge_duplicate_sections` 의 병합 키에 source_term 이 없어서, 두 학기를 한 번에
+    모으면 과목명·교수·시간이 같은 분반이 한 행으로 합쳐진다. 다학기를 지원하려면
+    병합 키부터 고쳐야 한다.
+    """
+    term_label = term_label_of(term)
     session = requests.Session()
     session.headers.update(
         {
@@ -316,18 +356,31 @@ def crawl_sections(departments: Iterable[DepartmentRequest] = TARGET_DEPARTMENTS
     index = session.get(BASE_URL, timeout=30)
     index.raise_for_status()
 
-    _term_page, p_yy, p_hakgi = fetch_selected_term_page(session)
+    _term_page, p_yy, p_hakgi = fetch_selected_term_page(session, term_label)
     all_rows: list[dict[str, str]] = []
     for department in departments:
         detail = fetch_department_detail(session, department, p_yy=p_yy, p_hakgi=p_hakgi)
-        rows = parse_detail_rows(detail, department)
+        rows = parse_detail_rows(detail, department, source_term=term)
         if not rows:
             raise TimetableCrawlerError(f"No timetable rows parsed for {department.p_dept}")
         all_rows.extend(rows)
     return sorted(_merge_duplicate_sections(all_rows), key=section_sort_key)
 
 
-def write_csv(rows: list[dict[str, str]], output: Path) -> None:
+def write_csv(rows: list[dict[str, str]], output: Path, term: str | None = None) -> None:
+    """CSV 로 쓴다. `term` 을 주면 모든 행이 그 학기인지 먼저 단언한다.
+
+    배선을 한 지점이라도 빠뜨리면 2026-2 실데이터에 `2026-1` 이 찍힌 CSV 가 나온다.
+    행수도 과목명도 교수도 전부 정상이라 눈으로는 안 잡히고, 그대로 적재되면
+    DB 에 틀린 학기가 굳는다. 여기서 막으면 다음 학기에 같은 실수가 불가능하다.
+    """
+    if term is not None:
+        found = {row["source_term"] for row in rows}
+        if found != {term}:
+            raise TimetableCrawlerError(
+                f"source_term 이 요청한 학기와 다릅니다: 기대 {{{term!r}}}, 실제 {found!r}. "
+                "--term 배선이 빠진 지점이 있습니다 (parse_detail_rows 확인)."
+            )
     output.parent.mkdir(parents=True, exist_ok=True)
     with output.open("w", encoding="utf-8", newline="") as fp:
         writer = csv.DictWriter(fp, fieldnames=CSV_FIELDS)
@@ -335,14 +388,29 @@ def write_csv(rows: list[dict[str, str]], output: Path) -> None:
         writer.writerows(rows)
 
 
+def _term_arg(value: str) -> str:
+    """argparse 용 — 형식 오류를 크롤 실패가 아니라 CLI 오류로 돌려준다."""
+    try:
+        term_label_of(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(str(exc)) from exc
+    return value
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=Path("data/course_section.csv"))
+    parser.add_argument(
+        "--term",
+        type=_term_arg,
+        default=SOURCE_TERM,
+        help="크롤할 학기 (예: 2026-2). 정규학기 1·2만 받는다.",
+    )
     args = parser.parse_args(argv)
 
     try:
-        rows = crawl_sections()
-        write_csv(rows, args.output)
+        rows = crawl_sections(term=args.term)
+        write_csv(rows, args.output, term=args.term)
     except (requests.RequestException, TimetableCrawlerError, OSError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
