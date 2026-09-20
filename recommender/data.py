@@ -22,6 +22,29 @@ DB_PATH = ROOT / "db" / "app.db"
 EXCLUDED_CAND_AREAS = ("일반선택",)   # 후보집합 제외 (설계 1절)
 
 
+def active_term(conn) -> str:
+    """DB 에 적재된 개설 학기. 둘 이상이면 즉시 실패한다.
+
+    course_section 의 PK 는 (course_id, section, source_term) 3축인데 후보집합과 분반
+    메타는 (course_id, section) 2축으로만 다룬다. 두 학기가 함께 적재되면 같은 키가
+    겹쳐 조용히 덮어써지고 지난 학기 분반이 후보에 섞인다. 섞인 뒤에는 증상이
+    "추천이 좀 이상하다"로만 보여서 추적이 어렵다 — 적재 단계에서 멈춘다.
+
+    학기를 환경변수로 받지 않는 이유: 설정이 데이터와 어긋나면 후보가 0건이 되는데
+    그 0건은 오류가 아니라 "이번 학기엔 들을 게 없다"처럼 보인다. 데이터에서 유도하면
+    어긋날 자리가 없다.
+    """
+    terms = [r[0] for r in conn.execute(
+        "SELECT DISTINCT source_term FROM course_section ORDER BY source_term")]
+    if len(terms) != 1:
+        raise ValueError(
+            f"course_section 의 학기가 {len(terms)}개입니다: {terms}. "
+            "이 파이프라인은 한 학기만 적재한다고 가정합니다 — 여러 학기를 함께 쓰려면 "
+            "load_candidates·load_section_meta 에 term 을 명시해 호출하세요."
+        )
+    return terms[0]
+
+
 @dataclass
 class Candidate:
     course_id: str
@@ -84,13 +107,16 @@ def load_weights(conn, course_ids) -> dict[str, dict[str, float]]:
     return out
 
 
-def load_candidates(conn, dept_id: str) -> list[Candidate]:
-    """후보집합 C. 학생 dept 전공 + COMMON 교양, 일반선택 제외.
+def load_candidates(conn, dept_id: str, *, term: str) -> list[Candidate]:
+    """후보집합 C. 학생 dept 전공 + COMMON 교양, 일반선택 제외, 해당 학기 개설분만.
 
     ORDER BY 필수 — 이 순서가 ILP 결정변수 x_0..x_N의 번호를 정한다. 순서가 흔들리면
     동점 최적해 중 CBC가 고르는 해가 바뀌어 같은 입력에 다른 시간표가 나온다.
     ORDER BY 없는 SQL 결과 순서는 표준상 미보장이고, 인덱스 추가·VACUUM·DB 재생성으로
     실제로 바뀔 수 있다(컨테이너는 빌드마다 DB를 새로 만든다).
+
+    `term` 은 기본값이 없다. 빠뜨리면 TypeError 로 즉시 죽는다 — 지난 학기 분반을
+    추천하는 것보다 안 뜨는 편이 낫다. 값은 보통 `active_term(conn)` 으로 얻는다.
     """
     depts = ["COMMON"] if dept_id == "COMMON" else [dept_id, "COMMON"]
     dep_q = ",".join("?" * len(depts))
@@ -101,10 +127,11 @@ def load_candidates(conn, dept_id: str) -> list[Candidate]:
                s.time_slots_int, c.prerequisites
         FROM course_section s
         JOIN course c ON c.course_id = s.course_id
-        WHERE c.dept_id IN ({dep_q}) AND c.area NOT IN ({excl_q})
+        WHERE s.source_term = ?
+          AND c.dept_id IN ({dep_q}) AND c.area NOT IN ({excl_q})
         ORDER BY s.course_id, s.section
         """,
-        (*depts, *EXCLUDED_CAND_AREAS),
+        (term, *depts, *EXCLUDED_CAND_AREAS),
     ).fetchall()
 
     weights = load_weights(conn, {r["course_id"] for r in rows})

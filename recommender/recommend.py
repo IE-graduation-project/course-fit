@@ -53,7 +53,8 @@ def recommend(input_hash, job_id, *, db_path=data.DB_PATH, U=18, L=12,
         comp = data.comp_ids(conn)
         student = data.load_student(conn, input_hash)
         rho = data.load_rho(conn, job_id)
-        candidates = data.load_candidates(conn, student.dept_id)
+        candidates = data.load_candidates(
+            conn, student.dept_id, term=data.active_term(conn))
         min_credits = data.load_min_credits(conn, student.dept_id, student.admission_year)
         # 입학년도와 다를 수 있다 — 2025학번 경영은 2022 교육과정을 따른다(결정 ⑨).
         req_year = data.effective_year(conn, student.dept_id, student.admission_year)
