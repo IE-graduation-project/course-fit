@@ -25,12 +25,27 @@ REQUIRED_SECTION_FIELDS = {
     "source_url",
 }
 
-SAMPLE_EXPECTATIONS = [
-    ("140715", "시스템분석", "하정훈", "월91011"),
-    ("140524", "경제성분석", "옥창수", "화123"),
-    ("140316", "데이터사이언스", "박희석", "수89,금9"),
-]
-MULTI_SECTION_EXPECTATIONS = ["033102", "033103"]
+# 파서가 컬럼을 한 칸 밀어 읽어도 행수·과목명은 멀쩡해 보인다. 교수·시간표까지
+# 맞는 표본을 몇 개 박아 두는 것이 그걸 잡는 유일한 방법이다.
+# 다만 교수와 시간표는 학기마다 바뀌므로 학기별로 등록한다 — 한 학기 값을 모든
+# 학기에 적용하면 멀쩡한 데이터가 거절된다(2026-2 에서 세 표본이 모두 어긋났다).
+SAMPLE_EXPECTATIONS: dict[str, list[tuple[str, str, str, str]]] = {
+    "2026-1": [
+        ("140715", "시스템분석", "하정훈", "월91011"),
+        ("140524", "경제성분석", "옥창수", "화123"),
+        ("140316", "데이터사이언스", "박희석", "수89,금9"),
+    ],
+    "2026-2": [
+        ("140715", "시스템분석", "이용오", "월678"),
+        ("140421", "데이터전처리", "하정훈", "월123"),
+        # 2026-2 신설 과목 — 새로 생긴 학수번호도 같은 경로로 파싱되는지 함께 본다.
+        ("101414", "인공지능수학", "김태형3", "화7,수23"),
+    ],
+}
+MULTI_SECTION_EXPECTATIONS: dict[str, list[str]] = {
+    "2026-1": ["033102", "033103"],
+    "2026-2": ["033102", "033103"],
+}
 
 
 def read_csv(path: Path) -> list[dict[str, str]]:
@@ -38,7 +53,8 @@ def read_csv(path: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(fp))
 
 
-def validate(sections_path: Path, courses_path: Path) -> dict[str, object]:
+def validate(sections_path: Path, courses_path: Path,
+             crawled_path: Path | None = None) -> dict[str, object]:
     sections = read_csv(sections_path)
     courses = read_csv(courses_path)
     if not sections:
@@ -47,6 +63,19 @@ def validate(sections_path: Path, courses_path: Path) -> dict[str, object]:
     missing_fields = REQUIRED_SECTION_FIELDS - set(sections[0].keys())
     if missing_fields:
         raise AssertionError(f"Missing course_section fields: {sorted(missing_fields)}")
+
+    terms = sorted({row["source_term"] for row in sections})
+    if len(terms) != 1:
+        raise AssertionError(
+            f"source_term 이 {len(terms)}종입니다: {terms}. "
+            "한 파일에는 한 학기만 담습니다."
+        )
+    term = terms[0]
+    if term not in SAMPLE_EXPECTATIONS:
+        raise AssertionError(
+            f"{term} 의 표본이 등록돼 있지 않습니다. SAMPLE_EXPECTATIONS·MULTI_SECTION_EXPECTATIONS "
+            "에 이 학기 항목을 추가하세요 — 표본 없이 받은 통과는 통과가 아닙니다."
+        )
 
     section_course_ids = {row["course_id"] for row in sections}
     course_ids = {row["course_id"] for row in courses}
@@ -72,7 +101,7 @@ def validate(sections_path: Path, courses_path: Path) -> dict[str, object]:
             )
 
     sample_results = []
-    for course_id, name, professor, time_slots in SAMPLE_EXPECTATIONS:
+    for course_id, name, professor, time_slots in SAMPLE_EXPECTATIONS[term]:
         matches = [
             row
             for row in sections
@@ -103,7 +132,7 @@ def validate(sections_path: Path, courses_path: Path) -> dict[str, object]:
             raise AssertionError(f"Sample check failed for {course_id}; observed={observed}")
 
     multi_section_results = []
-    for course_id in MULTI_SECTION_EXPECTATIONS:
+    for course_id in MULTI_SECTION_EXPECTATIONS[term]:
         count = section_counts[course_id]
         multi_section_results.append({"course_id": course_id, "section_count": count, "pass": count >= 2})
         if count < 2:
@@ -116,14 +145,45 @@ def validate(sections_path: Path, courses_path: Path) -> dict[str, object]:
                 f"{row['course_id']}-{row['section']} {row['course_name']}"
             )
 
+    # course.csv 는 커레이트 193행뿐이라 그것만으로는 FK 를 볼 수 없다.
+    # 실제 카탈로그는 course.csv ∪ course_crawled.csv 이고, 여기서 빠진 과목이
+    # 있으면 DB 적재가 FK 로 죽거나(켜져 있으면) 역량 매핑 없는 후보가 된다.
+    catalog_missing: list[str] = []
+    if crawled_path is not None and crawled_path.exists():
+        catalog_ids = course_ids | {r["course_id"] for r in read_csv(crawled_path)}
+        catalog_missing = sorted(section_course_ids - catalog_ids)
+        if catalog_missing:
+            raise AssertionError(
+                f"카탈로그(course.csv ∪ course_crawled.csv)에 없는 과목 "
+                f"{len(catalog_missing)}개: {catalog_missing[:10]}. "
+                "crawl_catalog → merge_catalog 를 먼저 돌리세요."
+            )
+
+    # 전처리를 마친 CSV 라면, 원문이 있는데 교시가 빈 행은 파싱 실패다.
+    # NULL 은 "시간 미지정"이라는 뜻이라 실패가 NULL 로 섞이면 시간충돌 제약에서
+    # 조용히 빠진다.
+    slots_lost: list[str] = []
+    if "time_slots_int" in sections[0]:
+        slots_lost = [
+            f'{r["course_id"]}-{r["section"]}({r["time_slots_raw"]})'
+            for r in sections
+            if r["time_slots_raw"].strip() and not r.get("time_slots_int", "").strip()
+        ]
+        if slots_lost:
+            raise AssertionError(
+                f"시간표 원문이 있는데 교시 파싱이 빈 행 {len(slots_lost)}개: "
+                f"{slots_lost[:10]}"
+            )
+
     return {
+        "source_term": term,
         "section_rows": len(sections),
         "unique_section_course_ids": len(section_course_ids),
         "course_rows": len(courses),
         "matched_unique_course_ids": len(matched_course_ids),
         "unmatched_unique_course_ids": len(unmatched),
         "matched_rate_vs_section_course_ids": round(len(matched_course_ids) / len(section_course_ids), 4),
-        "course_csv_rows_with_2026_1_sections": len(matched_course_ids),
+        "course_csv_rows_with_sections_this_term": len(matched_course_ids),
         "course_csv_match_rate": round(len(matched_course_ids) / len(course_ids), 4) if course_ids else 0,
         "unmatched_examples": unmatched[:20],
         "unmatched_examples_by_source_dept": dict(by_dept_unmatched),
@@ -137,6 +197,7 @@ def validate(sections_path: Path, courses_path: Path) -> dict[str, object]:
 
 
 def print_summary(result: dict[str, object]) -> None:
+    print(f"source_term: {result['source_term']}")
     print(f"course_section rows: {result['section_rows']}")
     print(f"unique course_section.course_id: {result['unique_section_course_ids']}")
     print(f"course.csv rows: {result['course_rows']}")
@@ -146,8 +207,8 @@ def print_summary(result: dict[str, object]) -> None:
         f"({result['matched_rate_vs_section_course_ids']})"
     )
     print(
-        "course.csv target courses with 2026-1 sections: "
-        f"{result['course_csv_rows_with_2026_1_sections']} / {result['course_rows']} "
+        f"course.csv target courses with {result['source_term']} sections: "
+        f"{result['course_csv_rows_with_sections_this_term']} / {result['course_rows']} "
         f"({result['course_csv_match_rate']})"
     )
     print(f"unmatched unique course_ids: {result['unmatched_unique_course_ids']}")
@@ -168,11 +229,13 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--sections", type=Path, default=Path("data/course_section.csv"))
     parser.add_argument("--courses", type=Path, default=Path("data/course.csv"))
+    parser.add_argument("--crawled", type=Path, default=Path("data/course_crawled.csv"),
+                        help="카탈로그 보강분. course.csv 와 합쳐 FK 를 본다")
     parser.add_argument("--json", action="store_true", help="Print machine-readable JSON summary")
     args = parser.parse_args(argv)
 
     try:
-        result = validate(args.sections, args.courses)
+        result = validate(args.sections, args.courses, args.crawled)
     except (OSError, AssertionError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1

@@ -27,6 +27,9 @@ from typing import Iterable
 import requests
 
 BASE_URL = "https://cn.hongik.ac.kr/app/timetable/"
+# 시간표 크롤의 학기는 --term 으로만 정한다(기본값 없음). 아래 둘은 catalog 크롤
+# (crawl_catalog.py)이 parse_detail_rows 를 2인자로 부를 때 쓰는 자리값이고, 그쪽은
+# source_term 컬럼을 버리므로 값 자체가 산출물에 남지 않는다.
 SOURCE_TERM = "2026-1"
 TERM_LABEL = "2026학년도 1학기"
 
@@ -403,8 +406,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--term",
         type=_term_arg,
-        default=SOURCE_TERM,
-        help="크롤할 학기 (예: 2026-2). 정규학기 1·2만 받는다.",
+        required=True,
+        help="크롤할 학기 (예: 2026-2). 정규학기 1·2만 받는다. 기본값 없음 — "
+             "빠뜨리면 옛 학기를 긁어 새 CSV 를 덮는다.",
     )
     args = parser.parse_args(argv)
 
