@@ -27,7 +27,7 @@ LOAD_ORDER = [
     ("competency",             "competency.csv"),
     ("course",                 "course.csv"),
     ("course",                 "course_crawled.csv"),  # 다년도 시간표 보강분 (이슈 #18)
-    ("course_section",         "course_section.csv"),  # 2026-1 분반/시간표 (FK: course 적재 후)
+    ("course_section",         "course_section.csv"),  # 개설 학기 분반/시간표 (FK: course 적재 후)
     ("job",                    "job.csv"),
     ("course_competency",      "course_competency.csv"),
     ("job_competency",         "job_competency.csv"),
