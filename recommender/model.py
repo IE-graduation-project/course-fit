@@ -32,6 +32,21 @@ def filter_candidates(candidates, taken_ids, passed_ids):
     return out
 
 
+def _objective_value(expr) -> float:
+    """PuLP 목적값을 float 로 읽는다. 빈 식이면 None 이 오는데 그건 0.0 이라는 뜻이다.
+
+    PuLP 는 계수 0 인 항을 식에서 버린다. 그래서 모든 계수가 0 이거나(전 후보 Score 0)
+    항이 하나도 안 만들어지면(need 가 비어 f_g 가 없음) 식 자체가 비고 `value()` 가
+    None 을 낸다. 풀이가 실패한 것이 아니라 더할 것이 없었던 것이라 LpStatus 는
+    'Optimal' 이고, 그래서 상태 가드로는 걸리지 않는다.
+
+    None 을 그대로 흘리면 두 가지로 터진다: 산술에 쓰이면 TypeError 이고,
+    Result 에 담기면 float 로 선언된 필드에 None 이 들어가 API·프론트까지 샌다.
+    접는 자리를 한 곳으로 모아, 호출부마다 `or 0.0` 을 반복하지 않는다.
+    """
+    return float(pulp.value(expr) or 0.0)
+
+
 def _add_base_constraints(prob, x, cands, U, L):
     """hard 제약 A1·A2·A3·A3'를 prob에 추가 (매 problem마다 새 제약 객체로)."""
     # A1 시간충돌: 슬롯별 ≤1. NULL 슬롯은 c.slots=()이라 어디에도 안 들어가 자동 제외.
@@ -77,6 +92,10 @@ def solve_topk(candidates, score_by_course, need, *, U=18, L=12,
     x = {i: pulp.LpVariable(f"x_{i}", cat="Binary") for i in range(len(cands))}
     careerfit = pulp.lpSum(c.credit * score_by_course[c.course_id] * x[i]
                            for i, c in enumerate(cands))
+    # 전 후보 Score 가 0 이면 PuLP 가 계수 0 인 항을 버려 이 식이 빈다. 그 사실은
+    # **p1 을 풀기 전에** 기록해야 한다 — solve() 가 변수 없는 목적식에 `__dummy` 를
+    # 끼워 넣으면서 이 식 객체를 제자리에서 바꾸기 때문에, 나중에 len() 을 재면 1 이 나온다.
+    careerfit_is_empty = len(careerfit) == 0
     solver = pulp.PULP_CBC_CMD(msg=msg, timeLimit=time_limit)
 
     # ── 1순위: 직무적합 최대화 → V*
@@ -86,7 +105,7 @@ def solve_topk(candidates, score_by_course, need, *, U=18, L=12,
     p1.solve(solver)
     if pulp.LpStatus[p1.status] != "Optimal":
         return [Result([], 0.0, 0.0, 0, pulp.LpStatus[p1.status])]
-    vstar = pulp.value(careerfit)
+    vstar = _objective_value(careerfit)
 
     # ── 2순위: 졸업진척(need-cap) 최대화 (직무적합 ≥ (1−ε)V* 유지) + k-best 루프
     # GradProgress = Σ_g min(need_g, 영역 g에 담은 학점). min은 보조변수 f_g로 선형화:
@@ -105,7 +124,12 @@ def solve_topk(candidates, score_by_course, need, *, U=18, L=12,
     gradprog = pulp.lpSum(fvars)
     p2 += gradprog
     _add_base_constraints(p2, x, cands, U, L)
-    p2 += careerfit >= (1.0 - eps) * vstar - 1e-6, "careerfit_floor"  # 부동소수 여유
+    # careerfit 이 빈 식이면(전 후보 Score 0) 이 제약은 0 >= -1e-6 이라 항상 참이다.
+    # 그런데 PuLP 는 변수가 없는 제약·목적에 `__dummy` 를 끼워 넣는다. 목적식(gradprog)도
+    # 비어 있으면 `__dummy` 가 두 번 들어가 LP 파일이 깨지고(Repeated variable names)
+    # CBC 가 통째로 실패한다. 뜻이 없는 제약은 아예 걸지 않는다.
+    if not careerfit_is_empty:
+        p2 += careerfit >= (1.0 - eps) * vstar - 1e-6, "careerfit_floor"  # 부동소수 여유
 
     results: list[Result] = []
     for it in range(k):
@@ -116,8 +140,8 @@ def solve_topk(candidates, score_by_course, need, *, U=18, L=12,
         selected = [cands[i] for i in sel_idx]
         results.append(Result(
             selected=selected,
-            careerfit=pulp.value(careerfit),
-            gradprogress=pulp.value(gradprog),
+            careerfit=_objective_value(careerfit),
+            gradprogress=_objective_value(gradprog),
             total_credit=sum(c.credit for c in selected),
             status="Optimal",
         ))
