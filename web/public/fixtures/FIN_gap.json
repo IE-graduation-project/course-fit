@@ -2,38 +2,39 @@
   "student": {
     "deptId": "BIZ",
     "admissionYear": 2022,
-    "requirementYear": 2022
+    "requirementYear": 2022,
+    "gradeLevel": 4
   },
   "fitByJob": [
     {
       "job": "DA",
       "name": "데이터 분석가",
-      "fit": 92.3
+      "fit": 87.8
     },
     {
       "job": "DE",
       "name": "데이터 엔지니어",
-      "fit": 87.7
+      "fit": 85.2
     },
     {
       "job": "DS",
       "name": "데이터 사이언티스트",
-      "fit": 96.5
+      "fit": 93.9
     },
     {
       "job": "FIN",
       "name": "재무 분석가",
-      "fit": 96.9
+      "fit": 98.1
     },
     {
       "job": "MKT",
       "name": "마케팅 매니저",
-      "fit": 97.8
+      "fit": 97.1
     },
     {
       "job": "PM",
       "name": "프로덕트 매니저",
-      "fit": 99.8
+      "fit": 99.7
     }
   ],
   "job": {
@@ -50,16 +51,16 @@
   },
   "diagnosis": {
     "sigma": {
-      "BIZ": 0.9957,
-      "COMM": 0.9824,
-      "DATA": 0.9289,
-      "DB": 0.6352,
-      "FIN": 0.9194,
-      "MKT": 0.9448,
-      "ML": 0.9033,
-      "OR": 0.9003,
-      "PROG": 0.8662,
-      "VIZ": 0.8286
+      "BIZ": 0.9927,
+      "COMM": 0.8614,
+      "DATA": 0.896,
+      "DB": 0.5617,
+      "FIN": 0.9506,
+      "MKT": 0.927,
+      "ML": 0.8282,
+      "OR": 0.8571,
+      "PROG": 0.79,
+      "VIZ": 0.7126
     },
     "rho": {
       "BIZ": 0.5442,
@@ -78,7 +79,7 @@
       "COMM": 0.0,
       "DATA": 0.0,
       "DB": 0.0,
-      "FIN": 0.0806,
+      "FIN": 0.0494,
       "MKT": 0.0,
       "ML": 0.0,
       "OR": 0.0,
@@ -89,109 +90,77 @@
       {
         "comp": "BIZ",
         "compKo": "비즈니스",
-        "sigma": 0.9957
-      },
-      {
-        "comp": "COMM",
-        "compKo": "커뮤니케이션",
-        "sigma": 0.9824
+        "sigma": 0.9927
       },
       {
         "comp": "MKT",
         "compKo": "마케팅",
-        "sigma": 0.9448
+        "sigma": 0.927
       },
       {
         "comp": "DATA",
         "compKo": "데이터분석",
-        "sigma": 0.9289
+        "sigma": 0.896
       },
       {
-        "comp": "ML",
-        "compKo": "머신러닝",
-        "sigma": 0.9033
+        "comp": "COMM",
+        "compKo": "커뮤니케이션",
+        "sigma": 0.8614
       },
       {
         "comp": "OR",
         "compKo": "최적화",
-        "sigma": 0.9003
+        "sigma": 0.8571
+      },
+      {
+        "comp": "ML",
+        "compKo": "머신러닝",
+        "sigma": 0.8282
       },
       {
         "comp": "PROG",
         "compKo": "프로그래밍",
-        "sigma": 0.8662
+        "sigma": 0.79
       },
       {
         "comp": "VIZ",
         "compKo": "데이터시각화",
-        "sigma": 0.8286
+        "sigma": 0.7126
       },
       {
         "comp": "DB",
         "compKo": "데이터베이스",
-        "sigma": 0.6352
+        "sigma": 0.5617
       }
     ],
     "gaps": [
       {
         "comp": "FIN",
         "compKo": "재무",
-        "gap": 0.0806
+        "gap": 0.0494
       }
     ]
   },
   "need": {
     "SW데이터활용역량": 9,
+    "공통교양": 7,
+    "교양필수": 3,
+    "전공기초영어": 2,
     "전공선택": 12,
-    "전공필수": 3,
     "특성화교양": 3
   },
   "timetables": [
     {
       "rank": 1,
-      "careerfit": 0.7394,
-      "gradProgress": 9.0,
+      "careerfit": 0.4827,
+      "gradProgress": 15.0,
       "totalCredit": 18,
       "status": "Optimal",
       "courses": [
         {
-          "courseId": "002592",
+          "courseId": "313116",
           "section": "1",
-          "name": "회계의이해",
-          "credit": 3,
-          "area": "공통교양",
-          "slots": [
-            54,
-            55,
-            56
-          ],
-          "slotsHuman": [
-            "목6",
-            "목7",
-            "목8"
-          ],
-          "professor": "신진희",
-          "timeRaw": "목678",
-          "offeringDept": "경영학전공",
-          "category": "교선\n사회와경제",
-          "score": 0.0479,
-          "careerReason": [
-            {
-              "comp": "FIN",
-              "compKo": "재무",
-              "value": 0.0479,
-              "share": 1.0
-            }
-          ],
-          "gradReason": {
-            "area": "공통교양",
-            "remaining": 0
-          }
-        },
-        {
-          "courseId": "311314",
-          "section": "1",
-          "name": "중급재무회계",
+          "name": "자본시장과회계제도회계감사(NCS)",
           "credit": 3,
           "area": "전공선택",
           "slots": [
@@ -208,12 +177,12 @@
           "timeRaw": "월234",
           "offeringDept": "경영학전공",
           "category": "전선",
-          "score": 0.0448,
+          "score": 0.0301,
           "careerReason": [
             {
               "comp": "FIN",
               "compKo": "재무",
-              "value": 0.0448,
+              "value": 0.0301,
               "share": 1.0
             }
           ],
@@ -223,31 +192,65 @@
           }
         },
         {
-          "courseId": "311717",
+          "courseId": "002592",
           "section": "1",
-          "name": "세무회계",
+          "name": "회계의이해",
+          "credit": 3,
+          "area": "공통교양",
+          "slots": [
+            71,
+            72,
+            73
+          ],
+          "slotsHuman": [
+            "금7",
+            "금8",
+            "금9"
+          ],
+          "professor": "허윤영",
+          "timeRaw": "금789",
+          "offeringDept": "경영학전공",
+          "category": "교선\n사회와경제",
+          "score": 0.0294,
+          "careerReason": [
+            {
+              "comp": "FIN",
+              "compKo": "재무",
+              "value": 0.0294,
+              "share": 1.0
+            }
+          ],
+          "gradReason": {
+            "area": "공통교양",
+            "remaining": 7
+          }
+        },
+        {
+          "courseId": "311514",
+          "section": "1",
+          "name": "정부비영리회계",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            22,
-            23,
-            24
+            55,
+            56,
+            57
           ],
           "slotsHuman": [
-            "화6",
-            "화7",
-            "화8"
+            "목7",
+            "목8",
+            "목9"
           ],
-          "professor": "조형태",
-          "timeRaw": "화678",
+          "professor": "이계형",
+          "timeRaw": "목789",
           "offeringDept": "경영학전공",
           "category": "전선",
-          "score": 0.0419,
+          "score": 0.0285,
           "careerReason": [
             {
               "comp": "FIN",
               "compKo": "재무",
-              "value": 0.0419,
+              "value": 0.0285,
               "share": 1.0
             }
           ],
@@ -257,11 +260,11 @@
           }
         },
         {
-          "courseId": "002581",
+          "courseId": "311415",
           "section": "1",
-          "name": "대학생을위한실용금융",
+          "name": "재무제표론",
           "credit": 3,
-          "area": "공통교양",
+          "area": "전공선택",
           "slots": [
             50,
             51,
@@ -272,84 +275,510 @@
             "목3",
             "목4"
           ],
-          "professor": "송병욱",
+          "professor": "조형태",
           "timeRaw": "목234",
-          "offeringDept": "경제학부",
-          "category": "교선",
-          "score": 0.0387,
+          "offeringDept": "경영학전공",
+          "category": "전선",
+          "score": 0.0266,
           "careerReason": [
             {
               "comp": "FIN",
               "compKo": "재무",
-              "value": 0.0387,
+              "value": 0.0266,
               "share": 1.0
             }
           ],
           "gradReason": {
-            "area": "공통교양",
-            "remaining": 0
+            "area": "전공선택",
+            "remaining": 12
           }
         },
         {
-          "courseId": "002232",
-          "section": "1",
-          "name": "생활금융과법",
-          "credit": 3,
-          "area": "공통교양",
-          "slots": [
-            18,
-            19,
-            20
-          ],
-          "slotsHuman": [
-            "화2",
-            "화3",
-            "화4"
-          ],
-          "professor": "신상균",
-          "timeRaw": "화234",
-          "offeringDept": "법학과",
-          "category": "교선",
-          "score": 0.0374,
-          "careerReason": [
-            {
-              "comp": "FIN",
-              "compKo": "재무",
-              "value": 0.0374,
-              "share": 1.0
-            }
-          ],
-          "gradReason": {
-            "area": "공통교양",
-            "remaining": 0
-          }
-        },
-        {
-          "courseId": "311513",
-          "section": "1",
-          "name": "재무분석",
+          "courseId": "313106",
+          "section": "2",
+          "name": "원가회계",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            6,
-            7,
-            8
+            66,
+            67,
+            68
           ],
           "slotsHuman": [
-            "월6",
-            "월7",
-            "월8"
+            "금2",
+            "금3",
+            "금4"
           ],
-          "professor": "고경연",
-          "timeRaw": "월678",
+          "professor": "황진아",
+          "timeRaw": "금234",
           "offeringDept": "경영학전공",
           "category": "전선",
-          "score": 0.0358,
+          "score": 0.0236,
           "careerReason": [
             {
               "comp": "FIN",
               "compKo": "재무",
-              "value": 0.0358,
+              "value": 0.0236,
+              "share": 1.0
+            }
+          ],
+          "gradReason": {
+            "area": "전공선택",
+            "remaining": 12
+          }
+        },
+        {
+          "courseId": "311606",
+          "section": "1",
+          "name": "기업경영과세무",
+          "credit": 3,
+          "area": "전공선택",
+          "slots": [
+            34,
+            35,
+            36
+          ],
+          "slotsHuman": [
+            "수2",
+            "수3",
+            "수4"
+          ],
+          "professor": "윤재원1",
+          "timeRaw": "수234",
+          "offeringDept": "경영학전공",
+          "category": "전선",
+          "score": 0.0228,
+          "careerReason": [
+            {
+              "comp": "FIN",
+              "compKo": "재무",
+              "value": 0.0228,
+              "share": 1.0
+            }
+          ],
+          "gradReason": {
+            "area": "전공선택",
+            "remaining": 12
+          }
+        }
+      ]
+    },
+    {
+      "rank": 2,
+      "careerfit": 0.4827,
+      "gradProgress": 15.0,
+      "totalCredit": 18,
+      "status": "Optimal",
+      "courses": [
+        {
+          "courseId": "313116",
+          "section": "1",
+          "name": "자본시장과회계제도회계감사(NCS)",
+          "credit": 3,
+          "area": "전공선택",
+          "slots": [
+            2,
+            3,
+            4
+          ],
+          "slotsHuman": [
+            "월2",
+            "월3",
+            "월4"
+          ],
+          "professor": "천준범",
+          "timeRaw": "월234",
+          "offeringDept": "경영학전공",
+          "category": "전선",
+          "score": 0.0301,
+          "careerReason": [
+            {
+              "comp": "FIN",
+              "compKo": "재무",
+              "value": 0.0301,
+              "share": 1.0
+            }
+          ],
+          "gradReason": {
+            "area": "전공선택",
+            "remaining": 12
+          }
+        },
+        {
+          "courseId": "002592",
+          "section": "1",
+          "name": "회계의이해",
+          "credit": 3,
+          "area": "공통교양",
+          "slots": [
+            71,
+            72,
+            73
+          ],
+          "slotsHuman": [
+            "금7",
+            "금8",
+            "금9"
+          ],
+          "professor": "허윤영",
+          "timeRaw": "금789",
+          "offeringDept": "경영학전공",
+          "category": "교선\n사회와경제",
+          "score": 0.0294,
+          "careerReason": [
+            {
+              "comp": "FIN",
+              "compKo": "재무",
+              "value": 0.0294,
+              "share": 1.0
+            }
+          ],
+          "gradReason": {
+            "area": "공통교양",
+            "remaining": 7
+          }
+        },
+        {
+          "courseId": "311514",
+          "section": "1",
+          "name": "정부비영리회계",
+          "credit": 3,
+          "area": "전공선택",
+          "slots": [
+            55,
+            56,
+            57
+          ],
+          "slotsHuman": [
+            "목7",
+            "목8",
+            "목9"
+          ],
+          "professor": "이계형",
+          "timeRaw": "목789",
+          "offeringDept": "경영학전공",
+          "category": "전선",
+          "score": 0.0285,
+          "careerReason": [
+            {
+              "comp": "FIN",
+              "compKo": "재무",
+              "value": 0.0285,
+              "share": 1.0
+            }
+          ],
+          "gradReason": {
+            "area": "전공선택",
+            "remaining": 12
+          }
+        },
+        {
+          "courseId": "311415",
+          "section": "1",
+          "name": "재무제표론",
+          "credit": 3,
+          "area": "전공선택",
+          "slots": [
+            50,
+            51,
+            52
+          ],
+          "slotsHuman": [
+            "목2",
+            "목3",
+            "목4"
+          ],
+          "professor": "조형태",
+          "timeRaw": "목234",
+          "offeringDept": "경영학전공",
+          "category": "전선",
+          "score": 0.0266,
+          "careerReason": [
+            {
+              "comp": "FIN",
+              "compKo": "재무",
+              "value": 0.0266,
+              "share": 1.0
+            }
+          ],
+          "gradReason": {
+            "area": "전공선택",
+            "remaining": 12
+          }
+        },
+        {
+          "courseId": "313106",
+          "section": "2",
+          "name": "원가회계",
+          "credit": 3,
+          "area": "전공선택",
+          "slots": [
+            66,
+            67,
+            68
+          ],
+          "slotsHuman": [
+            "금2",
+            "금3",
+            "금4"
+          ],
+          "professor": "황진아",
+          "timeRaw": "금234",
+          "offeringDept": "경영학전공",
+          "category": "전선",
+          "score": 0.0236,
+          "careerReason": [
+            {
+              "comp": "FIN",
+              "compKo": "재무",
+              "value": 0.0236,
+              "share": 1.0
+            }
+          ],
+          "gradReason": {
+            "area": "전공선택",
+            "remaining": 12
+          }
+        },
+        {
+          "courseId": "311606",
+          "section": "2",
+          "name": "기업경영과세무",
+          "credit": 3,
+          "area": "전공선택",
+          "slots": [
+            38,
+            39,
+            40
+          ],
+          "slotsHuman": [
+            "수6",
+            "수7",
+            "수8"
+          ],
+          "professor": "윤재원1",
+          "timeRaw": "수678",
+          "offeringDept": "경영학전공",
+          "category": "전선",
+          "score": 0.0228,
+          "careerReason": [
+            {
+              "comp": "FIN",
+              "compKo": "재무",
+              "value": 0.0228,
+              "share": 1.0
+            }
+          ],
+          "gradReason": {
+            "area": "전공선택",
+            "remaining": 12
+          }
+        }
+      ]
+    },
+    {
+      "rank": 3,
+      "careerfit": 0.4827,
+      "gradProgress": 15.0,
+      "totalCredit": 18,
+      "status": "Optimal",
+      "courses": [
+        {
+          "courseId": "313116",
+          "section": "1",
+          "name": "자본시장과회계제도회계감사(NCS)",
+          "credit": 3,
+          "area": "전공선택",
+          "slots": [
+            2,
+            3,
+            4
+          ],
+          "slotsHuman": [
+            "월2",
+            "월3",
+            "월4"
+          ],
+          "professor": "천준범",
+          "timeRaw": "월234",
+          "offeringDept": "경영학전공",
+          "category": "전선",
+          "score": 0.0301,
+          "careerReason": [
+            {
+              "comp": "FIN",
+              "compKo": "재무",
+              "value": 0.0301,
+              "share": 1.0
+            }
+          ],
+          "gradReason": {
+            "area": "전공선택",
+            "remaining": 12
+          }
+        },
+        {
+          "courseId": "002592",
+          "section": "1",
+          "name": "회계의이해",
+          "credit": 3,
+          "area": "공통교양",
+          "slots": [
+            71,
+            72,
+            73
+          ],
+          "slotsHuman": [
+            "금7",
+            "금8",
+            "금9"
+          ],
+          "professor": "허윤영",
+          "timeRaw": "금789",
+          "offeringDept": "경영학전공",
+          "category": "교선\n사회와경제",
+          "score": 0.0294,
+          "careerReason": [
+            {
+              "comp": "FIN",
+              "compKo": "재무",
+              "value": 0.0294,
+              "share": 1.0
+            }
+          ],
+          "gradReason": {
+            "area": "공통교양",
+            "remaining": 7
+          }
+        },
+        {
+          "courseId": "311514",
+          "section": "1",
+          "name": "정부비영리회계",
+          "credit": 3,
+          "area": "전공선택",
+          "slots": [
+            55,
+            56,
+            57
+          ],
+          "slotsHuman": [
+            "목7",
+            "목8",
+            "목9"
+          ],
+          "professor": "이계형",
+          "timeRaw": "목789",
+          "offeringDept": "경영학전공",
+          "category": "전선",
+          "score": 0.0285,
+          "careerReason": [
+            {
+              "comp": "FIN",
+              "compKo": "재무",
+              "value": 0.0285,
+              "share": 1.0
+            }
+          ],
+          "gradReason": {
+            "area": "전공선택",
+            "remaining": 12
+          }
+        },
+        {
+          "courseId": "311415",
+          "section": "1",
+          "name": "재무제표론",
+          "credit": 3,
+          "area": "전공선택",
+          "slots": [
+            50,
+            51,
+            52
+          ],
+          "slotsHuman": [
+            "목2",
+            "목3",
+            "목4"
+          ],
+          "professor": "조형태",
+          "timeRaw": "목234",
+          "offeringDept": "경영학전공",
+          "category": "전선",
+          "score": 0.0266,
+          "careerReason": [
+            {
+              "comp": "FIN",
+              "compKo": "재무",
+              "value": 0.0266,
+              "share": 1.0
+            }
+          ],
+          "gradReason": {
+            "area": "전공선택",
+            "remaining": 12
+          }
+        },
+        {
+          "courseId": "313106",
+          "section": "3",
+          "name": "원가회계",
+          "credit": 3,
+          "area": "전공선택",
+          "slots": [
+            37,
+            38,
+            39
+          ],
+          "slotsHuman": [
+            "수5",
+            "수6",
+            "수7"
+          ],
+          "professor": "이윤기",
+          "timeRaw": "수567",
+          "offeringDept": "경영학전공",
+          "category": "전선",
+          "score": 0.0236,
+          "careerReason": [
+            {
+              "comp": "FIN",
+              "compKo": "재무",
+              "value": 0.0236,
+              "share": 1.0
+            }
+          ],
+          "gradReason": {
+            "area": "전공선택",
+            "remaining": 12
+          }
+        },
+        {
+          "courseId": "311606",
+          "section": "1",
+          "name": "기업경영과세무",
+          "credit": 3,
+          "area": "전공선택",
+          "slots": [
+            34,
+            35,
+            36
+          ],
+          "slotsHuman": [
+            "수2",
+            "수3",
+            "수4"
+          ],
+          "professor": "윤재원1",
+          "timeRaw": "수234",
+          "offeringDept": "경영학전공",
+          "category": "전선",
+          "score": 0.0228,
+          "careerReason": [
+            {
+              "comp": "FIN",
+              "compKo": "재무",
+              "value": 0.0228,
               "share": 1.0
             }
           ],
@@ -365,6 +794,7 @@
     "noTimeConflict": true,
     "creditBounds": true,
     "excludeTaken": true,
-    "prereqSatisfied": true
+    "prereqSatisfied": true,
+    "gradeEligible": true
   }
 }
