@@ -6,7 +6,7 @@ transcript 모듈을 import 하지 않으며, student/student_course 테이블�
 - w_{c,k}: course_competency,  ρ_k: job_competency
 - 학생 기수강: student_course 단일 원천
     · σ·선수충족 = matched ∧ passed ∧ ¬superseded
-    · 기이수학점(need) = area별 passed ∧ ¬superseded 합
+    · 기이수학점(need) = area별 passed ∧ ¬superseded 합. 타 학과 전공 영역은 일반선택으로 (#40)
     · B1 = 전체 course_id
 - min_credits_g: graduation_requirement,  선수: course.prerequisites,  시간슬롯: course_section
 """
@@ -20,6 +20,12 @@ ROOT = Path(__file__).resolve().parent.parent
 DB_PATH = ROOT / "db" / "app.db"
 
 EXCLUDED_CAND_AREAS = ("일반선택",)   # 후보집합 제외 (설계 1절)
+
+# 학과마다 따로 정의되는 영역. 이름이 같아도 경영학과 「전공필수」와 산업데이터공학과
+# 「전공필수」는 다른 요건이다 — 타 학과 과목이면 일반선택으로 인정한다(#40). 교양 영역
+# (공통교양·교양필수·특성화교양 등)은 전교 공통이라 여기 넣지 않는다.
+DEPT_SCOPED_AREAS = frozenset({"전공필수", "전공선택", "전공기초", "MSC"})
+CROSS_DEPT_AREA = "일반선택"
 
 
 def active_term(conn) -> str:
@@ -150,6 +156,18 @@ def load_candidates(conn, dept_id: str, *, term: str) -> list[Candidate]:
     ]
 
 
+def _credited_area(area: str, course_dept: str | None, student_dept: str) -> str:
+    """이 학생의 졸업요건에서 그 과목이 채우는 영역.
+
+    student_course.area 는 카탈로그 영역을 그대로 복사한 값이라 개설 학과 기준이다.
+    학생 학과 기준으로 옮기는 건 여기 한 곳에서만 한다. 카탈로그에 없는 과목
+    (course_dept=None)은 적재 때 이미 일반선택 등으로 들어왔으니 그대로 둔다.
+    """
+    if course_dept in (None, student_dept, "COMMON"):
+        return area
+    return CROSS_DEPT_AREA if area in DEPT_SCOPED_AREAS else area
+
+
 def load_student(conn, input_hash: str) -> Student:
     srow = conn.execute(
         "SELECT input_hash, dept_id, admission_year FROM student WHERE input_hash=?",
@@ -166,8 +184,10 @@ def load_student(conn, input_hash: str) -> Student:
     taken_ids: set[str] = set()
     earned_by_area: dict[str, int] = {}
     for r in conn.execute(
-        """SELECT course_id, area, credit, grade, is_pn, matched, passed, superseded
-           FROM student_course WHERE input_hash=?""",
+        """SELECT sc.course_id, sc.area, sc.credit, sc.grade, sc.is_pn, sc.matched,
+                  sc.passed, sc.superseded, c.dept_id AS course_dept
+           FROM student_course sc LEFT JOIN course c ON c.course_id = sc.course_id
+           WHERE sc.input_hash=?""",
         (input_hash,),
     ):
         cid = r["course_id"]
@@ -175,7 +195,8 @@ def load_student(conn, input_hash: str) -> Student:
             taken_ids.add(cid)                         # B1: 성적표 전 과목 제외
         active = r["passed"] and not r["superseded"]
         if active and r["area"]:                       # need_g: area별 기이수학점
-            earned_by_area[r["area"]] = earned_by_area.get(r["area"], 0) + (r["credit"] or 0)
+            area = _credited_area(r["area"], r["course_dept"], srow["dept_id"])
+            earned_by_area[area] = earned_by_area.get(area, 0) + (r["credit"] or 0)
         if cid and r["matched"] and active:            # σ·선수충족: 매칭+이수+비대체
             cmp_g = 0.0 if (r["is_pn"] or r["grade"] is None) else r["grade"]
             if cid not in best_cmp or cmp_g > best_cmp[cid]:
