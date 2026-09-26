@@ -99,8 +99,16 @@ export interface RecommendRequest {
 
 /** POST /api/recommend 응답 = recommender.explain.build_explanation 확장판 */
 export interface Recommendation {
-  /** requirementYear = 실제 적용된 교육과정 개정 연도. 입학년도와 다를 수 있어 화면에 밝힌다 */
-  student: { deptId: string; admissionYear: number; requirementYear: number };
+  /**
+   * requirementYear = 실제 적용된 교육과정 개정 연도. 입학년도와 다를 수 있어 화면에 밝힌다.
+   * gradeLevel = 후보를 거른 학년. 성적표의 마지막 학기에서 계산해 입학년도와 다를 수 있다(#42)
+   */
+  student: {
+    deptId: string;
+    admissionYear: number;
+    requirementYear: number;
+    gradeLevel: number;
+  };
   job: JobRef;
   /**
    * 직무 6종 각각의 적합도(0~100). σ 는 직무와 무관해서 한 번에 다 낼 수 있고,
@@ -126,6 +134,7 @@ export interface Recommendation {
     creditBounds: boolean;
     excludeTaken: boolean;
     prereqSatisfied: boolean;
+    gradeEligible: boolean;
   };
 }
 

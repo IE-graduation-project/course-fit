@@ -124,7 +124,10 @@
   "student": { "deptId": "BIZ", "admissionYear": 2022,
                // 실제 적용된 교육과정 개정 연도. 입학년도와 다를 수 있다
                // (2025학번 경영 → 2022). 결과 화면에 "2022학년도 교육과정 기준"으로 고지한다.
-               "requirementYear": 2022 },
+               "requirementYear": 2022,
+               // 후보를 거른 학년(#42). 성적표의 마지막 확정 학기의 다음 학기 학년이라
+               // 입학년도와 다를 수 있다. 결과 화면 머리에 "N학년 기준"으로 고지한다.
+               "gradeLevel": 4 },
   "job": { "id": "DA", "name": "데이터 분석가" },
 
   // 직무 6종 적합도 — σ 는 직무 무관이라 한 번에 다 낸다. ε 에 안 흔들린다.
@@ -163,7 +166,8 @@
   }],
 
   "constraints": { "noTimeConflict": true, "creditBounds": true,
-                   "excludeTaken": true, "prereqSatisfied": true }
+                   "excludeTaken": true, "prereqSatisfied": true,
+                   "gradeEligible": true }   // 분반 지정 학년 ≤ gradeLevel (0 = 무관)
 }
 ```
 

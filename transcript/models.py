@@ -17,7 +17,7 @@ class StudentMeta:
     dept_id: str | None = None          # 매핑된 학과 (IDE/BIZ), 실패 시 None
     dept_name_raw: str | None = None    # 성적표 원문 학과명
     admission_year: int | None = None   # 입학년도
-    current_grade: int | None = None    # 현재 학년
+    current_grade: int | None = None    # 이번 학기 학년 (마지막 확정 학기의 다음 학기, #42)
     total_earned: int | None = None     # 총 취득학점
     gpa: float | None = None            # 전체 평점평균
 

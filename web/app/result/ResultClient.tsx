@@ -147,6 +147,7 @@ export default function ResultClient() {
       <h1 className="text-h1 font-bold leading-h">이번 학기, 이렇게 들어보세요</h1>
       <p className="mt-2 text-sm text-text-muted">
         {rec.student.deptId} {rec.student.admissionYear}학번 ·{" "}
+        <span className="tnum">{rec.student.gradeLevel}학년</span> 기준 ·{" "}
         {tt === null ? (
           <span>추천 가능한 시간표 없음</span>
         ) : (
@@ -326,7 +327,7 @@ export default function ResultClient() {
         {/* 토글 안에만 두면 아무도 안 편다. 한 줄 요약은 항상 보이게 두고 식은 접어 둔다. */}
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-text-muted">
           목표 직무가 요구하는 역량 중 <b className="text-text">지금 모자란 것</b>을 크게
-          채우는 과목부터 고르고, 시간 충돌·학점 범위·기수강·선수과목을 제약으로 걸어
+          채우는 과목부터 고르고, 시간 충돌·학점 범위·기수강·선수과목·수강 학년을 제약으로 걸어
           풀었습니다. 카드의 비율은 그 과목이{" "}
           <b className="text-text">어느 역량 갭을 채우는지</b>입니다.
         </p>
@@ -338,7 +339,7 @@ export default function ResultClient() {
               (많이 들을수록 1에 수렴) → <b className="text-text">gap = max(0, ρ − σ)</b>{" "}
               목표 직무가 원하는 수준 ρ 에서 모자란 만큼 → 과목마다{" "}
               <b className="text-text">Score = Σ gap × 기여도</b> 를 매기고, 시간 충돌·학점
-              상하한·기수강·선수과목을 <b className="text-text">제약</b>으로 걸어 정수계획법으로
+              상하한·기수강·선수과목·수강 학년을 <b className="text-text">제약</b>으로 걸어 정수계획법으로
               풉니다. 1순위는 직무 적합, 2순위는 졸업 진척이고 그 사이를 ε 이 조절합니다
               (지금 ε = <span className="tnum">{rec.params.eps}</span>).
             </p>
@@ -387,6 +388,7 @@ const CONSTRAINT_LABEL: Record<keyof Recommendation["constraints"], string> = {
   creditBounds: "학점 범위 준수",
   excludeTaken: "기수강 제외",
   prereqSatisfied: "선수과목 충족",
+  gradeEligible: "수강 학년 충족",
 };
 
 /** 만족한 제약은 한 줄로, 깨진 제약은 경고로. 간판으로 내건 보증이라 실제 값을 읽는다. */
@@ -502,7 +504,7 @@ function Infeasible({
     <div className="rounded-lg border border-border bg-surface p-8 text-center">
       <p className="text-h3 font-semibold">조건에 맞는 시간표가 없어요</p>
       <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-text-muted">
-        학점 범위·시간 충돌·선수과목을 모두 만족하는 조합을 못 찾았습니다.
+        학점 범위·시간 충돌·선수과목·수강 학년을 모두 만족하는 조합을 못 찾았습니다.
         남은 과목이 적거나 개설 분반이 겹칠 때 이렇게 됩니다.
       </p>
       {mode !== "graduation" && (

@@ -36,7 +36,7 @@ def _conn(terms: tuple[str, ...]) -> sqlite3.Connection:
         CREATE TABLE course_section (
             course_id TEXT, section TEXT, source_term TEXT,
             time_slots_int TEXT, time_slots_raw TEXT, professor TEXT,
-            category TEXT, offering_dept TEXT,
+            category TEXT, offering_dept TEXT, grade INTEGER,
             PRIMARY KEY (course_id, section, source_term)
         );
         CREATE TABLE course_competency (course_id TEXT, comp_id TEXT, weight REAL);
@@ -72,16 +72,16 @@ def test_active_term_refuses_two_terms():
 def test_candidates_do_not_duplicate_across_terms():
     """학기 필터가 없으면 같은 분반이 학기 수만큼 후보에 들어간다."""
     with _conn((TERM_OLD, TERM_NEW)) as conn:
-        cands = data.load_candidates(conn, "IDE", term=TERM_NEW)
+        cands = data.load_candidates(conn, "IDE", term=TERM_NEW, grade=None)
     assert len(cands) == 1, "같은 분반이 학기별로 중복되면 ILP 가 같은 과목을 두 번 고를 수 있다"
     assert cands[0].course_id == "C1"
 
 
 def test_candidates_exclude_other_terms():
     with _conn((TERM_OLD, TERM_NEW)) as conn:
-        assert data.load_candidates(conn, "IDE", term=TERM_OLD) != []
+        assert data.load_candidates(conn, "IDE", term=TERM_OLD, grade=None) != []
         # 적재되지 않은 학기를 물으면 조용히 이번 학기로 넘어가지 않고 비어야 한다
-        assert data.load_candidates(conn, "IDE", term="2027-1") == []
+        assert data.load_candidates(conn, "IDE", term="2027-1", grade=None) == []
 
 
 def test_candidates_require_explicit_term():

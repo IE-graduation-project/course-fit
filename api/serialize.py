@@ -189,7 +189,9 @@ def build_payload(conn, rec: Recommendation, ref: RefData, *, job_id: str, mode:
     payload = {
         "student": {"deptId": rec.dept_id, "admissionYear": rec.admission_year,
                     # 적용된 교육과정 연도. 입학년도와 다를 수 있어 화면에 고지한다(결정 ⑨).
-                    "requirementYear": rec.requirement_year},
+                    "requirementYear": rec.requirement_year,
+                    # 후보를 거른 학년(#42). 성적표의 마지막 학기에서 계산해 입학년도와 다를 수 있다.
+                    "gradeLevel": rec.grade_level},
         "fitByJob": [{"job": jid, "name": jname,
                       "fit": job_fit(rec.sigma, data.load_rho(conn, jid), comp_ids)}
                      for jid, jname in ref.jobs],
@@ -210,7 +212,9 @@ def build_payload(conn, rec: Recommendation, ref: RefData, *, job_id: str, mode:
         "need": {a: n for a, n in sorted(rec.need.items()) if n > 0},
         "timetables": timetables,
         "constraints": {"noTimeConflict": True, "creditBounds": True,
-                        "excludeTaken": True, "prereqSatisfied": True},
+                        "excludeTaken": True, "prereqSatisfied": True,
+                        # 후보집합에서 걸렀으니 구조적으로 참이다(data.load_candidates, #42)
+                        "gradeEligible": True},
     }
     if not solved:
         # 못 푼 이유를 디버깅용으로만 덧붙인다. Optimal일 때는 넣지 않는다 —
