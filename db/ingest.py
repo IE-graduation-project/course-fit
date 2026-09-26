@@ -27,7 +27,7 @@ LOAD_ORDER = [
     ("competency",             "competency.csv"),
     ("course",                 "course.csv"),
     ("course",                 "course_crawled.csv"),  # 다년도 시간표 보강분 (이슈 #18)
-    ("course_section",         "course_section.csv"),  # 2026-1 분반/시간표 (FK: course 적재 후)
+    ("course_section",         "course_section.csv"),  # 개설 학기 분반/시간표 (FK: course 적재 후)
     ("job",                    "job.csv"),
     ("course_competency",      "course_competency.csv"),
     ("job_competency",         "job_competency.csv"),
@@ -148,6 +148,61 @@ def validate(conn: sqlite3.Connection) -> list[str]:
     for row in cur:
         errors.append(
             f"course {row[0]}: msc_subarea='{row[2]}'인데 area='{row[1]}' (기대 'MSC')"
+        )
+
+    # 검증 8: course_section 은 한 학기만 — 섞이면 같은 분반이 중복 후보가 되고
+    # 분반 메타 dict((course_id, section) 2축)가 지난 학기 행으로 덮어써진다.
+    terms = [r[0] for r in conn.execute(
+        "SELECT DISTINCT source_term FROM course_section ORDER BY source_term")]
+    if len(terms) != 1:
+        errors.append(
+            f"course_section.source_term 이 {len(terms)}종입니다: {terms} (기대 1종). "
+            "학기 교체는 덮어쓰기여야 하고 누적이면 안 됩니다."
+        )
+
+    # 검증 9: 개설 분반의 과목이 카탈로그에 있나 (FK)
+    # PRAGMA foreign_keys 가 꺼진 채 적재된 DB 도 여기서 걸린다.
+    cur = conn.execute("""
+        SELECT DISTINCT s.course_id FROM course_section s
+        LEFT JOIN course c ON c.course_id = s.course_id
+        WHERE c.course_id IS NULL
+    """)
+    orphans = [r[0] for r in cur]
+    if orphans:
+        errors.append(
+            f"course_section: 카탈로그에 없는 course_id {len(orphans)}개 "
+            f"(예: {orphans[:5]}). 새 학기 과목은 카탈로그 크롤·병합을 먼저 돌리세요."
+        )
+
+    # 검증 10: 개설 분반의 과목에 역량 가중치가 있나
+    # 없으면 score_of 가 0.0 을 돌려주는데 그 0.0 은 "진로와 무관"이 아니라 "모른다"다.
+    # 후보에서 빠지지도 않아서, 졸업학점만 채우는 과목이 진로 근거 없이 시간표에 들어간다.
+    cur = conn.execute("""
+        SELECT DISTINCT s.course_id FROM course_section s
+        LEFT JOIN course_competency cc ON cc.course_id = s.course_id
+        WHERE cc.course_id IS NULL
+    """)
+    unmapped = [r[0] for r in cur]
+    if unmapped:
+        errors.append(
+            f"course_section: 역량 매핑이 없는 과목 {len(unmapped)}개 "
+            f"(예: {unmapped[:5]}). mapping 파이프라인(01→03→04→05)을 다시 돌리세요."
+        )
+
+    # 검증 11: 시간표 원문은 있는데 파싱 결과가 비었나
+    # NULL 은 "비대면·논문이라 시간 미지정"이라는 뜻이라, 파싱 실패가 NULL 로 들어가면
+    # 시간충돌 제약에서 조용히 빠져 겹치는 시간표가 만들어진다.
+    cur = conn.execute("""
+        SELECT course_id, section, time_slots_raw FROM course_section
+        WHERE COALESCE(TRIM(time_slots_raw), '') != ''
+          AND COALESCE(TRIM(time_slots_int), '') = ''
+    """)
+    lost = cur.fetchall()
+    if lost:
+        sample = [f"{r[0]}-{r[1]}({r[2]})" for r in lost[:5]]
+        errors.append(
+            f"course_section: 시간표 원문이 있는데 교시 파싱이 빈 행 {len(lost)}개 "
+            f"(예: {sample}). preprocess_time_slots 를 다시 돌리세요."
         )
 
     return errors

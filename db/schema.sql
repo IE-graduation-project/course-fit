@@ -5,7 +5,7 @@
 --            course_competency, job, job_competency, course_section
 --   runtime(3, 빈 채로): recommendation_log, student, student_course
 --   (student_input은 student_course에서 파생 가능해 제거 — σ는 matched∧passed∧¬superseded 필터)
--- 참고: course_section(2026-1 분반/시간표)은 ILP 시간표 추천 후보의 시간정보. course 전체 적재 후 적재.
+-- 참고: course_section(개설 학기 분반/시간표)은 ILP 시간표 추천 후보의 시간정보. course 전체 적재 후 적재.
 --       job_posting 원본 크롤링은 매핑 도출에만 사용, DB 미포함.
 --       student/student_course는 성적표 적재(이슈 #16)로 채워진다.
 
@@ -131,14 +131,14 @@ CREATE TABLE IF NOT EXISTS student_course (
     FOREIGN KEY (input_hash) REFERENCES student(input_hash)
 );
 
--- 12. course_section: 2026-1 분반/시간표 (ILP 시간표 추천 후보의 시간정보)
--- grain: 과목 × 분반 × 학기. (course_id, section, source_term) 유일성 검증됨(986행 중복 0).
+-- 12. course_section: 개설 학기 분반/시간표 (ILP 시간표 추천 후보의 시간정보). 현재 2026-2.
+-- grain: 과목 × 분반 × 학기. (course_id, section, source_term) 유일성 검증됨(927행 중복 0).
 -- course 전체 적재 후 적재(FK 의존). credit/course_name은 course에서 조인(중복 저장 안 함).
--- time_slots_int NULL = 비대면/논문/실습 등 고정 시간 미지정(28행) → 추천 시 시간충돌 제약 제외.
+-- time_slots_int NULL = 비대면/논문/실습 등 고정 시간 미지정(27행) → 추천 시 시간충돌 제약 제외.
 CREATE TABLE IF NOT EXISTS course_section (
     course_id        TEXT    NOT NULL,   -- FK → course
     section          TEXT    NOT NULL,   -- 분반 번호 ('1','2'...)
-    source_term      TEXT    NOT NULL,   -- 개설 학기 ('2026-1')
+    source_term      TEXT    NOT NULL,   -- 개설 학기 ('2026-2'). 한 번에 한 학기만 적재한다
     time_slots_int   TEXT,               -- ILP 충돌제약용 교시 인덱스 ('34,35,50,51')
     time_slots_raw   TEXT,               -- 사람 읽기용 ('수23,목23')
     professor        TEXT,

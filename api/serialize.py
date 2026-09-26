@@ -53,16 +53,20 @@ class RefData:
     jobs: list[tuple[str, str]]         # (job_id, job_name)
     programs: list[dict]                # 지원 학과 · 적용 시작 연도 (결정 ⑨)
     sec_meta: dict[tuple[str, str], dict]   # (course_id, section) -> 표시용 메타
+    term: str                           # sec_meta 가 담고 있는 개설 학기
 
 
 def load_ref_data(conn) -> RefData:
+    """참조 데이터 1회 로드. 분반 메타는 DB 에 적재된 그 학기분만 담는다."""
+    term = data.active_term(conn)
     return RefData(
         comp_ids=data.comp_ids(conn),
         comps=[(r[0], r[1]) for r in conn.execute("SELECT comp_id, comp_name FROM competency")],
         jobs=[(r[0], r[1]) for r in
               conn.execute("SELECT job_id, job_name FROM job ORDER BY job_id")],
         programs=load_programs(conn),
-        sec_meta=load_section_meta(conn),
+        sec_meta=load_section_meta(conn, term=term),
+        term=term,
     )
 
 
@@ -86,7 +90,7 @@ def load_programs(conn) -> list[dict]:
     ]
 
 
-def load_section_meta(conn) -> dict[tuple[str, str], dict]:
+def load_section_meta(conn, *, term: str) -> dict[tuple[str, str], dict]:
     """(course_id, section) -> {professor, timeRaw, offeringDept, category}.
 
     빈 문자열은 None으로 접는다 — 계약상 이 넷은 nullable이고, 프론트는 null을 '미지정'으로
@@ -101,7 +105,8 @@ def load_section_meta(conn) -> dict[tuple[str, str], dict]:
         }
         for r in conn.execute(
             "SELECT course_id, section, professor, time_slots_raw, offering_dept, category "
-            "FROM course_section"
+            "FROM course_section WHERE source_term = ?",
+            (term,),
         )
     }
 

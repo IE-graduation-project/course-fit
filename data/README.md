@@ -96,14 +96,14 @@ python3 crawlers/courses/validate_course_sections.py --sections data/course_sect
 - `credit`: 학점
 - `grade`: 개설학년 (`0`은 전체/학년 무관 개설로 취급)
 - `category`: 공식 시간표 이수구분 (`전필`, `전선`, `전기` 등)
-- `source_term`: 데이터 기준 학기. 현재 `2026-1`
+- `source_term`: 데이터 기준 학기. 현재 `2026-2`
 - `source_url`: `https://cn.hongik.ac.kr/app/timetable/`
 - `source_dept_code`: 크롤링에 사용한 공식 조회 scope 코드 (`A200`, `B010`, `GE1`, `ENG_GE14` 등). 동일 분반이 비공학/공학 교양 메뉴에 동시에 노출되면 세미콜론으로 병합한다. 예: `ENG_GE14;GE4`
 - `source_dept_name`: 공식 조회 scope명. 중복 scope 병합 시 세미콜론으로 병합한다.
 - `notes`: 공식 시간표 비고
 
 
-**현재 포함 scope (2026-1, 서울캠퍼스, 2022년 입학생~)**
+**현재 포함 scope (2026-2, 서울캠퍼스, 2022년 입학생~)**
 - 전공: `A200` 컴퓨터·데이터공학부(컴퓨터공학과, 산업·데이터공학과), `B010` 경영학부
 - 비공학 교양: `GE1~GE8`, `GE11~GE17`
 - 공학계열 교양/MSC: `ENG_GE1~ENG_GE7`, `ENG_GE11~ENG_GE16` (`ENG_GE14=MSC수학`, `ENG_GE15=MSC과학`, `ENG_GE16=MSC전산`)
@@ -123,10 +123,10 @@ python3 crawlers/courses/validate_course_sections.py --sections data/course_sect
 - CSV 16컬럼 중 **11컬럼만 저장**. 다음 5개는 미저장:
   - `course_name`, `credit` → `course` 테이블에서 조인 (credit은 course와 100% 일치 검증됨)
   - `dept_name` → `offering_dept`와 중복, `grade` → `course.allowed_years`와 중복, `source_url` → 전 행 상수
-- `time_slots_int` NULL(28분반) = 비대면/논문/실습 등 고정 시간 미지정 → ILP 시간충돌 제약에서 제외.
+- `time_slots_int` NULL(27분반) = 비대면/논문/실습 등 고정 시간 미지정 → ILP 시간충돌 제약에서 제외.
 - **추천 후보는 별도 테이블이 아니라 조인으로 도출**:
   `course_section ⋈ course (dept_id IN ('IDE','BIZ','COMMON'))`
-  → 현재 280과목/986분반(IDE 39, BIZ 32, COMMON 209). `course`(전체 카탈로그 3,304)는 성적표 역량 매칭용 universe이고, 추천 후보는 26-1 분반이 있는 부분집합.
+  → 현재 278과목/927분반(IDE 35, BIZ 44, COMMON 199). `course`(전체 카탈로그 3,389)는 성적표 역량 매칭용 universe이고, 추천 후보는 26-2 분반이 있는 부분집합.
 
 ## 4. `competency.csv`
 역량 taxonomy 10개 -- 한국 NCS 기반 + 약간 변형
