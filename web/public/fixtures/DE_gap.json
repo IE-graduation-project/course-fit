@@ -9,27 +9,27 @@
     {
       "job": "DA",
       "name": "데이터 분석가",
-      "fit": 87.8
+      "fit": 62.5
     },
     {
       "job": "DE",
       "name": "데이터 엔지니어",
-      "fit": 85.2
+      "fit": 62.8
     },
     {
       "job": "DS",
       "name": "데이터 사이언티스트",
-      "fit": 93.9
+      "fit": 78.9
     },
     {
       "job": "FIN",
       "name": "재무 분석가",
-      "fit": 98.1
+      "fit": 96.1
     },
     {
       "job": "MKT",
       "name": "마케팅 매니저",
-      "fit": 97.1
+      "fit": 95.1
     },
     {
       "job": "PM",
@@ -51,16 +51,16 @@
   },
   "diagnosis": {
     "sigma": {
-      "BIZ": 0.9927,
-      "COMM": 0.8614,
-      "DATA": 0.896,
-      "DB": 0.5617,
-      "FIN": 0.9506,
-      "MKT": 0.927,
-      "ML": 0.8282,
-      "OR": 0.8571,
-      "PROG": 0.79,
-      "VIZ": 0.7126
+      "BIZ": 0.9901,
+      "COMM": 0.8095,
+      "DATA": 0.7556,
+      "DB": 0.0,
+      "FIN": 0.9251,
+      "MKT": 0.8899,
+      "ML": 0.5422,
+      "OR": 0.6872,
+      "PROG": 0.6626,
+      "VIZ": 0.1386
     },
     "rho": {
       "BIZ": 0.1812,
@@ -78,66 +78,66 @@
       "BIZ": 0.0,
       "COMM": 0.0,
       "DATA": 0.0,
-      "DB": 0.4383,
+      "DB": 1.0,
       "FIN": 0.0,
       "MKT": 0.0,
       "ML": 0.0,
       "OR": 0.0,
-      "PROG": 0.0,
-      "VIZ": 0.0
+      "PROG": 0.1186,
+      "VIZ": 0.0375
     },
     "strengths": [
       {
         "comp": "BIZ",
         "compKo": "비즈니스",
-        "sigma": 0.9927
+        "sigma": 0.9901
       },
       {
         "comp": "FIN",
         "compKo": "재무",
-        "sigma": 0.9506
+        "sigma": 0.9251
       },
       {
         "comp": "MKT",
         "compKo": "마케팅",
-        "sigma": 0.927
-      },
-      {
-        "comp": "DATA",
-        "compKo": "데이터분석",
-        "sigma": 0.896
+        "sigma": 0.8899
       },
       {
         "comp": "COMM",
         "compKo": "커뮤니케이션",
-        "sigma": 0.8614
+        "sigma": 0.8095
+      },
+      {
+        "comp": "DATA",
+        "compKo": "데이터분석",
+        "sigma": 0.7556
       },
       {
         "comp": "OR",
         "compKo": "최적화",
-        "sigma": 0.8571
+        "sigma": 0.6872
       },
       {
         "comp": "ML",
         "compKo": "머신러닝",
-        "sigma": 0.8282
-      },
-      {
-        "comp": "PROG",
-        "compKo": "프로그래밍",
-        "sigma": 0.79
-      },
-      {
-        "comp": "VIZ",
-        "compKo": "데이터시각화",
-        "sigma": 0.7126
+        "sigma": 0.5422
       }
     ],
     "gaps": [
       {
         "comp": "DB",
         "compKo": "데이터베이스",
-        "gap": 0.4383
+        "gap": 1.0
+      },
+      {
+        "comp": "PROG",
+        "compKo": "프로그래밍",
+        "gap": 0.1186
+      },
+      {
+        "comp": "VIZ",
+        "compKo": "데이터시각화",
+        "gap": 0.0375
       }
     ]
   },
@@ -152,7 +152,7 @@
   "timetables": [
     {
       "rank": 1,
-      "careerfit": 1.5006,
+      "careerfit": 3.76,
       "gradProgress": 13.0,
       "totalCredit": 18,
       "status": "Optimal",
@@ -177,12 +177,12 @@
           "timeRaw": "수91011",
           "offeringDept": "산업공학전공",
           "category": "교선",
-          "score": 0.1246,
+          "score": 0.2844,
           "careerReason": [
             {
               "comp": "DB",
               "compKo": "데이터베이스",
-              "value": 0.1246,
+              "value": 0.2844,
               "share": 1.0
             }
           ],
@@ -211,52 +211,18 @@
           "timeRaw": "목234",
           "offeringDept": "경영학전공",
           "category": "전선",
-          "score": 0.1091,
+          "score": 0.249,
           "careerReason": [
             {
               "comp": "DB",
               "compKo": "데이터베이스",
-              "value": 0.1091,
+              "value": 0.249,
               "share": 1.0
             }
           ],
           "gradReason": {
             "area": "전공선택",
             "remaining": 12
-          }
-        },
-        {
-          "courseId": "002653",
-          "section": "1",
-          "name": "언어와빅데이터",
-          "credit": 3,
-          "area": "공통교양",
-          "slots": [
-            34,
-            35,
-            36
-          ],
-          "slotsHuman": [
-            "수2",
-            "수3",
-            "수4"
-          ],
-          "professor": "임동식1",
-          "timeRaw": "수234",
-          "offeringDept": "교양과(서울)",
-          "category": "교선",
-          "score": 0.0848,
-          "careerReason": [
-            {
-              "comp": "DB",
-              "compKo": "데이터베이스",
-              "value": 0.0848,
-              "share": 1.0
-            }
-          ],
-          "gradReason": {
-            "area": "공통교양",
-            "remaining": 7
           }
         },
         {
@@ -279,12 +245,52 @@
           "timeRaw": "화678",
           "offeringDept": "교양과(서울)",
           "category": "교선\n과학과컴퓨터",
-          "score": 0.0816,
+          "score": 0.2034,
           "careerReason": [
             {
               "comp": "DB",
               "compKo": "데이터베이스",
-              "value": 0.0816,
+              "value": 0.1861,
+              "share": 0.915
+            },
+            {
+              "comp": "PROG",
+              "compKo": "프로그래밍",
+              "value": 0.0173,
+              "share": 0.085
+            }
+          ],
+          "gradReason": {
+            "area": "공통교양",
+            "remaining": 7
+          }
+        },
+        {
+          "courseId": "002653",
+          "section": "1",
+          "name": "언어와빅데이터",
+          "credit": 3,
+          "area": "공통교양",
+          "slots": [
+            34,
+            35,
+            36
+          ],
+          "slotsHuman": [
+            "수2",
+            "수3",
+            "수4"
+          ],
+          "professor": "임동식1",
+          "timeRaw": "수234",
+          "offeringDept": "교양과(서울)",
+          "category": "교선",
+          "score": 0.1935,
+          "careerReason": [
+            {
+              "comp": "DB",
+              "compKo": "데이터베이스",
+              "value": 0.1935,
               "share": 1.0
             }
           ],
@@ -313,13 +319,19 @@
           "timeRaw": "금678",
           "offeringDept": "경영학전공",
           "category": "전선",
-          "score": 0.0583,
+          "score": 0.1703,
           "careerReason": [
             {
               "comp": "DB",
               "compKo": "데이터베이스",
-              "value": 0.0583,
-              "share": 1.0
+              "value": 0.1329,
+              "share": 0.7807
+            },
+            {
+              "comp": "PROG",
+              "compKo": "프로그래밍",
+              "value": 0.0373,
+              "share": 0.2193
             }
           ],
           "gradReason": {
@@ -347,13 +359,19 @@
           "timeRaw": "수567",
           "offeringDept": "산업공학전공",
           "category": "일선",
-          "score": 0.0418,
+          "score": 0.1528,
           "careerReason": [
             {
               "comp": "DB",
               "compKo": "데이터베이스",
-              "value": 0.0418,
-              "share": 1.0
+              "value": 0.0953,
+              "share": 0.6237
+            },
+            {
+              "comp": "PROG",
+              "compKo": "프로그래밍",
+              "value": 0.0575,
+              "share": 0.3763
             }
           ],
           "gradReason": {
@@ -365,7 +383,7 @@
     },
     {
       "rank": 2,
-      "careerfit": 1.5006,
+      "careerfit": 3.76,
       "gradProgress": 13.0,
       "totalCredit": 18,
       "status": "Optimal",
@@ -390,12 +408,12 @@
           "timeRaw": "수91011",
           "offeringDept": "산업공학전공",
           "category": "교선",
-          "score": 0.1246,
+          "score": 0.2844,
           "careerReason": [
             {
               "comp": "DB",
               "compKo": "데이터베이스",
-              "value": 0.1246,
+              "value": 0.2844,
               "share": 1.0
             }
           ],
@@ -424,52 +442,18 @@
           "timeRaw": "목234",
           "offeringDept": "경영학전공",
           "category": "전선",
-          "score": 0.1091,
+          "score": 0.249,
           "careerReason": [
             {
               "comp": "DB",
               "compKo": "데이터베이스",
-              "value": 0.1091,
+              "value": 0.249,
               "share": 1.0
             }
           ],
           "gradReason": {
             "area": "전공선택",
             "remaining": 12
-          }
-        },
-        {
-          "courseId": "002653",
-          "section": "1",
-          "name": "언어와빅데이터",
-          "credit": 3,
-          "area": "공통교양",
-          "slots": [
-            34,
-            35,
-            36
-          ],
-          "slotsHuman": [
-            "수2",
-            "수3",
-            "수4"
-          ],
-          "professor": "임동식1",
-          "timeRaw": "수234",
-          "offeringDept": "교양과(서울)",
-          "category": "교선",
-          "score": 0.0848,
-          "careerReason": [
-            {
-              "comp": "DB",
-              "compKo": "데이터베이스",
-              "value": 0.0848,
-              "share": 1.0
-            }
-          ],
-          "gradReason": {
-            "area": "공통교양",
-            "remaining": 7
           }
         },
         {
@@ -492,12 +476,52 @@
           "timeRaw": "화678",
           "offeringDept": "교양과(서울)",
           "category": "교선\n과학과컴퓨터",
-          "score": 0.0816,
+          "score": 0.2034,
           "careerReason": [
             {
               "comp": "DB",
               "compKo": "데이터베이스",
-              "value": 0.0816,
+              "value": 0.1861,
+              "share": 0.915
+            },
+            {
+              "comp": "PROG",
+              "compKo": "프로그래밍",
+              "value": 0.0173,
+              "share": 0.085
+            }
+          ],
+          "gradReason": {
+            "area": "공통교양",
+            "remaining": 7
+          }
+        },
+        {
+          "courseId": "002653",
+          "section": "1",
+          "name": "언어와빅데이터",
+          "credit": 3,
+          "area": "공통교양",
+          "slots": [
+            34,
+            35,
+            36
+          ],
+          "slotsHuman": [
+            "수2",
+            "수3",
+            "수4"
+          ],
+          "professor": "임동식1",
+          "timeRaw": "수234",
+          "offeringDept": "교양과(서울)",
+          "category": "교선",
+          "score": 0.1935,
+          "careerReason": [
+            {
+              "comp": "DB",
+              "compKo": "데이터베이스",
+              "value": 0.1935,
               "share": 1.0
             }
           ],
@@ -526,13 +550,19 @@
           "timeRaw": "금234",
           "offeringDept": "경영학전공",
           "category": "전선",
-          "score": 0.0583,
+          "score": 0.1703,
           "careerReason": [
             {
               "comp": "DB",
               "compKo": "데이터베이스",
-              "value": 0.0583,
-              "share": 1.0
+              "value": 0.1329,
+              "share": 0.7807
+            },
+            {
+              "comp": "PROG",
+              "compKo": "프로그래밍",
+              "value": 0.0373,
+              "share": 0.2193
             }
           ],
           "gradReason": {
@@ -560,13 +590,19 @@
           "timeRaw": "수567",
           "offeringDept": "산업공학전공",
           "category": "일선",
-          "score": 0.0418,
+          "score": 0.1528,
           "careerReason": [
             {
               "comp": "DB",
               "compKo": "데이터베이스",
-              "value": 0.0418,
-              "share": 1.0
+              "value": 0.0953,
+              "share": 0.6237
+            },
+            {
+              "comp": "PROG",
+              "compKo": "프로그래밍",
+              "value": 0.0575,
+              "share": 0.3763
             }
           ],
           "gradReason": {

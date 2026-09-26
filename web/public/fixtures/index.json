@@ -99,12 +99,12 @@
     "job": "PM",
     "mode": "balanced",
     "file": "PM_balanced.json",
-    "nCourses": 7
+    "nCourses": 6
   },
   {
     "job": "PM",
     "mode": "graduation",
     "file": "PM_graduation.json",
-    "nCourses": 7
+    "nCourses": 6
   }
 ]
