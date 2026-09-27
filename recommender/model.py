@@ -2,6 +2,7 @@
 
 [1순위] max CareerFit → V*
 [2순위] max GradProgress  s.t. CareerFit ≥ (1−ε)·V*
+[3순위] 2순위가 같으면 CareerFit 이 높은 쪽 — 목적에 δ·CareerFit 을 섞는다 (#45)
 hard 제약 A1(시간충돌)·A2(분반택1)·A3/A3'(학점상한/하한). B1·B2는 후보 사전필터로 처리.
 """
 from __future__ import annotations
@@ -122,7 +123,16 @@ def solve_topk(candidates, score_by_course, need, *, U=18, L=12,
         p2 += f <= placed, f"needcap_{j}"                          # f_g ≤ 담은학점_g
         fvars.append(f)
     gradprog = pulp.lpSum(fvars)
-    p2 += gradprog
+    # 3순위 — 졸업 반영이 같은 해가 여럿이면 CBC 탐색 순서가 해를 골라, 같은 입력이 로컬과
+    # 배포 서버에서 다른 시간표를 냈고 배포 쪽 직무 적합이 더 낮았다(#45). δ·CareerFit 을
+    # 목적에 섞어 동점 안에서 직무 적합이 높은 해를 고른다. 졸업 반영은 학점 단위라 해 사이
+    # 차이가 0 이 아니면 최소 1 이고, CareerFit ≤ U·max Score 이므로 δ = 0.5/(U·max Score)
+    # 면 δ·CareerFit 의 폭이 0.5 를 넘지 않아 졸업 반영을 한 학점도 내주지 않는다.
+    max_score = max((score_by_course[c.course_id] for c in cands), default=0.0)
+    if careerfit_is_empty or max_score <= 0:
+        p2 += gradprog
+    else:
+        p2 += gradprog + (0.5 / (U * max_score)) * careerfit
     _add_base_constraints(p2, x, cands, U, L)
     # careerfit 이 빈 식이면(전 후보 Score 0) 이 제약은 0 >= -1e-6 이라 항상 참이다.
     # 그런데 PuLP 는 변수가 없는 제약·목적에 `__dummy` 를 끼워 넣는다. 목적식(gradprog)도
