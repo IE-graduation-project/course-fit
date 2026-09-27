@@ -11,7 +11,7 @@ import sys
 
 from . import data, params
 from .explain import build_explanation, format_card
-from .recommend import DEFAULT_PREFERENCE, PREFERENCE_EPS, recommend
+from .recommend import DEFAULT_PREFERENCE, PREFERENCE_AREA_WEIGHT, PREFERENCE_EPS, recommend
 
 
 def main(argv=None) -> int:
@@ -34,6 +34,7 @@ def main(argv=None) -> int:
         rec = recommend(
             args.student, args.job, db_path=args.db,
             U=args.max_credits, L=args.min_credits, alpha=args.alpha, eps=eps, k=args.top_k,
+            area_weight=PREFERENCE_AREA_WEIGHT[args.mode],
         )
     except ValueError as e:
         print(f"ERROR: {e}", file=sys.stderr)

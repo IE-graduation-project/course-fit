@@ -23,6 +23,17 @@ PREFERENCE_EPS = {
 }
 DEFAULT_PREFERENCE = "balanced"
 
+# 성향별 2순위 영역 가중 (#53). ε 만으로는 졸업 우선이 균형과 같은 시간표를 냈다 — 균형에서
+# 이미 담은 학점 전부가 남은 요건에 들어가면(졸업 반영 = 학점 상한) 더 고를 해가 없다.
+# 졸업 우선은 화면 설명(「졸업요건·전공 학점을 먼저 채움」)대로 필수 → 전공 → 나머지 순으로 채운다.
+GRADUATION_AREA_WEIGHT = {"전공필수": 3, "교양필수": 3,
+                          "전공기초": 2, "MSC": 2, "전공선택": 2}
+PREFERENCE_AREA_WEIGHT: dict[str, dict[str, int] | None] = {
+    "gap": None,
+    "balanced": None,
+    "graduation": GRADUATION_AREA_WEIGHT,
+}
+
 
 @dataclass
 class Recommendation:
@@ -44,7 +55,8 @@ class Recommendation:
 
 def recommend(input_hash, job_id, *, db_path=data.DB_PATH, U=18, L=12,
               alpha=params.ALPHA_DEFAULT, eps=0.0, k=3,
-              time_limit: float | None = None) -> Recommendation:
+              time_limit: float | None = None,
+              area_weight: dict[str, int] | None = None) -> Recommendation:
     """파라미터 사전계산(σ/gap/Score/need) → 2단계 ILP(top-k) → Recommendation.
 
     dept/입학년도는 student 테이블에서 읽으므로 인자로 받지 않는다.
@@ -77,7 +89,7 @@ def recommend(input_hash, job_id, *, db_path=data.DB_PATH, U=18, L=12,
         U=U, L=L,
         taken_ids=student.taken_ids,
         passed_ids=set(student.passed.keys()),
-        eps=eps, k=k, time_limit=time_limit,
+        eps=eps, k=k, time_limit=time_limit, area_weight=area_weight,
     )
     return Recommendation(
         results=results, sigma=sigma, gap=gap, need=need,
