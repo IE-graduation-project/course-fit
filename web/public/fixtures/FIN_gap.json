@@ -301,22 +301,22 @@
         },
         {
           "courseId": "313106",
-          "section": "2",
+          "section": "3",
           "name": "원가회계",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            66,
-            67,
-            68
+            37,
+            38,
+            39
           ],
           "slotsHuman": [
-            "금2",
-            "금3",
-            "금4"
+            "수5",
+            "수6",
+            "수7"
           ],
-          "professor": "황진아",
-          "timeRaw": "금234",
+          "professor": "이윤기",
+          "timeRaw": "수567",
           "offeringDept": "경영학전공",
           "category": "전선",
           "score": 0.0358,
@@ -520,22 +520,22 @@
         },
         {
           "courseId": "313106",
-          "section": "3",
+          "section": "2",
           "name": "원가회계",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            37,
-            38,
-            39
+            66,
+            67,
+            68
           ],
           "slotsHuman": [
-            "수5",
-            "수6",
-            "수7"
+            "금2",
+            "금3",
+            "금4"
           ],
-          "professor": "이윤기",
-          "timeRaw": "수567",
+          "professor": "황진아",
+          "timeRaw": "금234",
           "offeringDept": "경영학전공",
           "category": "전선",
           "score": 0.0358,

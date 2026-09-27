@@ -321,22 +321,22 @@
         },
         {
           "courseId": "311419",
-          "section": "1",
+          "section": "2",
           "name": "마케팅트렌드",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            18,
-            19,
-            20
+            22,
+            23,
+            24
           ],
           "slotsHuman": [
-            "화2",
-            "화3",
-            "화4"
+            "화6",
+            "화7",
+            "화8"
           ],
           "professor": "이준환",
-          "timeRaw": "화234",
+          "timeRaw": "화678",
           "offeringDept": "경영학전공",
           "category": "전선",
           "score": 0.0428,
@@ -526,22 +526,22 @@
         },
         {
           "courseId": "311419",
-          "section": "2",
+          "section": "1",
           "name": "마케팅트렌드",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            22,
-            23,
-            24
+            18,
+            19,
+            20
           ],
           "slotsHuman": [
-            "화6",
-            "화7",
-            "화8"
+            "화2",
+            "화3",
+            "화4"
           ],
           "professor": "이준환",
-          "timeRaw": "화678",
+          "timeRaw": "화234",
           "offeringDept": "경영학전공",
           "category": "전선",
           "score": 0.0428,

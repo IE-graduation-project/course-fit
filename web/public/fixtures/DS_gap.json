@@ -294,22 +294,22 @@
         },
         {
           "courseId": "311806",
-          "section": "2",
+          "section": "4",
           "name": "경영정보시스템",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            38,
-            39,
-            40
+            50,
+            51,
+            52
           ],
           "slotsHuman": [
-            "수6",
-            "수7",
-            "수8"
+            "목2",
+            "목3",
+            "목4"
           ],
-          "professor": "남호헌",
-          "timeRaw": "수678",
+          "professor": "김범열",
+          "timeRaw": "목234",
           "offeringDept": "경영학전공",
           "category": "전선",
           "score": 0.0912,
@@ -503,22 +503,22 @@
         },
         {
           "courseId": "311806",
-          "section": "4",
+          "section": "2",
           "name": "경영정보시스템",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            50,
-            51,
-            52
+            38,
+            39,
+            40
           ],
           "slotsHuman": [
-            "목2",
-            "목3",
-            "목4"
+            "수6",
+            "수7",
+            "수8"
           ],
-          "professor": "김범열",
-          "timeRaw": "목234",
+          "professor": "남호헌",
+          "timeRaw": "수678",
           "offeringDept": "경영학전공",
           "category": "전선",
           "score": 0.0912,
