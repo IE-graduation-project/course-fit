@@ -739,22 +739,22 @@
         },
         {
           "courseId": "311606",
-          "section": "2",
+          "section": "1",
           "name": "기업경영과세무",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            38,
-            39,
-            40
+            34,
+            35,
+            36
           ],
           "slotsHuman": [
-            "수6",
-            "수7",
-            "수8"
+            "수2",
+            "수3",
+            "수4"
           ],
           "professor": "윤재원1",
-          "timeRaw": "수678",
+          "timeRaw": "수234",
           "offeringDept": "경영학전공",
           "category": "전선",
           "score": 0.0345,

@@ -239,22 +239,22 @@
         },
         {
           "courseId": "311806",
-          "section": "2",
+          "section": "1",
           "name": "경영정보시스템",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            38,
-            39,
-            40
+            34,
+            35,
+            36
           ],
           "slotsHuman": [
-            "수6",
-            "수7",
-            "수8"
+            "수2",
+            "수3",
+            "수4"
           ],
           "professor": "남호헌",
-          "timeRaw": "수678",
+          "timeRaw": "수234",
           "offeringDept": "경영학전공",
           "category": "전선",
           "score": 0.2205,
@@ -353,22 +353,22 @@
         },
         {
           "courseId": "311620",
-          "section": "1",
+          "section": "2",
           "name": "전략경영세미나",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            22,
-            23,
-            24
+            27,
+            28,
+            29
           ],
           "slotsHuman": [
-            "화6",
-            "화7",
-            "화8"
+            "화11",
+            "화12",
+            "화13"
           ],
           "professor": "신형덕",
-          "timeRaw": "화678",
+          "timeRaw": "화111213",
           "offeringDept": "경영학전공",
           "category": "전선",
           "score": 0.0714,
@@ -476,22 +476,22 @@
         },
         {
           "courseId": "311806",
-          "section": "4",
+          "section": "1",
           "name": "경영정보시스템",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            50,
-            51,
-            52
+            34,
+            35,
+            36
           ],
           "slotsHuman": [
-            "목2",
-            "목3",
-            "목4"
+            "수2",
+            "수3",
+            "수4"
           ],
-          "professor": "김범열",
-          "timeRaw": "목234",
+          "professor": "남호헌",
+          "timeRaw": "수234",
           "offeringDept": "경영학전공",
           "category": "전선",
           "score": 0.2205,
@@ -516,22 +516,22 @@
         },
         {
           "courseId": "311622",
-          "section": "2",
+          "section": "3",
           "name": "비즈니스프로그래밍II",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            70,
-            71,
-            72
+            50,
+            51,
+            52
           ],
           "slotsHuman": [
-            "금6",
-            "금7",
-            "금8"
+            "목2",
+            "목3",
+            "목4"
           ],
           "professor": "이가현",
-          "timeRaw": "금678",
+          "timeRaw": "목234",
           "offeringDept": "경영학전공",
           "category": "전선",
           "score": 0.1107,
@@ -713,22 +713,22 @@
         },
         {
           "courseId": "311806",
-          "section": "4",
+          "section": "1",
           "name": "경영정보시스템",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            50,
-            51,
-            52
+            34,
+            35,
+            36
           ],
           "slotsHuman": [
-            "목2",
-            "목3",
-            "목4"
+            "수2",
+            "수3",
+            "수4"
           ],
-          "professor": "김범열",
-          "timeRaw": "목234",
+          "professor": "남호헌",
+          "timeRaw": "수234",
           "offeringDept": "경영학전공",
           "category": "전선",
           "score": 0.2205,
@@ -753,22 +753,22 @@
         },
         {
           "courseId": "311622",
-          "section": "2",
+          "section": "1",
           "name": "비즈니스프로그래밍II",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            70,
-            71,
-            72
+            66,
+            67,
+            68
           ],
           "slotsHuman": [
-            "금6",
-            "금7",
-            "금8"
+            "금2",
+            "금3",
+            "금4"
           ],
           "professor": "이가현",
-          "timeRaw": "금678",
+          "timeRaw": "금234",
           "offeringDept": "경영학전공",
           "category": "전선",
           "score": 0.1107,
@@ -827,22 +827,22 @@
         },
         {
           "courseId": "311620",
-          "section": "2",
+          "section": "1",
           "name": "전략경영세미나",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            27,
-            28,
-            29
+            22,
+            23,
+            24
           ],
           "slotsHuman": [
-            "화11",
-            "화12",
-            "화13"
+            "화6",
+            "화7",
+            "화8"
           ],
           "professor": "신형덕",
-          "timeRaw": "화111213",
+          "timeRaw": "화678",
           "offeringDept": "경영학전공",
           "category": "전선",
           "score": 0.0714,

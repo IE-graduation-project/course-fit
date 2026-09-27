@@ -185,22 +185,22 @@
         },
         {
           "courseId": "002177",
-          "section": "2",
+          "section": "1",
           "name": "마케팅의이해",
           "credit": 3,
           "area": "공통교양",
           "slots": [
-            34,
-            35,
-            36
+            70,
+            71,
+            72
           ],
           "slotsHuman": [
-            "수2",
-            "수3",
-            "수4"
+            "금6",
+            "금7",
+            "금8"
           ],
-          "professor": "정호진",
-          "timeRaw": "수234",
+          "professor": "윤나라",
+          "timeRaw": "금678",
           "offeringDept": "경영학전공",
           "category": "교선\n사회와경제",
           "score": 0.0551,
@@ -219,22 +219,22 @@
         },
         {
           "courseId": "311610",
-          "section": "2",
+          "section": "3",
           "name": "소비자행동",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            38,
-            39,
-            40
+            50,
+            51,
+            52
           ],
           "slotsHuman": [
-            "수6",
-            "수7",
-            "수8"
+            "목2",
+            "목3",
+            "목4"
           ],
-          "professor": "Yoon-Na Cho",
-          "timeRaw": "수678",
+          "professor": "채보연",
+          "timeRaw": "목234",
           "offeringDept": "경영학전공",
           "category": "전선",
           "score": 0.0506,
@@ -390,22 +390,22 @@
         },
         {
           "courseId": "002177",
-          "section": "2",
+          "section": "3",
           "name": "마케팅의이해",
           "credit": 3,
           "area": "공통교양",
           "slots": [
-            34,
-            35,
-            36
+            38,
+            39,
+            40
           ],
           "slotsHuman": [
-            "수2",
-            "수3",
-            "수4"
+            "수6",
+            "수7",
+            "수8"
           ],
           "professor": "정호진",
-          "timeRaw": "수234",
+          "timeRaw": "수678",
           "offeringDept": "경영학전공",
           "category": "교선\n사회와경제",
           "score": 0.0551,
@@ -629,22 +629,22 @@
         },
         {
           "courseId": "311610",
-          "section": "1",
+          "section": "2",
           "name": "소비자행동",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            34,
-            35,
-            36
+            38,
+            39,
+            40
           ],
           "slotsHuman": [
-            "수2",
-            "수3",
-            "수4"
+            "수6",
+            "수7",
+            "수8"
           ],
           "professor": "Yoon-Na Cho",
-          "timeRaw": "수234",
+          "timeRaw": "수678",
           "offeringDept": "경영학전공",
           "category": "전선",
           "score": 0.0506,
@@ -663,22 +663,22 @@
         },
         {
           "courseId": "311419",
-          "section": "1",
+          "section": "3",
           "name": "마케팅트렌드",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            18,
-            19,
-            20
+            34,
+            35,
+            36
           ],
           "slotsHuman": [
-            "화2",
-            "화3",
-            "화4"
+            "수2",
+            "수3",
+            "수4"
           ],
           "professor": "이준환",
-          "timeRaw": "화234",
+          "timeRaw": "수234",
           "offeringDept": "경영학전공",
           "category": "전선",
           "score": 0.0428,
@@ -731,22 +731,22 @@
         },
         {
           "courseId": "311617",
-          "section": "2",
+          "section": "1",
           "name": "서비스경영",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            6,
-            7,
-            8
+            2,
+            3,
+            4
           ],
           "slotsHuman": [
-            "월6",
-            "월7",
-            "월8"
+            "월2",
+            "월3",
+            "월4"
           ],
           "professor": "정연봉",
-          "timeRaw": "월678",
+          "timeRaw": "월234",
           "offeringDept": "경영학전공",
           "category": "전선",
           "score": 0.0394,

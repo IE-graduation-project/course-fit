@@ -301,22 +301,22 @@
         },
         {
           "courseId": "311622",
-          "section": "2",
+          "section": "1",
           "name": "비즈니스프로그래밍II",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            70,
-            71,
-            72
+            66,
+            67,
+            68
           ],
           "slotsHuman": [
-            "금6",
-            "금7",
-            "금8"
+            "금2",
+            "금3",
+            "금4"
           ],
           "professor": "이가현",
-          "timeRaw": "금678",
+          "timeRaw": "금234",
           "offeringDept": "경영학전공",
           "category": "전선",
           "score": 0.1703,
@@ -532,22 +532,22 @@
         },
         {
           "courseId": "311622",
-          "section": "1",
+          "section": "2",
           "name": "비즈니스프로그래밍II",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            66,
-            67,
-            68
+            70,
+            71,
+            72
           ],
           "slotsHuman": [
-            "금2",
-            "금3",
-            "금4"
+            "금6",
+            "금7",
+            "금8"
           ],
           "professor": "이가현",
-          "timeRaw": "금234",
+          "timeRaw": "금678",
           "offeringDept": "경영학전공",
           "category": "전선",
           "score": 0.1703,

@@ -319,22 +319,22 @@
         },
         {
           "courseId": "012313",
-          "section": "12",
+          "section": "5",
           "name": "MATLAB프로그래밍및실습",
           "credit": 3,
           "area": "공통교양",
           "slots": [
-            2,
-            3,
-            4
+            68,
+            69,
+            70
           ],
           "slotsHuman": [
-            "월2",
-            "월3",
-            "월4"
+            "금4",
+            "금5",
+            "금6"
           ],
-          "professor": "정승환2",
-          "timeRaw": "월234",
+          "professor": "김영호",
+          "timeRaw": "금456",
           "offeringDept": "기계ㆍ시스템디자인공학과",
           "category": "일선",
           "score": 0.1781,
@@ -713,22 +713,22 @@
         },
         {
           "courseId": "311806",
-          "section": "4",
+          "section": "2",
           "name": "경영정보시스템",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            50,
-            51,
-            52
+            38,
+            39,
+            40
           ],
           "slotsHuman": [
-            "목2",
-            "목3",
-            "목4"
+            "수6",
+            "수7",
+            "수8"
           ],
-          "professor": "김범열",
-          "timeRaw": "목234",
+          "professor": "남호헌",
+          "timeRaw": "수678",
           "offeringDept": "경영학전공",
           "category": "전선",
           "score": 0.2205,
@@ -793,22 +793,22 @@
         },
         {
           "courseId": "012313",
-          "section": "12",
+          "section": "13",
           "name": "MATLAB프로그래밍및실습",
           "credit": 3,
           "area": "공통교양",
           "slots": [
-            2,
-            3,
-            4
+            6,
+            7,
+            8
           ],
           "slotsHuman": [
-            "월2",
-            "월3",
-            "월4"
+            "월6",
+            "월7",
+            "월8"
           ],
           "professor": "정승환2",
-          "timeRaw": "월234",
+          "timeRaw": "월678",
           "offeringDept": "기계ㆍ시스템디자인공학과",
           "category": "일선",
           "score": 0.1781,
@@ -827,22 +827,22 @@
         },
         {
           "courseId": "002534",
-          "section": "1",
+          "section": "2",
           "name": "컴퓨터활용기초",
           "credit": 3,
           "area": "공통교양",
           "slots": [
-            22,
-            23,
-            24
+            50,
+            51,
+            52
           ],
           "slotsHuman": [
-            "화6",
-            "화7",
-            "화8"
+            "목2",
+            "목3",
+            "목4"
           ],
-          "professor": "함채원",
-          "timeRaw": "화678",
+          "professor": "박만희",
+          "timeRaw": "목234",
           "offeringDept": "교양과(서울)",
           "category": "교선\n과학과컴퓨터",
           "score": 0.155,

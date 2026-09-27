@@ -234,22 +234,22 @@
         },
         {
           "courseId": "311806",
-          "section": "4",
+          "section": "2",
           "name": "경영정보시스템",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            50,
-            51,
-            52
+            38,
+            39,
+            40
           ],
           "slotsHuman": [
-            "목2",
-            "목3",
-            "목4"
+            "수6",
+            "수7",
+            "수8"
           ],
-          "professor": "김범열",
-          "timeRaw": "목234",
+          "professor": "남호헌",
+          "timeRaw": "수678",
           "offeringDept": "경영학전공",
           "category": "전선",
           "score": 0.0912,
@@ -268,22 +268,22 @@
         },
         {
           "courseId": "001023",
-          "section": "53",
+          "section": "18",
           "name": "대학영어",
           "credit": 3,
           "area": "교양필수",
           "slots": [
-            21,
-            22,
-            57
+            4,
+            5,
+            50
           ],
           "slotsHuman": [
-            "화5",
-            "화6",
-            "목9"
+            "월4",
+            "월5",
+            "목2"
           ],
-          "professor": "Matthew C.Watterson",
-          "timeRaw": "화56,목9",
+          "professor": "Carmen A. Cheers",
+          "timeRaw": "월45,목2",
           "offeringDept": "교양과(서울)",
           "category": "교필",
           "score": 0.0619,
@@ -302,22 +302,22 @@
         },
         {
           "courseId": "311419",
-          "section": "1",
+          "section": "2",
           "name": "마케팅트렌드",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            18,
-            19,
-            20
+            22,
+            23,
+            24
           ],
           "slotsHuman": [
-            "화2",
-            "화3",
-            "화4"
+            "화6",
+            "화7",
+            "화8"
           ],
           "professor": "이준환",
-          "timeRaw": "화234",
+          "timeRaw": "화678",
           "offeringDept": "경영학전공",
           "category": "전선",
           "score": 0.0587,
@@ -459,22 +459,22 @@
         },
         {
           "courseId": "311806",
-          "section": "4",
+          "section": "2",
           "name": "경영정보시스템",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            50,
-            51,
-            52
+            38,
+            39,
+            40
           ],
           "slotsHuman": [
-            "목2",
-            "목3",
-            "목4"
+            "수6",
+            "수7",
+            "수8"
           ],
-          "professor": "김범열",
-          "timeRaw": "목234",
+          "professor": "남호헌",
+          "timeRaw": "수678",
           "offeringDept": "경영학전공",
           "category": "전선",
           "score": 0.0912,
@@ -493,22 +493,22 @@
         },
         {
           "courseId": "001023",
-          "section": "53",
+          "section": "44",
           "name": "대학영어",
           "credit": 3,
           "area": "교양필수",
           "slots": [
-            21,
-            22,
-            57
+            5,
+            6,
+            52
           ],
           "slotsHuman": [
-            "화5",
-            "화6",
-            "목9"
+            "월5",
+            "월6",
+            "목4"
           ],
-          "professor": "Matthew C.Watterson",
-          "timeRaw": "화56,목9",
+          "professor": "Jeff T. Vandeweerd",
+          "timeRaw": "월56,목4",
           "offeringDept": "교양과(서울)",
           "category": "교필",
           "score": 0.0619,
@@ -527,22 +527,22 @@
         },
         {
           "courseId": "311419",
-          "section": "1",
+          "section": "2",
           "name": "마케팅트렌드",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            18,
-            19,
-            20
+            22,
+            23,
+            24
           ],
           "slotsHuman": [
-            "화2",
-            "화3",
-            "화4"
+            "화6",
+            "화7",
+            "화8"
           ],
           "professor": "이준환",
-          "timeRaw": "화234",
+          "timeRaw": "화678",
           "offeringDept": "경영학전공",
           "category": "전선",
           "score": 0.0587,
@@ -718,22 +718,22 @@
         },
         {
           "courseId": "001023",
-          "section": "75",
+          "section": "45",
           "name": "대학영어",
           "credit": 3,
           "area": "교양필수",
           "slots": [
-            19,
-            20,
-            72
+            7,
+            8,
+            53
           ],
           "slotsHuman": [
-            "화3",
-            "화4",
-            "금8"
+            "월7",
+            "월8",
+            "목5"
           ],
-          "professor": "Richard Wright",
-          "timeRaw": "화34,금8",
+          "professor": "Jeff T. Vandeweerd",
+          "timeRaw": "월78,목5",
           "offeringDept": "교양과(서울)",
           "category": "교필",
           "score": 0.0619,
@@ -752,22 +752,22 @@
         },
         {
           "courseId": "311419",
-          "section": "2",
+          "section": "1",
           "name": "마케팅트렌드",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            22,
-            23,
-            24
+            18,
+            19,
+            20
           ],
           "slotsHuman": [
-            "화6",
-            "화7",
-            "화8"
+            "화2",
+            "화3",
+            "화4"
           ],
           "professor": "이준환",
-          "timeRaw": "화678",
+          "timeRaw": "화234",
           "offeringDept": "경영학전공",
           "category": "전선",
           "score": 0.0587,
