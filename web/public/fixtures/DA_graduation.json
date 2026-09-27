@@ -2,38 +2,39 @@
   "student": {
     "deptId": "BIZ",
     "admissionYear": 2022,
-    "requirementYear": 2022
+    "requirementYear": 2022,
+    "gradeLevel": 4
   },
   "fitByJob": [
     {
       "job": "DA",
       "name": "데이터 분석가",
-      "fit": 92.3
+      "fit": 87.8
     },
     {
       "job": "DE",
       "name": "데이터 엔지니어",
-      "fit": 87.7
+      "fit": 85.2
     },
     {
       "job": "DS",
       "name": "데이터 사이언티스트",
-      "fit": 96.5
+      "fit": 93.9
     },
     {
       "job": "FIN",
       "name": "재무 분석가",
-      "fit": 96.9
+      "fit": 98.1
     },
     {
       "job": "MKT",
       "name": "마케팅 매니저",
-      "fit": 97.8
+      "fit": 97.1
     },
     {
       "job": "PM",
       "name": "프로덕트 매니저",
-      "fit": 99.8
+      "fit": 99.7
     }
   ],
   "job": {
@@ -50,16 +51,16 @@
   },
   "diagnosis": {
     "sigma": {
-      "BIZ": 0.9957,
-      "COMM": 0.9824,
-      "DATA": 0.9289,
-      "DB": 0.6352,
-      "FIN": 0.9194,
-      "MKT": 0.9448,
-      "ML": 0.9033,
-      "OR": 0.9003,
-      "PROG": 0.8662,
-      "VIZ": 0.8286
+      "BIZ": 0.9927,
+      "COMM": 0.8614,
+      "DATA": 0.896,
+      "DB": 0.5617,
+      "FIN": 0.9506,
+      "MKT": 0.927,
+      "ML": 0.8282,
+      "OR": 0.8571,
+      "PROG": 0.79,
+      "VIZ": 0.7126
     },
     "rho": {
       "BIZ": 0.9484,
@@ -76,312 +77,136 @@
     "gap": {
       "BIZ": 0.0,
       "COMM": 0.0,
-      "DATA": 0.0247,
-      "DB": 0.1977,
+      "DATA": 0.0576,
+      "DB": 0.2712,
       "FIN": 0.0,
       "MKT": 0.0,
       "ML": 0.0,
       "OR": 0.0,
       "PROG": 0.0,
-      "VIZ": 0.1714
+      "VIZ": 0.2874
     },
     "strengths": [
       {
         "comp": "BIZ",
         "compKo": "비즈니스",
-        "sigma": 0.9957
-      },
-      {
-        "comp": "COMM",
-        "compKo": "커뮤니케이션",
-        "sigma": 0.9824
-      },
-      {
-        "comp": "MKT",
-        "compKo": "마케팅",
-        "sigma": 0.9448
-      },
-      {
-        "comp": "DATA",
-        "compKo": "데이터분석",
-        "sigma": 0.9289
+        "sigma": 0.9927
       },
       {
         "comp": "FIN",
         "compKo": "재무",
-        "sigma": 0.9194
+        "sigma": 0.9506
       },
       {
-        "comp": "ML",
-        "compKo": "머신러닝",
-        "sigma": 0.9033
+        "comp": "MKT",
+        "compKo": "마케팅",
+        "sigma": 0.927
+      },
+      {
+        "comp": "COMM",
+        "compKo": "커뮤니케이션",
+        "sigma": 0.8614
       },
       {
         "comp": "OR",
         "compKo": "최적화",
-        "sigma": 0.9003
+        "sigma": 0.8571
+      },
+      {
+        "comp": "ML",
+        "compKo": "머신러닝",
+        "sigma": 0.8282
       },
       {
         "comp": "PROG",
         "compKo": "프로그래밍",
-        "sigma": 0.8662
+        "sigma": 0.79
       }
     ],
     "gaps": [
       {
-        "comp": "DB",
-        "compKo": "데이터베이스",
-        "gap": 0.1977
-      },
-      {
         "comp": "VIZ",
         "compKo": "데이터시각화",
-        "gap": 0.1714
+        "gap": 0.2874
+      },
+      {
+        "comp": "DB",
+        "compKo": "데이터베이스",
+        "gap": 0.2712
+      },
+      {
+        "comp": "DATA",
+        "compKo": "데이터분석",
+        "gap": 0.0576
       }
     ]
   },
   "need": {
     "SW데이터활용역량": 9,
+    "공통교양": 7,
+    "교양필수": 3,
+    "전공기초영어": 2,
     "전공선택": 12,
-    "전공필수": 3,
     "특성화교양": 3
   },
   "timetables": [
     {
       "rank": 1,
-      "careerfit": 0.4658,
-      "gradProgress": 12.0,
+      "careerfit": 0.9715,
+      "gradProgress": 18.0,
       "totalCredit": 18,
       "status": "Optimal",
       "courses": [
         {
-          "courseId": "311317",
+          "courseId": "002658",
           "section": "1",
-          "name": "IT와경영",
+          "name": "데이터시각화와스토리텔링",
           "credit": 3,
-          "area": "전공선택",
+          "area": "공통교양",
           "slots": [
-            18,
-            19,
-            20
+            54,
+            55,
+            56
           ],
           "slotsHuman": [
-            "화2",
-            "화3",
-            "화4"
+            "목6",
+            "목7",
+            "목8"
           ],
-          "professor": "안형준",
-          "timeRaw": "화234",
-          "offeringDept": "경영학전공",
-          "category": "전선",
-          "score": 0.0574,
+          "professor": "박상준",
+          "timeRaw": "목678",
+          "offeringDept": "교양과(서울)",
+          "category": "교선",
+          "score": 0.1632,
           "careerReason": [
-            {
-              "comp": "DB",
-              "compKo": "데이터베이스",
-              "value": 0.0502,
-              "share": 0.8745
-            },
             {
               "comp": "VIZ",
               "compKo": "데이터시각화",
+              "value": 0.1371,
+              "share": 0.84
+            },
+            {
+              "comp": "DB",
+              "compKo": "데이터베이스",
+              "value": 0.0195,
+              "share": 0.1197
+            },
+            {
+              "comp": "DATA",
+              "compKo": "데이터분석",
               "value": 0.0066,
-              "share": 0.1148
-            },
-            {
-              "comp": "DATA",
-              "compKo": "데이터분석",
-              "value": 0.0006,
-              "share": 0.0107
-            }
-          ],
-          "gradReason": {
-            "area": "전공선택",
-            "remaining": 12
-          }
-        },
-        {
-          "courseId": "002653",
-          "section": "1",
-          "name": "언어와빅데이터",
-          "credit": 3,
-          "area": "공통교양",
-          "slots": [
-            34,
-            35,
-            36
-          ],
-          "slotsHuman": [
-            "수2",
-            "수3",
-            "수4"
-          ],
-          "professor": "임동식1",
-          "timeRaw": "수234",
-          "offeringDept": "교양과(서울)",
-          "category": "교선",
-          "score": 0.0542,
-          "careerReason": [
-            {
-              "comp": "DB",
-              "compKo": "데이터베이스",
-              "value": 0.038,
-              "share": 0.7019
-            },
-            {
-              "comp": "VIZ",
-              "compKo": "데이터시각화",
-              "value": 0.0116,
-              "share": 0.2143
-            },
-            {
-              "comp": "DATA",
-              "compKo": "데이터분석",
-              "value": 0.0045,
-              "share": 0.0837
+              "share": 0.0404
             }
           ],
           "gradReason": {
             "area": "공통교양",
-            "remaining": 0
+            "remaining": 7
           }
         },
         {
-          "courseId": "311712",
+          "courseId": "311622",
           "section": "1",
-          "name": "파생상품론",
-          "credit": 3,
-          "area": "전공선택",
-          "slots": [
-            38,
-            39,
-            40
-          ],
-          "slotsHuman": [
-            "수6",
-            "수7",
-            "수8"
-          ],
-          "professor": "고경연",
-          "timeRaw": "수678",
-          "offeringDept": "경영학전공",
-          "category": "전선",
-          "score": 0.0149,
-          "careerReason": [
-            {
-              "comp": "VIZ",
-              "compKo": "데이터시각화",
-              "value": 0.0077,
-              "share": 0.5127
-            },
-            {
-              "comp": "DB",
-              "compKo": "데이터베이스",
-              "value": 0.0058,
-              "share": 0.3861
-            },
-            {
-              "comp": "DATA",
-              "compKo": "데이터분석",
-              "value": 0.0015,
-              "share": 0.1012
-            }
-          ],
-          "gradReason": {
-            "area": "전공선택",
-            "remaining": 12
-          }
-        },
-        {
-          "courseId": "311520",
-          "section": "1",
-          "name": "지속가능경영",
-          "credit": 3,
-          "area": "전공선택",
-          "slots": [
-            7,
-            8,
-            9
-          ],
-          "slotsHuman": [
-            "월7",
-            "월8",
-            "월9"
-          ],
-          "professor": "현은정",
-          "timeRaw": "월789",
-          "offeringDept": "경영학전공",
-          "category": "전선",
-          "score": 0.0119,
-          "careerReason": [
-            {
-              "comp": "VIZ",
-              "compKo": "데이터시각화",
-              "value": 0.0079,
-              "share": 0.6647
-            },
-            {
-              "comp": "DB",
-              "compKo": "데이터베이스",
-              "value": 0.003,
-              "share": 0.2533
-            },
-            {
-              "comp": "DATA",
-              "compKo": "데이터분석",
-              "value": 0.001,
-              "share": 0.0819
-            }
-          ],
-          "gradReason": {
-            "area": "전공선택",
-            "remaining": 12
-          }
-        },
-        {
-          "courseId": "002151",
-          "section": "1",
-          "name": "광고의이해",
-          "credit": 3,
-          "area": "공통교양",
-          "slots": [
-            50,
-            51,
-            52
-          ],
-          "slotsHuman": [
-            "목2",
-            "목3",
-            "목4"
-          ],
-          "professor": "이승연1",
-          "timeRaw": "목234",
-          "offeringDept": "교양과(서울)",
-          "category": "교선",
-          "score": 0.0095,
-          "careerReason": [
-            {
-              "comp": "VIZ",
-              "compKo": "데이터시각화",
-              "value": 0.0083,
-              "share": 0.8735
-            },
-            {
-              "comp": "DATA",
-              "compKo": "데이터분석",
-              "value": 0.0012,
-              "share": 0.1265
-            }
-          ],
-          "gradReason": {
-            "area": "공통교양",
-            "remaining": 0
-          }
-        },
-        {
-          "courseId": "311716",
-          "section": "4",
-          "name": "문화예술경영",
+          "name": "비즈니스프로그래밍II",
           "credit": 3,
           "area": "전공선택",
           "slots": [
@@ -394,141 +219,215 @@
             "금3",
             "금4"
           ],
-          "professor": "권지연",
+          "professor": "이가현",
           "timeRaw": "금234",
           "offeringDept": "경영학전공",
           "category": "전선",
-          "score": 0.0073,
+          "score": 0.0564,
           "careerReason": [
-            {
-              "comp": "VIZ",
-              "compKo": "데이터시각화",
-              "value": 0.0036,
-              "share": 0.4975
-            },
             {
               "comp": "DB",
               "compKo": "데이터베이스",
-              "value": 0.0021,
-              "share": 0.2805
+              "value": 0.0361,
+              "share": 0.6397
+            },
+            {
+              "comp": "VIZ",
+              "compKo": "데이터시각화",
+              "value": 0.0153,
+              "share": 0.2715
             },
             {
               "comp": "DATA",
               "compKo": "데이터분석",
-              "value": 0.0016,
-              "share": 0.222
+              "value": 0.005,
+              "share": 0.0888
             }
           ],
           "gradReason": {
             "area": "전공선택",
             "remaining": 12
+          }
+        },
+        {
+          "courseId": "313106",
+          "section": "3",
+          "name": "원가회계",
+          "credit": 3,
+          "area": "전공선택",
+          "slots": [
+            37,
+            38,
+            39
+          ],
+          "slotsHuman": [
+            "수5",
+            "수6",
+            "수7"
+          ],
+          "professor": "이윤기",
+          "timeRaw": "수567",
+          "offeringDept": "경영학전공",
+          "category": "전선",
+          "score": 0.0399,
+          "careerReason": [
+            {
+              "comp": "VIZ",
+              "compKo": "데이터시각화",
+              "value": 0.0198,
+              "share": 0.4951
+            },
+            {
+              "comp": "DB",
+              "compKo": "데이터베이스",
+              "value": 0.0148,
+              "share": 0.3696
+            },
+            {
+              "comp": "DATA",
+              "compKo": "데이터분석",
+              "value": 0.0054,
+              "share": 0.1352
+            }
+          ],
+          "gradReason": {
+            "area": "전공선택",
+            "remaining": 12
+          }
+        },
+        {
+          "courseId": "002641",
+          "section": "1",
+          "name": "체험인공지능",
+          "credit": 3,
+          "area": "공통교양",
+          "slots": [],
+          "slotsHuman": [],
+          "professor": "김혜진4",
+          "timeRaw": null,
+          "offeringDept": "전자·전기공학부",
+          "category": "교선",
+          "score": 0.0303,
+          "careerReason": [
+            {
+              "comp": "DB",
+              "compKo": "데이터베이스",
+              "value": 0.0163,
+              "share": 0.5396
+            },
+            {
+              "comp": "VIZ",
+              "compKo": "데이터시각화",
+              "value": 0.0085,
+              "share": 0.2811
+            },
+            {
+              "comp": "DATA",
+              "compKo": "데이터분석",
+              "value": 0.0054,
+              "share": 0.1792
+            }
+          ],
+          "gradReason": {
+            "area": "공통교양",
+            "remaining": 7
+          }
+        },
+        {
+          "courseId": "311417",
+          "section": "1",
+          "name": "비즈니스중국어",
+          "credit": 3,
+          "area": "전공선택",
+          "slots": [
+            22,
+            23,
+            24
+          ],
+          "slotsHuman": [
+            "화6",
+            "화7",
+            "화8"
+          ],
+          "professor": "Zheng Zhenmei",
+          "timeRaw": "화678",
+          "offeringDept": "경영학전공",
+          "category": "전선",
+          "score": 0.0189,
+          "careerReason": [
+            {
+              "comp": "VIZ",
+              "compKo": "데이터시각화",
+              "value": 0.0172,
+              "share": 0.9147
+            },
+            {
+              "comp": "DATA",
+              "compKo": "데이터분석",
+              "value": 0.0016,
+              "share": 0.0853
+            }
+          ],
+          "gradReason": {
+            "area": "전공선택",
+            "remaining": 12
+          }
+        },
+        {
+          "courseId": "001014",
+          "section": "1",
+          "name": "논리적사고와글쓰기(법학)",
+          "credit": 3,
+          "area": "교양필수",
+          "slots": [
+            18,
+            19,
+            50,
+            51
+          ],
+          "slotsHuman": [
+            "화2",
+            "화3",
+            "목2",
+            "목3"
+          ],
+          "professor": "안서현",
+          "timeRaw": "화23,목23",
+          "offeringDept": "교양과(서울)",
+          "category": "교필",
+          "score": 0.0152,
+          "careerReason": [
+            {
+              "comp": "VIZ",
+              "compKo": "데이터시각화",
+              "value": 0.0098,
+              "share": 0.6469
+            },
+            {
+              "comp": "DATA",
+              "compKo": "데이터분석",
+              "value": 0.0054,
+              "share": 0.3531
+            }
+          ],
+          "gradReason": {
+            "area": "교양필수",
+            "remaining": 3
           }
         }
       ]
     },
     {
       "rank": 2,
-      "careerfit": 0.4722,
-      "gradProgress": 12.0,
+      "careerfit": 0.8782,
+      "gradProgress": 18.0,
       "totalCredit": 18,
       "status": "Optimal",
       "courses": [
         {
-          "courseId": "311317",
+          "courseId": "311806",
           "section": "1",
-          "name": "IT와경영",
-          "credit": 3,
-          "area": "전공선택",
-          "slots": [
-            18,
-            19,
-            20
-          ],
-          "slotsHuman": [
-            "화2",
-            "화3",
-            "화4"
-          ],
-          "professor": "안형준",
-          "timeRaw": "화234",
-          "offeringDept": "경영학전공",
-          "category": "전선",
-          "score": 0.0574,
-          "careerReason": [
-            {
-              "comp": "DB",
-              "compKo": "데이터베이스",
-              "value": 0.0502,
-              "share": 0.8745
-            },
-            {
-              "comp": "VIZ",
-              "compKo": "데이터시각화",
-              "value": 0.0066,
-              "share": 0.1148
-            },
-            {
-              "comp": "DATA",
-              "compKo": "데이터분석",
-              "value": 0.0006,
-              "share": 0.0107
-            }
-          ],
-          "gradReason": {
-            "area": "전공선택",
-            "remaining": 12
-          }
-        },
-        {
-          "courseId": "002534",
-          "section": "1",
-          "name": "컴퓨터활용기초",
-          "credit": 3,
-          "area": "공통교양",
-          "slots": [
-            3,
-            4,
-            5
-          ],
-          "slotsHuman": [
-            "월3",
-            "월4",
-            "월5"
-          ],
-          "professor": "함채원",
-          "timeRaw": "월345",
-          "offeringDept": "교양과(서울)",
-          "category": "교선\n과학과컴퓨터",
-          "score": 0.0522,
-          "careerReason": [
-            {
-              "comp": "DB",
-              "compKo": "데이터베이스",
-              "value": 0.0367,
-              "share": 0.7035
-            },
-            {
-              "comp": "VIZ",
-              "compKo": "데이터시각화",
-              "value": 0.0142,
-              "share": 0.2722
-            },
-            {
-              "comp": "DATA",
-              "compKo": "데이터분석",
-              "value": 0.0013,
-              "share": 0.0242
-            }
-          ],
-          "gradReason": {
-            "area": "공통교양",
-            "remaining": 0
-          }
-        },
-        {
-          "courseId": "311506",
-          "section": "4",
-          "name": "품질과경영",
+          "name": "경영정보시스템",
           "credit": 3,
           "area": "전공선택",
           "slots": [
@@ -541,29 +440,29 @@
             "수3",
             "수4"
           ],
-          "professor": "조남형",
+          "professor": "남호헌",
           "timeRaw": "수234",
           "offeringDept": "경영학전공",
           "category": "전선",
-          "score": 0.016,
+          "score": 0.0882,
           "careerReason": [
-            {
-              "comp": "VIZ",
-              "compKo": "데이터시각화",
-              "value": 0.0062,
-              "share": 0.3871
-            },
             {
               "comp": "DB",
               "compKo": "데이터베이스",
-              "value": 0.0055,
-              "share": 0.341
+              "value": 0.0675,
+              "share": 0.7654
+            },
+            {
+              "comp": "VIZ",
+              "compKo": "데이터시각화",
+              "value": 0.0169,
+              "share": 0.1911
             },
             {
               "comp": "DATA",
               "compKo": "데이터분석",
-              "value": 0.0044,
-              "share": 0.2719
+              "value": 0.0038,
+              "share": 0.0435
             }
           ],
           "gradReason": {
@@ -572,44 +471,136 @@
           }
         },
         {
-          "courseId": "311712",
+          "courseId": "012313",
           "section": "1",
-          "name": "파생상품론",
+          "name": "MATLAB프로그래밍및실습",
+          "credit": 3,
+          "area": "공통교양",
+          "slots": [
+            22,
+            23,
+            24
+          ],
+          "slotsHuman": [
+            "화6",
+            "화7",
+            "화8"
+          ],
+          "professor": "조수현",
+          "timeRaw": "화678",
+          "offeringDept": "기계ㆍ시스템디자인공학과",
+          "category": "일선",
+          "score": 0.0797,
+          "careerReason": [
+            {
+              "comp": "VIZ",
+              "compKo": "데이터시각화",
+              "value": 0.0594,
+              "share": 0.7456
+            },
+            {
+              "comp": "DB",
+              "compKo": "데이터베이스",
+              "value": 0.0156,
+              "share": 0.1959
+            },
+            {
+              "comp": "DATA",
+              "compKo": "데이터분석",
+              "value": 0.0047,
+              "share": 0.0585
+            }
+          ],
+          "gradReason": {
+            "area": "공통교양",
+            "remaining": 7
+          }
+        },
+        {
+          "courseId": "002654",
+          "section": "1",
+          "name": "통계와코딩",
+          "credit": 3,
+          "area": "공통교양",
+          "slots": [
+            55,
+            56,
+            57
+          ],
+          "slotsHuman": [
+            "목7",
+            "목8",
+            "목9"
+          ],
+          "professor": "정용찬",
+          "timeRaw": "목789",
+          "offeringDept": "교양과(서울)",
+          "category": "교선",
+          "score": 0.0782,
+          "careerReason": [
+            {
+              "comp": "VIZ",
+              "compKo": "데이터시각화",
+              "value": 0.0349,
+              "share": 0.4465
+            },
+            {
+              "comp": "DATA",
+              "compKo": "데이터분석",
+              "value": 0.0261,
+              "share": 0.3334
+            },
+            {
+              "comp": "DB",
+              "compKo": "데이터베이스",
+              "value": 0.0172,
+              "share": 0.2201
+            }
+          ],
+          "gradReason": {
+            "area": "공통교양",
+            "remaining": 7
+          }
+        },
+        {
+          "courseId": "313113",
+          "section": "1",
+          "name": "인사조직세미나",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            38,
-            39,
-            40
+            2,
+            3,
+            4
           ],
           "slotsHuman": [
-            "수6",
-            "수7",
-            "수8"
+            "월2",
+            "월3",
+            "월4"
           ],
-          "professor": "고경연",
-          "timeRaw": "수678",
+          "professor": "김범열",
+          "timeRaw": "월234",
           "offeringDept": "경영학전공",
           "category": "전선",
-          "score": 0.0149,
+          "score": 0.0228,
           "careerReason": [
             {
               "comp": "VIZ",
               "compKo": "데이터시각화",
-              "value": 0.0077,
-              "share": 0.5127
+              "value": 0.0142,
+              "share": 0.6223
             },
             {
               "comp": "DB",
               "compKo": "데이터베이스",
-              "value": 0.0058,
-              "share": 0.3861
+              "value": 0.0052,
+              "share": 0.2283
             },
             {
               "comp": "DATA",
               "compKo": "데이터분석",
-              "value": 0.0015,
-              "share": 0.1012
+              "value": 0.0034,
+              "share": 0.1494
             }
           ],
           "gradReason": {
@@ -618,11 +609,57 @@
           }
         },
         {
-          "courseId": "002151",
+          "courseId": "313105",
           "section": "1",
-          "name": "광고의이해",
+          "name": "미시경제학",
           "credit": 3,
-          "area": "공통교양",
+          "area": "전공선택",
+          "slots": [
+            18,
+            19,
+            20
+          ],
+          "slotsHuman": [
+            "화2",
+            "화3",
+            "화4"
+          ],
+          "professor": "최동걸",
+          "timeRaw": "화234",
+          "offeringDept": "경영학전공",
+          "category": "전선",
+          "score": 0.0154,
+          "careerReason": [
+            {
+              "comp": "VIZ",
+              "compKo": "데이터시각화",
+              "value": 0.0063,
+              "share": 0.4078
+            },
+            {
+              "comp": "DB",
+              "compKo": "데이터베이스",
+              "value": 0.006,
+              "share": 0.3878
+            },
+            {
+              "comp": "DATA",
+              "compKo": "데이터분석",
+              "value": 0.0032,
+              "share": 0.2044
+            }
+          ],
+          "gradReason": {
+            "area": "전공선택",
+            "remaining": 12
+          }
+        },
+        {
+          "courseId": "313103",
+          "section": "1",
+          "name": "기업법",
+          "credit": 3,
+          "area": "전공선택",
           "slots": [
             50,
             51,
@@ -633,69 +670,29 @@
             "목3",
             "목4"
           ],
-          "professor": "이승연1",
+          "professor": "주강원",
           "timeRaw": "목234",
-          "offeringDept": "교양과(서울)",
-          "category": "교선",
-          "score": 0.0095,
-          "careerReason": [
-            {
-              "comp": "VIZ",
-              "compKo": "데이터시각화",
-              "value": 0.0083,
-              "share": 0.8735
-            },
-            {
-              "comp": "DATA",
-              "compKo": "데이터분석",
-              "value": 0.0012,
-              "share": 0.1265
-            }
-          ],
-          "gradReason": {
-            "area": "공통교양",
-            "remaining": 0
-          }
-        },
-        {
-          "courseId": "311716",
-          "section": "1",
-          "name": "문화예술경영",
-          "credit": 3,
-          "area": "전공선택",
-          "slots": [
-            23,
-            24,
-            25
-          ],
-          "slotsHuman": [
-            "화7",
-            "화8",
-            "화9"
-          ],
-          "professor": "김선영6",
-          "timeRaw": "화789",
           "offeringDept": "경영학전공",
           "category": "전선",
-          "score": 0.0073,
+          "score": 0.0084,
           "careerReason": [
-            {
-              "comp": "VIZ",
-              "compKo": "데이터시각화",
-              "value": 0.0036,
-              "share": 0.4975
-            },
             {
               "comp": "DB",
               "compKo": "데이터베이스",
-              "value": 0.0021,
-              "share": 0.2805
+              "value": 0.0048,
+              "share": 0.574
+            },
+            {
+              "comp": "VIZ",
+              "compKo": "데이터시각화",
+              "value": 0.0027,
+              "share": 0.3153
             },
             {
               "comp": "DATA",
               "compKo": "데이터분석",
-              "value": 0.0016,
-              "share": 0.222
+              "value": 0.0009,
+              "share": 0.1107
             }
           ],
           "gradReason": {
@@ -707,105 +704,61 @@
     },
     {
       "rank": 3,
-      "careerfit": 0.3634,
-      "gradProgress": 12.0,
-      "totalCredit": 17,
+      "careerfit": 1.0169,
+      "gradProgress": 18.0,
+      "totalCredit": 18,
       "status": "Optimal",
       "courses": [
         {
-          "courseId": "311317",
+          "courseId": "002618",
           "section": "1",
-          "name": "IT와경영",
+          "name": "빅데이터의이해",
           "credit": 3,
-          "area": "전공선택",
-          "slots": [
-            18,
-            19,
-            20
-          ],
-          "slotsHuman": [
-            "화2",
-            "화3",
-            "화4"
-          ],
-          "professor": "안형준",
-          "timeRaw": "화234",
-          "offeringDept": "경영학전공",
-          "category": "전선",
-          "score": 0.0574,
-          "careerReason": [
-            {
-              "comp": "DB",
-              "compKo": "데이터베이스",
-              "value": 0.0502,
-              "share": 0.8745
-            },
-            {
-              "comp": "VIZ",
-              "compKo": "데이터시각화",
-              "value": 0.0066,
-              "share": 0.1148
-            },
-            {
-              "comp": "DATA",
-              "compKo": "데이터분석",
-              "value": 0.0006,
-              "share": 0.0107
-            }
-          ],
-          "gradReason": {
-            "area": "전공선택",
-            "remaining": 12
-          }
-        },
-        {
-          "courseId": "008761",
-          "section": "2",
-          "name": "실용영어",
-          "credit": 2,
           "area": "공통교양",
           "slots": [
-            7,
-            8
+            41,
+            42,
+            43
           ],
           "slotsHuman": [
-            "월7",
-            "월8"
+            "수9",
+            "수10",
+            "수11"
           ],
-          "professor": "Edward Gray",
-          "timeRaw": "월78",
-          "offeringDept": "교양과(서울)",
+          "professor": "이시영",
+          "timeRaw": "수91011",
+          "offeringDept": "산업공학전공",
           "category": "교선",
-          "score": 0.0239,
+          "score": 0.1193,
           "careerReason": [
-            {
-              "comp": "VIZ",
-              "compKo": "데이터시각화",
-              "value": 0.0171,
-              "share": 0.7162
-            },
             {
               "comp": "DB",
               "compKo": "데이터베이스",
-              "value": 0.0058,
-              "share": 0.2422
+              "value": 0.0771,
+              "share": 0.6465
+            },
+            {
+              "comp": "VIZ",
+              "compKo": "데이터시각화",
+              "value": 0.0319,
+              "share": 0.2676
             },
             {
               "comp": "DATA",
               "compKo": "데이터분석",
-              "value": 0.001,
-              "share": 0.0416
+              "value": 0.0103,
+              "share": 0.0859
             }
           ],
           "gradReason": {
             "area": "공통교양",
-            "remaining": 0
+            "remaining": 7
           }
         },
         {
-          "courseId": "311506",
-          "section": "3",
-          "name": "품질과경영",
+          "courseId": "311806",
+          "section": "1",
+          "name": "경영정보시스템",
           "credit": 3,
           "area": "전공선택",
           "slots": [
@@ -818,29 +771,29 @@
             "수3",
             "수4"
           ],
-          "professor": "이미림1",
+          "professor": "남호헌",
           "timeRaw": "수234",
           "offeringDept": "경영학전공",
           "category": "전선",
-          "score": 0.016,
+          "score": 0.0882,
           "careerReason": [
-            {
-              "comp": "VIZ",
-              "compKo": "데이터시각화",
-              "value": 0.0062,
-              "share": 0.3871
-            },
             {
               "comp": "DB",
               "compKo": "데이터베이스",
-              "value": 0.0055,
-              "share": 0.341
+              "value": 0.0675,
+              "share": 0.7654
+            },
+            {
+              "comp": "VIZ",
+              "compKo": "데이터시각화",
+              "value": 0.0169,
+              "share": 0.1911
             },
             {
               "comp": "DATA",
               "compKo": "데이터분석",
-              "value": 0.0044,
-              "share": 0.2719
+              "value": 0.0038,
+              "share": 0.0435
             }
           ],
           "gradReason": {
@@ -849,9 +802,55 @@
           }
         },
         {
-          "courseId": "311712",
+          "courseId": "002654",
           "section": "1",
-          "name": "파생상품론",
+          "name": "통계와코딩",
+          "credit": 3,
+          "area": "공통교양",
+          "slots": [
+            55,
+            56,
+            57
+          ],
+          "slotsHuman": [
+            "목7",
+            "목8",
+            "목9"
+          ],
+          "professor": "정용찬",
+          "timeRaw": "목789",
+          "offeringDept": "교양과(서울)",
+          "category": "교선",
+          "score": 0.0782,
+          "careerReason": [
+            {
+              "comp": "VIZ",
+              "compKo": "데이터시각화",
+              "value": 0.0349,
+              "share": 0.4465
+            },
+            {
+              "comp": "DATA",
+              "compKo": "데이터분석",
+              "value": 0.0261,
+              "share": 0.3334
+            },
+            {
+              "comp": "DB",
+              "compKo": "데이터베이스",
+              "value": 0.0172,
+              "share": 0.2201
+            }
+          ],
+          "gradReason": {
+            "area": "공통교양",
+            "remaining": 7
+          }
+        },
+        {
+          "courseId": "311420",
+          "section": "3",
+          "name": "FinanceII",
           "credit": 3,
           "area": "전공선택",
           "slots": [
@@ -868,25 +867,25 @@
           "timeRaw": "수678",
           "offeringDept": "경영학전공",
           "category": "전선",
-          "score": 0.0149,
+          "score": 0.0242,
           "careerReason": [
             {
               "comp": "VIZ",
               "compKo": "데이터시각화",
-              "value": 0.0077,
-              "share": 0.5127
+              "value": 0.0124,
+              "share": 0.5111
             },
             {
               "comp": "DB",
               "compKo": "데이터베이스",
-              "value": 0.0058,
-              "share": 0.3861
+              "value": 0.0079,
+              "share": 0.3256
             },
             {
               "comp": "DATA",
               "compKo": "데이터분석",
-              "value": 0.0015,
-              "share": 0.1012
+              "value": 0.004,
+              "share": 0.1633
             }
           ],
           "gradReason": {
@@ -895,84 +894,92 @@
           }
         },
         {
-          "courseId": "002151",
-          "section": "1",
-          "name": "광고의이해",
+          "courseId": "001013",
+          "section": "10",
+          "name": "논리적사고와글쓰기(경영)",
           "credit": 3,
-          "area": "공통교양",
+          "area": "교양필수",
           "slots": [
-            50,
-            51,
-            52
+            3,
+            4,
+            19,
+            20
           ],
           "slotsHuman": [
-            "목2",
-            "목3",
-            "목4"
+            "월3",
+            "월4",
+            "화3",
+            "화4"
           ],
-          "professor": "이승연1",
-          "timeRaw": "목234",
+          "professor": "고지현1",
+          "timeRaw": "월34,화34",
           "offeringDept": "교양과(서울)",
-          "category": "교선",
-          "score": 0.0095,
+          "category": "교필",
+          "score": 0.0206,
           "careerReason": [
             {
               "comp": "VIZ",
               "compKo": "데이터시각화",
-              "value": 0.0083,
-              "share": 0.8735
+              "value": 0.0129,
+              "share": 0.6256
             },
             {
               "comp": "DATA",
               "compKo": "데이터분석",
-              "value": 0.0012,
-              "share": 0.1265
-            }
-          ],
-          "gradReason": {
-            "area": "공통교양",
-            "remaining": 0
-          }
-        },
-        {
-          "courseId": "311716",
-          "section": "1",
-          "name": "문화예술경영",
-          "credit": 3,
-          "area": "전공선택",
-          "slots": [
-            23,
-            24,
-            25
-          ],
-          "slotsHuman": [
-            "화7",
-            "화8",
-            "화9"
-          ],
-          "professor": "김선영6",
-          "timeRaw": "화789",
-          "offeringDept": "경영학전공",
-          "category": "전선",
-          "score": 0.0073,
-          "careerReason": [
-            {
-              "comp": "VIZ",
-              "compKo": "데이터시각화",
-              "value": 0.0036,
-              "share": 0.4975
+              "value": 0.0055,
+              "share": 0.2691
             },
             {
               "comp": "DB",
               "compKo": "데이터베이스",
-              "value": 0.0021,
-              "share": 0.2805
+              "value": 0.0022,
+              "share": 0.1054
+            }
+          ],
+          "gradReason": {
+            "area": "교양필수",
+            "remaining": 3
+          }
+        },
+        {
+          "courseId": "313103",
+          "section": "2",
+          "name": "기업법",
+          "credit": 3,
+          "area": "전공선택",
+          "slots": [
+            6,
+            7,
+            8
+          ],
+          "slotsHuman": [
+            "월6",
+            "월7",
+            "월8"
+          ],
+          "professor": "이채진",
+          "timeRaw": "월678",
+          "offeringDept": "경영학전공",
+          "category": "전선",
+          "score": 0.0084,
+          "careerReason": [
+            {
+              "comp": "DB",
+              "compKo": "데이터베이스",
+              "value": 0.0048,
+              "share": 0.574
+            },
+            {
+              "comp": "VIZ",
+              "compKo": "데이터시각화",
+              "value": 0.0027,
+              "share": 0.3153
             },
             {
               "comp": "DATA",
               "compKo": "데이터분석",
-              "value": 0.0016,
-              "share": 0.222
+              "value": 0.0009,
+              "share": 0.1107
             }
           ],
           "gradReason": {
@@ -987,6 +994,7 @@
     "noTimeConflict": true,
     "creditBounds": true,
     "excludeTaken": true,
-    "prereqSatisfied": true
+    "prereqSatisfied": true,
+    "gradeEligible": true
   }
 }

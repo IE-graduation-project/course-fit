@@ -2,38 +2,39 @@
   "student": {
     "deptId": "BIZ",
     "admissionYear": 2022,
-    "requirementYear": 2022
+    "requirementYear": 2022,
+    "gradeLevel": 4
   },
   "fitByJob": [
     {
       "job": "DA",
       "name": "데이터 분석가",
-      "fit": 92.3
+      "fit": 87.8
     },
     {
       "job": "DE",
       "name": "데이터 엔지니어",
-      "fit": 87.7
+      "fit": 85.2
     },
     {
       "job": "DS",
       "name": "데이터 사이언티스트",
-      "fit": 96.5
+      "fit": 93.9
     },
     {
       "job": "FIN",
       "name": "재무 분석가",
-      "fit": 96.9
+      "fit": 98.1
     },
     {
       "job": "MKT",
       "name": "마케팅 매니저",
-      "fit": 97.8
+      "fit": 97.1
     },
     {
       "job": "PM",
       "name": "프로덕트 매니저",
-      "fit": 99.8
+      "fit": 99.7
     }
   ],
   "job": {
@@ -50,16 +51,16 @@
   },
   "diagnosis": {
     "sigma": {
-      "BIZ": 0.9957,
-      "COMM": 0.9824,
-      "DATA": 0.9289,
-      "DB": 0.6352,
-      "FIN": 0.9194,
-      "MKT": 0.9448,
-      "ML": 0.9033,
-      "OR": 0.9003,
-      "PROG": 0.8662,
-      "VIZ": 0.8286
+      "BIZ": 0.9927,
+      "COMM": 0.8614,
+      "DATA": 0.896,
+      "DB": 0.5617,
+      "FIN": 0.9506,
+      "MKT": 0.927,
+      "ML": 0.8282,
+      "OR": 0.8571,
+      "PROG": 0.79,
+      "VIZ": 0.7126
     },
     "rho": {
       "BIZ": 0.2066,
@@ -80,7 +81,7 @@
       "DB": 0.0,
       "FIN": 0.0,
       "MKT": 0.0,
-      "ML": 0.0967,
+      "ML": 0.1718,
       "OR": 0.0,
       "PROG": 0.0,
       "VIZ": 0.0
@@ -89,68 +90,70 @@
       {
         "comp": "BIZ",
         "compKo": "비즈니스",
-        "sigma": 0.9957
-      },
-      {
-        "comp": "COMM",
-        "compKo": "커뮤니케이션",
-        "sigma": 0.9824
-      },
-      {
-        "comp": "MKT",
-        "compKo": "마케팅",
-        "sigma": 0.9448
-      },
-      {
-        "comp": "DATA",
-        "compKo": "데이터분석",
-        "sigma": 0.9289
+        "sigma": 0.9927
       },
       {
         "comp": "FIN",
         "compKo": "재무",
-        "sigma": 0.9194
+        "sigma": 0.9506
+      },
+      {
+        "comp": "MKT",
+        "compKo": "마케팅",
+        "sigma": 0.927
+      },
+      {
+        "comp": "DATA",
+        "compKo": "데이터분석",
+        "sigma": 0.896
+      },
+      {
+        "comp": "COMM",
+        "compKo": "커뮤니케이션",
+        "sigma": 0.8614
       },
       {
         "comp": "OR",
         "compKo": "최적화",
-        "sigma": 0.9003
+        "sigma": 0.8571
       },
       {
         "comp": "PROG",
         "compKo": "프로그래밍",
-        "sigma": 0.8662
+        "sigma": 0.79
       },
       {
         "comp": "VIZ",
         "compKo": "데이터시각화",
-        "sigma": 0.8286
+        "sigma": 0.7126
       },
       {
         "comp": "DB",
         "compKo": "데이터베이스",
-        "sigma": 0.6352
+        "sigma": 0.5617
       }
     ],
     "gaps": [
       {
         "comp": "ML",
         "compKo": "머신러닝",
-        "gap": 0.0967
+        "gap": 0.1718
       }
     ]
   },
   "need": {
     "SW데이터활용역량": 9,
+    "공통교양": 7,
+    "교양필수": 3,
+    "전공기초영어": 2,
     "전공선택": 12,
-    "전공필수": 3,
     "특성화교양": 3
   },
   "timetables": [
     {
       "rank": 1,
-      "careerfit": 0.3869,
-      "gradProgress": 12.0,
+      "careerfit": 0.626,
+      "gradProgress": 18.0,
       "totalCredit": 18,
       "status": "Optimal",
       "courses": [
@@ -166,18 +169,18 @@
           "timeRaw": null,
           "offeringDept": "전자·전기공학부",
           "category": "교선",
-          "score": 0.0417,
+          "score": 0.0731,
           "careerReason": [
             {
               "comp": "ML",
               "compKo": "머신러닝",
-              "value": 0.0417,
+              "value": 0.0731,
               "share": 1.0
             }
           ],
           "gradReason": {
             "area": "공통교양",
-            "remaining": 0
+            "remaining": 7
           }
         },
         {
@@ -200,24 +203,58 @@
           "timeRaw": "수234",
           "offeringDept": "교양과(서울)",
           "category": "교선",
-          "score": 0.0379,
+          "score": 0.067,
           "careerReason": [
             {
               "comp": "ML",
               "compKo": "머신러닝",
-              "value": 0.0379,
+              "value": 0.067,
               "share": 1.0
             }
           ],
           "gradReason": {
             "area": "공통교양",
-            "remaining": 0
+            "remaining": 7
           }
         },
         {
-          "courseId": "311319",
+          "courseId": "001023",
+          "section": "91",
+          "name": "대학영어",
+          "credit": 3,
+          "area": "교양필수",
+          "slots": [
+            59,
+            60,
+            61
+          ],
+          "slotsHuman": [
+            "목11",
+            "목12",
+            "목13"
+          ],
+          "professor": "Carmen A. Cheers",
+          "timeRaw": "목111213",
+          "offeringDept": "교양과(서울)",
+          "category": "교필",
+          "score": 0.0232,
+          "careerReason": [
+            {
+              "comp": "ML",
+              "compKo": "머신러닝",
+              "value": 0.0232,
+              "share": 1.0
+            }
+          ],
+          "gradReason": {
+            "area": "교양필수",
+            "remaining": 3
+          }
+        },
+        {
+          "courseId": "311419",
           "section": "1",
-          "name": "마케팅빅데이터애널리틱스I",
+          "name": "마케팅트렌드",
           "credit": 3,
           "area": "전공선택",
           "slots": [
@@ -230,16 +267,16 @@
             "화3",
             "화4"
           ],
-          "professor": "정호진",
+          "professor": "이준환",
           "timeRaw": "화234",
           "offeringDept": "경영학전공",
           "category": "전선",
-          "score": 0.0234,
+          "score": 0.022,
           "careerReason": [
             {
               "comp": "ML",
               "compKo": "머신러닝",
-              "value": 0.0234,
+              "value": 0.022,
               "share": 1.0
             }
           ],
@@ -249,31 +286,31 @@
           }
         },
         {
-          "courseId": "311519",
+          "courseId": "311622",
           "section": "1",
-          "name": "금융데이터분석",
+          "name": "비즈니스프로그래밍II",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            54,
-            55,
-            56
+            66,
+            67,
+            68
           ],
           "slotsHuman": [
-            "목6",
-            "목7",
-            "목8"
+            "금2",
+            "금3",
+            "금4"
           ],
-          "professor": "이유미2",
-          "timeRaw": "목678",
+          "professor": "이가현",
+          "timeRaw": "금234",
           "offeringDept": "경영학전공",
           "category": "전선",
-          "score": 0.0201,
+          "score": 0.0126,
           "careerReason": [
             {
               "comp": "ML",
               "compKo": "머신러닝",
-              "value": 0.0201,
+              "value": 0.0126,
               "share": 1.0
             }
           ],
@@ -283,65 +320,31 @@
           }
         },
         {
-          "courseId": "311308",
-          "section": "2",
-          "name": "경영과의사결정",
+          "courseId": "311817",
+          "section": "3",
+          "name": "문화콘텐츠산업론",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            38,
-            39,
-            40
+            50,
+            51,
+            52
           ],
           "slotsHuman": [
-            "수6",
-            "수7",
-            "수8"
+            "목2",
+            "목3",
+            "목4"
           ],
-          "professor": "정광헌",
-          "timeRaw": "수678",
+          "professor": "장웅조",
+          "timeRaw": "목234",
           "offeringDept": "경영학전공",
           "category": "전선",
-          "score": 0.005,
+          "score": 0.0107,
           "careerReason": [
             {
               "comp": "ML",
               "compKo": "머신러닝",
-              "value": 0.005,
-              "share": 1.0
-            }
-          ],
-          "gradReason": {
-            "area": "전공선택",
-            "remaining": 12
-          }
-        },
-        {
-          "courseId": "311716",
-          "section": "1",
-          "name": "문화예술경영",
-          "credit": 3,
-          "area": "전공선택",
-          "slots": [
-            23,
-            24,
-            25
-          ],
-          "slotsHuman": [
-            "화7",
-            "화8",
-            "화9"
-          ],
-          "professor": "김선영6",
-          "timeRaw": "화789",
-          "offeringDept": "경영학전공",
-          "category": "전선",
-          "score": 0.001,
-          "careerReason": [
-            {
-              "comp": "ML",
-              "compKo": "머신러닝",
-              "value": 0.001,
+              "value": 0.0107,
               "share": 1.0
             }
           ],
@@ -354,8 +357,8 @@
     },
     {
       "rank": 2,
-      "careerfit": 0.3739,
-      "gradProgress": 12.0,
+      "careerfit": 0.6276,
+      "gradProgress": 18.0,
       "totalCredit": 18,
       "status": "Optimal",
       "courses": [
@@ -371,18 +374,18 @@
           "timeRaw": null,
           "offeringDept": "전자·전기공학부",
           "category": "교선",
-          "score": 0.0417,
+          "score": 0.0731,
           "careerReason": [
             {
               "comp": "ML",
               "compKo": "머신러닝",
-              "value": 0.0417,
+              "value": 0.0731,
               "share": 1.0
             }
           ],
           "gradReason": {
             "area": "공통교양",
-            "remaining": 0
+            "remaining": 7
           }
         },
         {
@@ -405,24 +408,58 @@
           "timeRaw": "수234",
           "offeringDept": "교양과(서울)",
           "category": "교선",
-          "score": 0.0379,
+          "score": 0.067,
           "careerReason": [
             {
               "comp": "ML",
               "compKo": "머신러닝",
-              "value": 0.0379,
+              "value": 0.067,
               "share": 1.0
             }
           ],
           "gradReason": {
             "area": "공통교양",
-            "remaining": 0
+            "remaining": 7
           }
         },
         {
-          "courseId": "311319",
+          "courseId": "001023",
+          "section": "78",
+          "name": "대학영어",
+          "credit": 3,
+          "area": "교양필수",
+          "slots": [
+            23,
+            24,
+            54
+          ],
+          "slotsHuman": [
+            "화7",
+            "화8",
+            "목6"
+          ],
+          "professor": "Richard Wright",
+          "timeRaw": "화78,목6",
+          "offeringDept": "교양과(서울)",
+          "category": "교필",
+          "score": 0.0232,
+          "careerReason": [
+            {
+              "comp": "ML",
+              "compKo": "머신러닝",
+              "value": 0.0232,
+              "share": 1.0
+            }
+          ],
+          "gradReason": {
+            "area": "교양필수",
+            "remaining": 3
+          }
+        },
+        {
+          "courseId": "311419",
           "section": "1",
-          "name": "마케팅빅데이터애널리틱스I",
+          "name": "마케팅트렌드",
           "credit": 3,
           "area": "전공선택",
           "slots": [
@@ -435,16 +472,16 @@
             "화3",
             "화4"
           ],
-          "professor": "정호진",
+          "professor": "이준환",
           "timeRaw": "화234",
           "offeringDept": "경영학전공",
           "category": "전선",
-          "score": 0.0234,
+          "score": 0.022,
           "careerReason": [
             {
               "comp": "ML",
               "compKo": "머신러닝",
-              "value": 0.0234,
+              "value": 0.022,
               "share": 1.0
             }
           ],
@@ -454,31 +491,31 @@
           }
         },
         {
-          "courseId": "311317",
+          "courseId": "311622",
           "section": "3",
-          "name": "IT와경영",
+          "name": "비즈니스프로그래밍II",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            38,
-            39,
-            40
+            50,
+            51,
+            52
           ],
           "slotsHuman": [
-            "수6",
-            "수7",
-            "수8"
+            "목2",
+            "목3",
+            "목4"
           ],
-          "professor": "안형준",
-          "timeRaw": "수678",
+          "professor": "이가현",
+          "timeRaw": "목234",
           "offeringDept": "경영학전공",
           "category": "전선",
-          "score": 0.0124,
+          "score": 0.0126,
           "careerReason": [
             {
               "comp": "ML",
               "compKo": "머신러닝",
-              "value": 0.0124,
+              "value": 0.0126,
               "share": 1.0
             }
           ],
@@ -488,43 +525,9 @@
           }
         },
         {
-          "courseId": "311417",
+          "courseId": "311621",
           "section": "1",
-          "name": "비즈니스중국어",
-          "credit": 3,
-          "area": "전공선택",
-          "slots": [
-            22,
-            23,
-            24
-          ],
-          "slotsHuman": [
-            "화6",
-            "화7",
-            "화8"
-          ],
-          "professor": "Zheng Zhenmei",
-          "timeRaw": "화678",
-          "offeringDept": "경영학전공",
-          "category": "전선",
-          "score": 0.0049,
-          "careerReason": [
-            {
-              "comp": "ML",
-              "compKo": "머신러닝",
-              "value": 0.0049,
-              "share": 1.0
-            }
-          ],
-          "gradReason": {
-            "area": "전공선택",
-            "remaining": 12
-          }
-        },
-        {
-          "courseId": "311314",
-          "section": "1",
-          "name": "중급재무회계",
+          "name": "비즈니스일본어(취업탐색)II",
           "credit": 3,
           "area": "전공선택",
           "slots": [
@@ -537,16 +540,16 @@
             "월3",
             "월4"
           ],
-          "professor": "천준범",
+          "professor": "TERADA YOHHEI",
           "timeRaw": "월234",
           "offeringDept": "경영학전공",
           "category": "전선",
-          "score": 0.0043,
+          "score": 0.0112,
           "careerReason": [
             {
               "comp": "ML",
               "compKo": "머신러닝",
-              "value": 0.0043,
+              "value": 0.0112,
               "share": 1.0
             }
           ],
@@ -559,8 +562,8 @@
     },
     {
       "rank": 3,
-      "careerfit": 0.3689,
-      "gradProgress": 12.0,
+      "careerfit": 0.6211,
+      "gradProgress": 18.0,
       "totalCredit": 18,
       "status": "Optimal",
       "courses": [
@@ -576,18 +579,18 @@
           "timeRaw": null,
           "offeringDept": "전자·전기공학부",
           "category": "교선",
-          "score": 0.0417,
+          "score": 0.0731,
           "careerReason": [
             {
               "comp": "ML",
               "compKo": "머신러닝",
-              "value": 0.0417,
+              "value": 0.0731,
               "share": 1.0
             }
           ],
           "gradReason": {
             "area": "공통교양",
-            "remaining": 0
+            "remaining": 7
           }
         },
         {
@@ -610,80 +613,80 @@
           "timeRaw": "수234",
           "offeringDept": "교양과(서울)",
           "category": "교선",
-          "score": 0.0379,
+          "score": 0.067,
           "careerReason": [
             {
               "comp": "ML",
               "compKo": "머신러닝",
-              "value": 0.0379,
+              "value": 0.067,
               "share": 1.0
             }
           ],
           "gradReason": {
             "area": "공통교양",
-            "remaining": 0
+            "remaining": 7
           }
         },
         {
-          "courseId": "311319",
-          "section": "1",
-          "name": "마케팅빅데이터애널리틱스I",
+          "courseId": "001023",
+          "section": "63",
+          "name": "대학영어",
           "credit": 3,
-          "area": "전공선택",
+          "area": "교양필수",
           "slots": [
-            18,
             19,
-            20
+            20,
+            52
           ],
           "slotsHuman": [
-            "화2",
             "화3",
-            "화4"
+            "화4",
+            "목4"
           ],
-          "professor": "정호진",
-          "timeRaw": "화234",
-          "offeringDept": "경영학전공",
-          "category": "전선",
-          "score": 0.0234,
+          "professor": "Michael T. Welles",
+          "timeRaw": "화34,목4",
+          "offeringDept": "교양과(서울)",
+          "category": "교필",
+          "score": 0.0232,
           "careerReason": [
             {
               "comp": "ML",
               "compKo": "머신러닝",
-              "value": 0.0234,
+              "value": 0.0232,
               "share": 1.0
             }
           ],
           "gradReason": {
-            "area": "전공선택",
-            "remaining": 12
+            "area": "교양필수",
+            "remaining": 3
           }
         },
         {
-          "courseId": "311317",
+          "courseId": "311419",
           "section": "2",
-          "name": "IT와경영",
+          "name": "마케팅트렌드",
           "credit": 3,
           "area": "전공선택",
           "slots": [
+            22,
             23,
-            24,
-            25
+            24
           ],
           "slotsHuman": [
+            "화6",
             "화7",
-            "화8",
-            "화9"
+            "화8"
           ],
-          "professor": "안형준",
-          "timeRaw": "화789",
+          "professor": "이준환",
+          "timeRaw": "화678",
           "offeringDept": "경영학전공",
           "category": "전선",
-          "score": 0.0124,
+          "score": 0.022,
           "careerReason": [
             {
               "comp": "ML",
               "compKo": "머신러닝",
-              "value": 0.0124,
+              "value": 0.022,
               "share": 1.0
             }
           ],
@@ -693,31 +696,31 @@
           }
         },
         {
-          "courseId": "311314",
+          "courseId": "311622",
           "section": "2",
-          "name": "중급재무회계",
+          "name": "비즈니스프로그래밍II",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            54,
-            55,
-            56
+            70,
+            71,
+            72
           ],
           "slotsHuman": [
-            "목6",
-            "목7",
-            "목8"
+            "금6",
+            "금7",
+            "금8"
           ],
-          "professor": "천준범",
-          "timeRaw": "목678",
+          "professor": "이가현",
+          "timeRaw": "금678",
           "offeringDept": "경영학전공",
           "category": "전선",
-          "score": 0.0043,
+          "score": 0.0126,
           "careerReason": [
             {
               "comp": "ML",
               "compKo": "머신러닝",
-              "value": 0.0043,
+              "value": 0.0126,
               "share": 1.0
             }
           ],
@@ -727,31 +730,31 @@
           }
         },
         {
-          "courseId": "311506",
-          "section": "1",
-          "name": "품질과경영",
+          "courseId": "313106",
+          "section": "3",
+          "name": "원가회계",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            6,
-            7,
-            8
+            37,
+            38,
+            39
           ],
           "slotsHuman": [
-            "월6",
-            "월7",
-            "월8"
+            "수5",
+            "수6",
+            "수7"
           ],
-          "professor": "이미림1",
-          "timeRaw": "월678",
+          "professor": "이윤기",
+          "timeRaw": "수567",
           "offeringDept": "경영학전공",
           "category": "전선",
-          "score": 0.0033,
+          "score": 0.009,
           "careerReason": [
             {
               "comp": "ML",
               "compKo": "머신러닝",
-              "value": 0.0033,
+              "value": 0.009,
               "share": 1.0
             }
           ],
@@ -767,6 +770,7 @@
     "noTimeConflict": true,
     "creditBounds": true,
     "excludeTaken": true,
-    "prereqSatisfied": true
+    "prereqSatisfied": true,
+    "gradeEligible": true
   }
 }

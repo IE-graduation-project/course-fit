@@ -103,7 +103,7 @@ CREATE TABLE IF NOT EXISTS student (
     dept_id         TEXT,                  -- 매핑된 학과(IDE/BIZ), 매핑 실패 시 NULL
     dept_name_raw   TEXT,                  -- 성적표 원문 학과명
     admission_year  INTEGER,               -- 입학년도
-    current_grade   INTEGER,               -- 현재 학년 (성적표 기준/추정)
+    current_grade   INTEGER,               -- 이번 학기 학년 = 성적 확정된 마지막 정규학기의 다음 학기 (#42)
     total_earned    INTEGER,               -- 총 취득학점 (성적표 합계)
     gpa             REAL,                  -- 전체 평점평균 (성적표 표기)
     source_file     TEXT,                  -- 원본 PDF 파일명
@@ -143,6 +143,8 @@ CREATE TABLE IF NOT EXISTS course_section (
     time_slots_raw   TEXT,               -- 사람 읽기용 ('수23,목23')
     professor        TEXT,
     category         TEXT,               -- 개설시점 이수구분('전필' 등, 개설학부 관점)
+    grade            INTEGER,            -- 시간표의 지정 학년(1~4). 0 = 학년 무관(교양·일반선택 등).
+                                         -- 이 학년 이상이면 수강 가능 (#42). 성적 아님 — student_course.grade 와 다르다
     offering_dept    TEXT,               -- 실제 개설학과
     source_dept_code TEXT,               -- 크롤 스코프 코드('A200')
     source_dept_name TEXT,               -- 크롤 스코프명

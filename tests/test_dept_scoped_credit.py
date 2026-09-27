@@ -31,14 +31,15 @@ def _conn(student_dept: str) -> sqlite3.Connection:
         """
         CREATE TABLE course (course_id TEXT PRIMARY KEY, dept_id TEXT, area TEXT);
         CREATE TABLE course_competency (course_id TEXT, comp_id TEXT, weight REAL);
-        CREATE TABLE student (input_hash TEXT PRIMARY KEY, dept_id TEXT, admission_year INTEGER);
+        CREATE TABLE student (input_hash TEXT PRIMARY KEY, dept_id TEXT, admission_year INTEGER,
+                              current_grade INTEGER);
         CREATE TABLE student_course (
             input_hash TEXT, course_id TEXT, area TEXT, credit INTEGER, grade REAL,
             is_pn INTEGER, matched INTEGER, passed INTEGER, superseded INTEGER
         );
         """
     )
-    conn.execute("INSERT INTO student VALUES ('h', ?, 2026)", (student_dept,))
+    conn.execute("INSERT INTO student VALUES ('h', ?, 2026, NULL)", (student_dept,))
     for cid, dept, area, credit in CATALOG:
         conn.execute("INSERT INTO course VALUES (?, ?, ?)", (cid, dept, area))
         # student_course.area 는 load.py 가 카탈로그 영역을 그대로 복사한 값이다

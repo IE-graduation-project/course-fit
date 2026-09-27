@@ -205,6 +205,21 @@ def validate(conn: sqlite3.Connection) -> list[str]:
             f"(예: {sample}). preprocess_time_slots 를 다시 돌리세요."
         )
 
+    # 검증 12: 지정 학년이 비었거나 범위 밖인가 (#42)
+    # 0 은 "학년 무관"이라는 뜻이라, 크롤러가 이 열을 빠뜨려 NULL·빈 값이 들어오면
+    # 학년 제약이 조용히 풀려 1학년에게 4학년 전공이 추천된다.
+    cur = conn.execute("""
+        SELECT course_id, section, grade FROM course_section
+        WHERE grade IS NULL OR grade NOT IN (0, 1, 2, 3, 4)
+    """)
+    bad = cur.fetchall()
+    if bad:
+        sample = [f"{r[0]}-{r[1]}({r[2]!r})" for r in bad[:5]]
+        errors.append(
+            f"course_section: 지정 학년이 비었거나 0~4 밖인 행 {len(bad)}개 "
+            f"(예: {sample}). 시간표 크롤의 grade 열을 확인하세요."
+        )
+
     return errors
 
 

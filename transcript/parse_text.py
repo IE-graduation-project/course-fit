@@ -26,6 +26,22 @@ _GRADE_TOKENS = {"A+", "A0", "B+", "B0", "C+", "C0", "D+", "D0", "F", "P", "NP",
 _RETAKE_TOKEN = "재수강"
 _SKIP_PREFIX = ("학수번호", "신청학점", "취득학점", "전체성적조회")
 _TERM_CODE = {"1학기": "1", "2학기": "2", "하계계절학기": "S", "동계계절학기": "W"}
+_REGULAR_SEMESTER = {"1학기": 1, "2학기": 2}
+MAX_GRADE = 4
+
+
+def grade_in_next_semester(regular_terms: list[tuple[int, int, int]]) -> int | None:
+    """(학년도, 학기, 학년) 목록에서 성적이 확정된 마지막 정규학기의 **다음 학기** 학년.
+
+    전체성적조회엔 성적이 확정된 학기만 나온다. 그래서 학생이 지금 다니는 학기는
+    마지막 학기의 다음이다 — 3학년 2학기까지 나온 학생은 이번 학기 4학년이고,
+    3학년 1학기까지 나온 학생은 아직 3학년이다. 추천은 이번 학기 수강신청용이라
+    이 값을 써야 한다(#42). 계절학기와 0학년 표기는 학년 진급과 무관해 뺀다.
+    """
+    if not regular_terms:
+        return None
+    _, semester, level = max(regular_terms)
+    return min(level + 1 if semester == 2 else level, MAX_GRADE)
 
 
 def _split_fields(line: str) -> list[str]:
@@ -84,6 +100,7 @@ def parse_transcript_text(
     cur_year: int | None = None
     cur_term: str | None = None
     grade_levels: list[tuple[int, int]] = []   # (학년도, 학년) 입학년도 추론용
+    regular_terms: list[tuple[int, int, int]] = []   # (학년도, 학기, 학년) 현재 학년 계산용
     total_earned: int | None = None
     gpa: float | None = None
     in_overall = False
@@ -98,7 +115,10 @@ def parse_transcript_text(
         if m:
             cur_year = int(m.group(1))
             cur_term = m.group(3)
-            grade_levels.append((cur_year, int(m.group(2))))
+            level = int(m.group(2))
+            grade_levels.append((cur_year, level))
+            if cur_term in _REGULAR_SEMESTER and level > 0:
+                regular_terms.append((cur_year, _REGULAR_SEMESTER[cur_term], level))
             in_overall = False
             continue
 
@@ -140,7 +160,7 @@ def parse_transcript_text(
 
     if admission_year is None:
         admission_year = infer_admission_year(grade_levels)
-    current_grade = max((lvl for _, lvl in grade_levels if lvl > 0), default=None)
+    current_grade = grade_in_next_semester(regular_terms)
 
     meta = StudentMeta(
         student_no=student_no,

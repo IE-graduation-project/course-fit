@@ -72,6 +72,7 @@ class Student:
     taken_ids: set[str]                     # 성적표 전체 course_id  B1 제외용 (student_course)
     earned_by_area: dict[str, int]          # area -> 기이수학점  need용 (student_course)
     weights: dict[str, dict[str, float]]    # passed course_id -> {comp_id: weight}  σ용
+    current_grade: int | None = None        # 이번 학기 학년 (성적표 기준). None = 성적표에 정규학기 없음
 
 
 def connect(db_path=DB_PATH) -> sqlite3.Connection:
@@ -113,8 +114,8 @@ def load_weights(conn, course_ids) -> dict[str, dict[str, float]]:
     return out
 
 
-def load_candidates(conn, dept_id: str, *, term: str) -> list[Candidate]:
-    """후보집합 C. 학생 dept 전공 + COMMON 교양, 일반선택 제외, 해당 학기 개설분만.
+def load_candidates(conn, dept_id: str, *, term: str, grade: int | None) -> list[Candidate]:
+    """후보집합 C. 학생 dept 전공 + COMMON 교양, 일반선택 제외, 해당 학기 개설분, 수강 가능 학년만.
 
     ORDER BY 필수 — 이 순서가 ILP 결정변수 x_0..x_N의 번호를 정한다. 순서가 흔들리면
     동점 최적해 중 CBC가 고르는 해가 바뀌어 같은 입력에 다른 시간표가 나온다.
@@ -123,6 +124,10 @@ def load_candidates(conn, dept_id: str, *, term: str) -> list[Candidate]:
 
     `term` 은 기본값이 없다. 빠뜨리면 TypeError 로 즉시 죽는다 — 지난 학기 분반을
     추천하는 것보다 안 뜨는 편이 낫다. 값은 보통 `active_term(conn)` 으로 얻는다.
+
+    `grade` 도 같은 이유로 기본값이 없다(#42). 분반의 지정 학년이 이 값 이하이거나 0(학년
+    무관)인 분반만 남긴다 — 지정 학년 이상이면 수강 가능하다는 규칙이고, 카탈로그의
+    allowed_years("3,4" 등)도 같은 규칙으로 만들어져 있다. 제약 없이 부르려면 None 을 명시한다.
     """
     depts = ["COMMON"] if dept_id == "COMMON" else [dept_id, "COMMON"]
     dep_q = ",".join("?" * len(depts))
@@ -135,9 +140,10 @@ def load_candidates(conn, dept_id: str, *, term: str) -> list[Candidate]:
         JOIN course c ON c.course_id = s.course_id
         WHERE s.source_term = ?
           AND c.dept_id IN ({dep_q}) AND c.area NOT IN ({excl_q})
+          AND (? IS NULL OR COALESCE(s.grade, 0) = 0 OR s.grade <= ?)
         ORDER BY s.course_id, s.section
         """,
-        (term, *depts, *EXCLUDED_CAND_AREAS),
+        (term, *depts, *EXCLUDED_CAND_AREAS, grade, grade),
     ).fetchall()
 
     weights = load_weights(conn, {r["course_id"] for r in rows})
@@ -168,9 +174,25 @@ def _credited_area(area: str, course_dept: str | None, student_dept: str) -> str
     return CROSS_DEPT_AREA if area in DEPT_SCOPED_AREAS else area
 
 
+MAX_GRADE = 4   # transcript.parse_text.MAX_GRADE 와 같은 값 (이 모듈은 transcript 를 import 하지 않는다)
+
+
+def grade_for_term(current_grade: int | None, admission_year: int, term: str) -> int:
+    """추천 학기(`term`, 예: '2026-2')의 학년.
+
+    성적표가 알려주는 학년(마지막 확정 학기의 다음 학기)을 우선한다 — 학생이 고른 입학년도는
+    교육과정을 고르는 값이고, 휴학하면 학년과 어긋난다. 성적표에 정규학기가 하나도 없으면
+    (신입생) 입학년도에서 센다.
+    """
+    if current_grade is not None:
+        return current_grade
+    year = int(term.split("-")[0])
+    return max(1, min(MAX_GRADE, year - admission_year + 1))
+
+
 def load_student(conn, input_hash: str) -> Student:
     srow = conn.execute(
-        "SELECT input_hash, dept_id, admission_year FROM student WHERE input_hash=?",
+        "SELECT input_hash, dept_id, admission_year, current_grade FROM student WHERE input_hash=?",
         (input_hash,),
     ).fetchone()
     if srow is None:
@@ -211,6 +233,7 @@ def load_student(conn, input_hash: str) -> Student:
         taken_ids=taken_ids,
         earned_by_area=earned_by_area,
         weights=load_weights(conn, passed.keys()),
+        current_grade=srow["current_grade"],
     )
 
 

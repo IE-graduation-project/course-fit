@@ -34,6 +34,7 @@ class Recommendation:
     dept_id: str
     admission_year: int
     requirement_year: int           # 실제 적용된 교육과정 개정 연도 (결정 ⑨). 화면 고지용
+    grade_level: int                # 후보를 거른 학년 (#42). 화면 고지용
 
     @property
     def result(self) -> Result:
@@ -53,8 +54,9 @@ def recommend(input_hash, job_id, *, db_path=data.DB_PATH, U=18, L=12,
         comp = data.comp_ids(conn)
         student = data.load_student(conn, input_hash)
         rho = data.load_rho(conn, job_id)
-        candidates = data.load_candidates(
-            conn, student.dept_id, term=data.active_term(conn))
+        term = data.active_term(conn)
+        grade = data.grade_for_term(student.current_grade, student.admission_year, term)
+        candidates = data.load_candidates(conn, student.dept_id, term=term, grade=grade)
         min_credits = data.load_min_credits(conn, student.dept_id, student.admission_year)
         # 입학년도와 다를 수 있다 — 2025학번 경영은 2022 교육과정을 따른다(결정 ⑨).
         req_year = data.effective_year(conn, student.dept_id, student.admission_year)
@@ -80,5 +82,5 @@ def recommend(input_hash, job_id, *, db_path=data.DB_PATH, U=18, L=12,
     return Recommendation(
         results=results, sigma=sigma, gap=gap, need=need,
         dept_id=student.dept_id, admission_year=student.admission_year,
-        requirement_year=req_year,
+        requirement_year=req_year, grade_level=grade,
     )

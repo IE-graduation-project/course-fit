@@ -54,7 +54,8 @@ raw 채용공고는 DB 테이블로 만들지 않음. **schema.sql·ingest.py에
 실측 927분반 / 고유 course_id 278개(전부 2026-2). 카탈로그는 다년도 크롤로 3,389과목이고, **278개 전부 course에 존재 → FK 위반 0**. 그래서 필터 없이 927분반 전체 적재. 새 학기를 올릴 때는 카탈로그 크롤·병합을 먼저 돌려야 신설 과목이 FK 를 깨지 않는다.
 
 - **PK** `(course_id, section, source_term)` (927행 유일성 검증). **FK** `course_id → course`. 한 번에 한 학기만 적재한다 — `ingest --validate` 가 학기 단일성을 검사한다.
-- CSV 16컬럼 중 11컬럼 저장. 미저장 5개: `course_name`/`credit`(course 조인, credit 100% 일치), `dept_name`(`offering_dept`와 중복), `grade`(`allowed_years`와 중복), `source_url`(상수).
+- CSV 16컬럼 중 12컬럼 저장. 미저장 4개: `course_name`/`credit`(course 조인, credit 100% 일치), `dept_name`(`offering_dept`와 중복), `source_url`(상수).
+- `grade`(시간표의 지정 학년, 0=학년 무관)는 **저장한다**(#42). 처음엔 `allowed_years`와 중복이라 버렸는데, `allowed_years`는 큐레이션한 192과목에만 있고 크롤로 넓힌 3,197과목에는 비어 있어 후보 분반의 대부분에 학년 정보가 없었다. 반면 분반 `grade`는 927행 전부 채워져 있다(0: 738, 1~4: 189). `allowed_years`는 이 값에서 「지정 학년 이상」으로 만든 것이라(지정 2 → `"2,3,4"`) 같은 규칙을 분반에서 직접 적용한다. `ingest --validate` 가 비었거나 0~4 밖인 값을 막는다.
 - **추천 후보 = 별도 테이블 아님, 조인으로 도출**: `course_section ⋈ course WHERE dept_id IN ('IDE','BIZ','COMMON')` → 278과목/927분반(IDE 35, BIZ 44, COMMON 199). `course`(3,389)는 성적표 역량 매칭 universe, 추천 후보는 그중 26-2 분반이 있는 부분집합.
 - 컴공 전공(자료구조·알고리즘 등 21과목)도 분반이 적재됨 — 산데공과 같은 학부라 추천 scope 확장 시 활용 가능. 단 해당 과목 `area` 커레이트는 별도 과제.
 
