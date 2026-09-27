@@ -222,22 +222,22 @@
         },
         {
           "courseId": "311410",
-          "section": "6",
+          "section": "7",
           "name": "인적자원관리",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            34,
-            35,
-            36
+            6,
+            7,
+            8
           ],
           "slotsHuman": [
-            "수2",
-            "수3",
-            "수4"
+            "월6",
+            "월7",
+            "월8"
           ],
-          "professor": "문태원",
-          "timeRaw": "수234",
+          "professor": "김범열",
+          "timeRaw": "월678",
           "offeringDept": "경영학전공",
           "category": "전선",
           "score": 0.0055,
@@ -586,22 +586,22 @@
       "courses": [
         {
           "courseId": "311806",
-          "section": "2",
+          "section": "1",
           "name": "경영정보시스템",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            38,
-            39,
-            40
+            34,
+            35,
+            36
           ],
           "slotsHuman": [
-            "수6",
-            "수7",
-            "수8"
+            "수2",
+            "수3",
+            "수4"
           ],
           "professor": "남호헌",
-          "timeRaw": "수678",
+          "timeRaw": "수234",
           "offeringDept": "경영학전공",
           "category": "전선",
           "score": 0.0065,
@@ -660,22 +660,22 @@
         },
         {
           "courseId": "311410",
-          "section": "3",
+          "section": "7",
           "name": "인적자원관리",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            18,
-            19,
-            20
+            6,
+            7,
+            8
           ],
           "slotsHuman": [
-            "화2",
-            "화3",
-            "화4"
+            "월6",
+            "월7",
+            "월8"
           ],
           "professor": "김범열",
-          "timeRaw": "화234",
+          "timeRaw": "월678",
           "offeringDept": "경영학전공",
           "category": "전선",
           "score": 0.0055,

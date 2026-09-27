@@ -148,22 +148,22 @@
       "courses": [
         {
           "courseId": "311806",
-          "section": "1",
+          "section": "2",
           "name": "경영정보시스템",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            34,
-            35,
-            36
+            38,
+            39,
+            40
           ],
           "slotsHuman": [
-            "수2",
-            "수3",
-            "수4"
+            "수6",
+            "수7",
+            "수8"
           ],
           "professor": "남호헌",
-          "timeRaw": "수234",
+          "timeRaw": "수678",
           "offeringDept": "경영학전공",
           "category": "전선",
           "score": 0.0065,
@@ -222,22 +222,22 @@
         },
         {
           "courseId": "311410",
-          "section": "4",
+          "section": "7",
           "name": "인적자원관리",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            22,
-            23,
-            24
+            6,
+            7,
+            8
           ],
           "slotsHuman": [
-            "화6",
-            "화7",
-            "화8"
+            "월6",
+            "월7",
+            "월8"
           ],
           "professor": "김범열",
-          "timeRaw": "화678",
+          "timeRaw": "월678",
           "offeringDept": "경영학전공",
           "category": "전선",
           "score": 0.0055,
@@ -290,22 +290,22 @@
         },
         {
           "courseId": "311620",
-          "section": "2",
+          "section": "1",
           "name": "전략경영세미나",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            27,
-            28,
-            29
+            22,
+            23,
+            24
           ],
           "slotsHuman": [
-            "화11",
-            "화12",
-            "화13"
+            "화6",
+            "화7",
+            "화8"
           ],
           "professor": "신형덕",
-          "timeRaw": "화111213",
+          "timeRaw": "화678",
           "offeringDept": "경영학전공",
           "category": "전선",
           "score": 0.005,
@@ -367,22 +367,22 @@
       "courses": [
         {
           "courseId": "311806",
-          "section": "2",
+          "section": "3",
           "name": "경영정보시스템",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            38,
-            39,
-            40
+            43,
+            44,
+            45
           ],
           "slotsHuman": [
-            "수6",
-            "수7",
-            "수8"
+            "수11",
+            "수12",
+            "수13"
           ],
           "professor": "남호헌",
-          "timeRaw": "수678",
+          "timeRaw": "수111213",
           "offeringDept": "경영학전공",
           "category": "전선",
           "score": 0.0065,
@@ -509,22 +509,22 @@
         },
         {
           "courseId": "311620",
-          "section": "1",
+          "section": "2",
           "name": "전략경영세미나",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            22,
-            23,
-            24
+            27,
+            28,
+            29
           ],
           "slotsHuman": [
-            "화6",
-            "화7",
-            "화8"
+            "화11",
+            "화12",
+            "화13"
           ],
           "professor": "신형덕",
-          "timeRaw": "화678",
+          "timeRaw": "화111213",
           "offeringDept": "경영학전공",
           "category": "전선",
           "score": 0.005,
@@ -660,22 +660,22 @@
         },
         {
           "courseId": "311410",
-          "section": "7",
+          "section": "5",
           "name": "인적자원관리",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            6,
-            7,
-            8
+            18,
+            19,
+            20
           ],
           "slotsHuman": [
-            "월6",
-            "월7",
-            "월8"
+            "화2",
+            "화3",
+            "화4"
           ],
-          "professor": "김범열",
-          "timeRaw": "월678",
+          "professor": "문태원",
+          "timeRaw": "화234",
           "offeringDept": "경영학전공",
           "category": "전선",
           "score": 0.0055,

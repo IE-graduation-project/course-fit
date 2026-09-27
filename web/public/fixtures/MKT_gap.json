@@ -219,22 +219,22 @@
         },
         {
           "courseId": "311610",
-          "section": "1",
+          "section": "4",
           "name": "소비자행동",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            34,
-            35,
-            36
+            54,
+            55,
+            56
           ],
           "slotsHuman": [
-            "수2",
-            "수3",
-            "수4"
+            "목6",
+            "목7",
+            "목8"
           ],
-          "professor": "Yoon-Na Cho",
-          "timeRaw": "수234",
+          "professor": "채보연",
+          "timeRaw": "목678",
           "offeringDept": "경영학전공",
           "category": "전선",
           "score": 0.0506,
@@ -321,22 +321,22 @@
         },
         {
           "courseId": "311419",
-          "section": "2",
+          "section": "1",
           "name": "마케팅트렌드",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            22,
-            23,
-            24
+            18,
+            19,
+            20
           ],
           "slotsHuman": [
-            "화6",
-            "화7",
-            "화8"
+            "화2",
+            "화3",
+            "화4"
           ],
           "professor": "이준환",
-          "timeRaw": "화678",
+          "timeRaw": "화234",
           "offeringDept": "경영학전공",
           "category": "전선",
           "score": 0.0428,
@@ -629,22 +629,22 @@
         },
         {
           "courseId": "311610",
-          "section": "2",
+          "section": "4",
           "name": "소비자행동",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            38,
-            39,
-            40
+            54,
+            55,
+            56
           ],
           "slotsHuman": [
-            "수6",
-            "수7",
-            "수8"
+            "목6",
+            "목7",
+            "목8"
           ],
-          "professor": "Yoon-Na Cho",
-          "timeRaw": "수678",
+          "professor": "채보연",
+          "timeRaw": "목678",
           "offeringDept": "경영학전공",
           "category": "전선",
           "score": 0.0506,
@@ -663,22 +663,22 @@
         },
         {
           "courseId": "002151",
-          "section": "1",
+          "section": "2",
           "name": "광고의이해",
           "credit": 3,
           "area": "공통교양",
           "slots": [
-            34,
-            35,
-            36
+            38,
+            39,
+            40
           ],
           "slotsHuman": [
-            "수2",
-            "수3",
-            "수4"
+            "수6",
+            "수7",
+            "수8"
           ],
           "professor": "이승연1",
-          "timeRaw": "수234",
+          "timeRaw": "수678",
           "offeringDept": "교양과(서울)",
           "category": "교선",
           "score": 0.049,
@@ -731,22 +731,22 @@
         },
         {
           "courseId": "311419",
-          "section": "1",
+          "section": "3",
           "name": "마케팅트렌드",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            18,
-            19,
-            20
+            34,
+            35,
+            36
           ],
           "slotsHuman": [
-            "화2",
-            "화3",
-            "화4"
+            "수2",
+            "수3",
+            "수4"
           ],
           "professor": "이준환",
-          "timeRaw": "화234",
+          "timeRaw": "수234",
           "offeringDept": "경영학전공",
           "category": "전선",
           "score": 0.0428,

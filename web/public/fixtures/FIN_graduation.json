@@ -335,24 +335,24 @@
         },
         {
           "courseId": "001013",
-          "section": "7",
+          "section": "11",
           "name": "논리적사고와글쓰기(경영)",
           "credit": 3,
           "area": "교양필수",
           "slots": [
-            21,
-            22,
-            53,
-            54
+            81,
+            82,
+            83,
+            84
           ],
           "slotsHuman": [
-            "화5",
-            "화6",
-            "목5",
-            "목6"
+            "토1",
+            "토2",
+            "토3",
+            "토4"
           ],
-          "professor": "이부순",
-          "timeRaw": "화56,목56",
+          "professor": "유정월",
+          "timeRaw": "토1234",
           "offeringDept": "교양과(서울)",
           "category": "교필",
           "score": 0.0074,
@@ -556,24 +556,24 @@
         },
         {
           "courseId": "001013",
-          "section": "14",
+          "section": "7",
           "name": "논리적사고와글쓰기(경영)",
           "credit": 3,
           "area": "교양필수",
           "slots": [
-            42,
-            43,
-            44,
-            45
+            21,
+            22,
+            53,
+            54
           ],
           "slotsHuman": [
-            "수10",
-            "수11",
-            "수12",
-            "수13"
+            "화5",
+            "화6",
+            "목5",
+            "목6"
           ],
-          "professor": "곽민석",
-          "timeRaw": "수10111213",
+          "professor": "이부순",
+          "timeRaw": "화56,목56",
           "offeringDept": "교양과(서울)",
           "category": "교필",
           "score": 0.0074,
@@ -743,22 +743,22 @@
         },
         {
           "courseId": "313106",
-          "section": "2",
+          "section": "3",
           "name": "원가회계",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            66,
-            67,
-            68
+            37,
+            38,
+            39
           ],
           "slotsHuman": [
-            "금2",
-            "금3",
-            "금4"
+            "수5",
+            "수6",
+            "수7"
           ],
-          "professor": "황진아",
-          "timeRaw": "금234",
+          "professor": "이윤기",
+          "timeRaw": "수567",
           "offeringDept": "경영학전공",
           "category": "전선",
           "score": 0.0358,
@@ -777,24 +777,24 @@
         },
         {
           "courseId": "001013",
-          "section": "11",
+          "section": "9",
           "name": "논리적사고와글쓰기(경영)",
           "credit": 3,
           "area": "교양필수",
           "slots": [
-            81,
-            82,
-            83,
-            84
+            21,
+            22,
+            53,
+            54
           ],
           "slotsHuman": [
-            "토1",
-            "토2",
-            "토3",
-            "토4"
+            "화5",
+            "화6",
+            "목5",
+            "목6"
           ],
-          "professor": "유정월",
-          "timeRaw": "토1234",
+          "professor": "김미영6",
+          "timeRaw": "화56,목56",
           "offeringDept": "교양과(서울)",
           "category": "교필",
           "score": 0.0074,
