@@ -75,12 +75,17 @@ def _add_base_constraints(prob, x, cands, U, L):
 
 def solve_topk(candidates, score_by_course, need, *, U=18, L=12,
                taken_ids, passed_ids, eps=0.0, k=3, msg=False,
-               time_limit: float | None = None) -> list[Result]:
+               time_limit: float | None = None,
+               area_weight: dict[str, int] | None = None) -> list[Result]:
     """상위 k개 시간표를 반환 (1등이 [0]). k-best via no-good cut.
 
     1순위(CareerFit)로 V*를 고정한 뒤, 2순위(GradProgress)를 풀고 → 그 해를 배제하는
     no-good cut을 추가 → 재풀이를 k번 반복한다. 재풀이도 전체 ILP라 모든 hard 제약
     (시간충돌·분반·학점)을 다시 만족하므로 나오는 대안은 전부 유효한 시간표다.
+
+    area_weight 는 2순위에서 영역별 졸업 반영 학점에 곱할 정수 가중이다(없는 영역 1). None 이면
+    모든 영역을 같은 무게로 센다. 가중은 목적식에만 걸고, Result.gradprogress 는 가중 없이
+    학점 그대로 센다 — 화면의 「졸업 반영」은 성향과 무관하게 같은 단위여야 한다(#53).
 
     time_limit(초)은 CBC 1회 풀이의 상한이다. None이면 무제한(CLI·테스트 기본). 웹 서버는
     반드시 지정해야 한다 — 탐색이 폭발하는 입력이 오면 요청이 무한정 물린다. 상한에 걸리면
@@ -123,6 +128,10 @@ def solve_topk(candidates, score_by_course, need, *, U=18, L=12,
         p2 += f <= placed, f"needcap_{j}"                          # f_g ≤ 담은학점_g
         fvars.append(f)
     gradprog = pulp.lpSum(fvars)
+    # 졸업 우선은 같은 학점이라도 필수·전공 영역을 먼저 채운다(#53). 가중이 정수라 서로 다른
+    # 해의 가중 합 차이도 0 이 아니면 최소 1 — 아래 δ 논증이 그대로 선다.
+    objective = (pulp.lpSum(area_weight.get(a, 1) * f for a, f in zip(need_areas, fvars))
+                 if area_weight else gradprog)
     # 3순위 — 졸업 반영이 같은 해가 여럿이면 CBC 탐색 순서가 해를 골라, 같은 입력이 로컬과
     # 배포 서버에서 다른 시간표를 냈고 배포 쪽 직무 적합이 더 낮았다(#45). δ·CareerFit 을
     # 목적에 섞어 동점 안에서 직무 적합이 높은 해를 고른다. 졸업 반영은 학점 단위라 해 사이
@@ -130,9 +139,9 @@ def solve_topk(candidates, score_by_course, need, *, U=18, L=12,
     # 면 δ·CareerFit 의 폭이 0.5 를 넘지 않아 졸업 반영을 한 학점도 내주지 않는다.
     max_score = max((score_by_course[c.course_id] for c in cands), default=0.0)
     if careerfit_is_empty or max_score <= 0:
-        p2 += gradprog
+        p2 += objective
     else:
-        p2 += gradprog + (0.5 / (U * max_score)) * careerfit
+        p2 += objective + (0.5 / (U * max_score)) * careerfit
     _add_base_constraints(p2, x, cands, U, L)
     # careerfit 이 빈 식이면(전 후보 Score 0) 이 제약은 0 >= -1e-6 이라 항상 참이다.
     # 그런데 PuLP 는 변수가 없는 제약·목적에 `__dummy` 를 끼워 넣는다. 목적식(gradprog)도

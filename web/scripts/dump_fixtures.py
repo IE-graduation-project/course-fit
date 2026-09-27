@@ -16,7 +16,7 @@ sys.path.insert(0, str(ROOT))
 
 from api.serialize import build_payload, build_reference, load_ref_data  # noqa: E402
 from recommender import data, params                                    # noqa: E402
-from recommender.recommend import PREFERENCE_EPS, recommend             # noqa: E402
+from recommender.recommend import PREFERENCE_AREA_WEIGHT, PREFERENCE_EPS, recommend  # noqa: E402
 
 DB = str(ROOT / "db" / "app.db")
 U, L, TOP_K = 18, 12, 3
@@ -38,7 +38,8 @@ def main() -> int:
     for job_id, _job_name in ref.jobs:
         for mode, eps in PREFERENCE_EPS.items():
             rec = recommend(input_hash, job_id, db_path=DB,
-                            U=U, L=L, alpha=params.ALPHA_DEFAULT, eps=eps, k=TOP_K)
+                            U=U, L=L, alpha=params.ALPHA_DEFAULT, eps=eps, k=TOP_K,
+                            area_weight=PREFERENCE_AREA_WEIGHT[mode])
             payload = build_payload(conn, rec, ref, job_id=job_id, mode=mode, eps=eps,
                                     alpha=params.ALPHA_DEFAULT,
                                     max_credits=U, min_credits=L, top_k=TOP_K)

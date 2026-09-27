@@ -12,7 +12,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from recommender import data as rdata, params as rparams
-from recommender.recommend import DEFAULT_PREFERENCE, PREFERENCE_EPS, recommend
+from recommender.recommend import (DEFAULT_PREFERENCE, PREFERENCE_AREA_WEIGHT, PREFERENCE_EPS,
+                                   recommend)
 from transcript.load import load_transcript
 from transcript.parse_text import parse_transcript_text
 
@@ -178,7 +179,8 @@ def recommend_endpoint(req: RecommendRequest) -> dict:
 
         rec = recommend(req.studentId, req.job, db_path=str(db.db_path()),
                         U=req.maxCredits, L=req.minCredits, alpha=rparams.ALPHA_DEFAULT,
-                        eps=eps, k=req.topK, time_limit=SOLVE_TIME_LIMIT)
+                        eps=eps, k=req.topK, time_limit=SOLVE_TIME_LIMIT,
+                        area_weight=PREFERENCE_AREA_WEIGHT.get(mode))
         return build_payload(conn, rec, app.state.ref, job_id=req.job, mode=mode, eps=eps,
                              alpha=rparams.ALPHA_DEFAULT, max_credits=req.maxCredits,
                              min_credits=req.minCredits, top_k=req.topK)
