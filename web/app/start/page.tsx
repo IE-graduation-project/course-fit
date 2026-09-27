@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { countCourseLines, fetchReference, submitTranscript } from "@/lib/api";
-import { SAMPLE_TRANSCRIPT } from "@/lib/sample";
+import { SAMPLE_TRANSCRIPTS } from "@/lib/sample";
 import type { JobRef, ModeRef, ProgramRef, Reference } from "@/lib/types";
 import { jobRank } from "@/lib/competency";
 
@@ -140,7 +140,11 @@ export default function StartPage() {
 
         {step === "transcript" && (
           <>
-            <TranscriptInput busy={busy} onSubmit={handleTranscript} />
+            <TranscriptInput
+              busy={busy}
+              onSubmit={handleTranscript}
+              sample={program ? (SAMPLE_TRANSCRIPTS[program.dept] ?? null) : null}
+            />
             {error && (
               <p role="alert" className="text-sm font-semibold text-danger">
                 {error}
@@ -302,9 +306,12 @@ function StepDots({ step }: { step: Step }) {
 function TranscriptInput({
   busy,
   onSubmit,
+  sample,
 }: {
   busy: boolean;
   onSubmit: (v: string) => void;
+  /** 고른 학과의 샘플. 학과가 다른 샘플을 넣으면 학번·학년·과목이 어긋나서 없으면 버튼을 숨긴다(#41) */
+  sample: string | null;
 }) {
   const [value, setValue] = useState("");
   const found = countCourseLines(value);
@@ -370,16 +377,18 @@ function TranscriptInput({
         >
           {busy ? "읽는 중…" : "이걸로 할게요"}
         </button>
-        <button
-          onClick={() => {
-            setValue(SAMPLE_TRANSCRIPT);
-            onSubmit(SAMPLE_TRANSCRIPT);
-          }}
-          disabled={busy}
-          className="rounded-md border border-border-strong px-5 py-2.5 text-sm font-semibold text-text-muted transition-colors hover:bg-surface-3"
-        >
-          샘플로 먼저 볼래요
-        </button>
+        {sample !== null && (
+          <button
+            onClick={() => {
+              setValue(sample);
+              onSubmit(sample);
+            }}
+            disabled={busy}
+            className="rounded-md border border-border-strong px-5 py-2.5 text-sm font-semibold text-text-muted transition-colors hover:bg-surface-3"
+          >
+            샘플로 먼저 볼래요
+          </button>
+        )}
       </div>
 
       {/* 결정 ⑧ — 구조가 이러하므로 사실인 문장만 쓴다. 학번·이름은 '전체성적조회'
