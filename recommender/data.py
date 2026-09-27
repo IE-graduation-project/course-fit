@@ -12,6 +12,7 @@ transcript 모듈을 import 하지 않으며, student/student_course 테이블�
 """
 from __future__ import annotations
 
+import re
 import sqlite3
 from dataclasses import dataclass
 from pathlib import Path
@@ -28,6 +29,16 @@ EXCLUDED_CAND_AREAS = ("일반선택",)   # 후보집합 제외 (설계 1절)
 # (공통교양·교양필수·특성화교양 등)은 전교 공통이라 여기 넣지 않는다.
 DEPT_SCOPED_AREAS = frozenset({"전공필수", "전공선택", "전공기초", "MSC"})
 CROSS_DEPT_AREA = "일반선택"
+
+# 단과대마다 따로 여는 교양필수 — 논리적사고와글쓰기(경영)·(공학)·(인문)·(법학)·(예술). 카탈로그에서
+# 학과 것은 그 학과, 나머지는 COMMON 이라 걸러 주지 않으면 경영학과 학생에게 (법학)이 추천된다(#55).
+# 괄호 안에 숫자가 있는 것(대학물리(2))은 순번이라 변형으로 보지 않는다.
+_VARIANT_SUFFIX = re.compile(r"\([^()\d]+\)$")
+
+
+def _variant_base(name: str) -> str | None:
+    m = _VARIANT_SUFFIX.search(name)
+    return name[:m.start()] if m else None
 
 
 def active_term(conn) -> str:
@@ -143,7 +154,7 @@ def load_candidates(conn, dept_id: str, *, term: str, grade: int | None) -> list
     excl_q = ",".join("?" * len(EXCLUDED_CAND_AREAS))
     rows = conn.execute(
         f"""
-        SELECT s.course_id, s.section, c.course_name, c.credit, c.area,
+        SELECT s.course_id, s.section, c.course_name, c.credit, c.area, c.dept_id,
                s.time_slots_int, c.prerequisites
         FROM course_section s
         JOIN course c ON c.course_id = s.course_id
@@ -154,6 +165,14 @@ def load_candidates(conn, dept_id: str, *, term: str, grade: int | None) -> list
         """,
         (term, *depts, *EXCLUDED_CAND_AREAS, grade, grade),
     ).fetchall()
+
+    # 학생 학과에 같은 이름의 교양필수 변형이 있으면 다른 단과대 변형(COMMON)은 뺀다(#55).
+    own = {_variant_base(n) for (n,) in conn.execute(
+        "SELECT course_name FROM course WHERE dept_id = ? AND area = '교양필수'", (dept_id,))}
+    own.discard(None)
+    rows = [r for r in rows
+            if not (r["area"] == "교양필수" and r["dept_id"] == "COMMON"
+                    and _variant_base(r["course_name"]) in own)]
 
     weights = load_weights(conn, {r["course_id"] for r in rows})
     return [
