@@ -143,7 +143,7 @@ export default function StartPage() {
             <TranscriptInput
               busy={busy}
               onSubmit={handleTranscript}
-              sample={program ? (SAMPLE_TRANSCRIPTS[program.dept] ?? null) : null}
+              sample={program && year !== null ? (SAMPLE_TRANSCRIPTS[program.dept]?.[year] ?? null) : null}
             />
             {error && (
               <p role="alert" className="text-sm font-semibold text-danger">
