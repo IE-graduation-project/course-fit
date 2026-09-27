@@ -9,27 +9,27 @@
     {
       "job": "DA",
       "name": "데이터 분석가",
-      "fit": 87.8
+      "fit": 62.5
     },
     {
       "job": "DE",
       "name": "데이터 엔지니어",
-      "fit": 85.2
+      "fit": 62.8
     },
     {
       "job": "DS",
       "name": "데이터 사이언티스트",
-      "fit": 93.9
+      "fit": 78.9
     },
     {
       "job": "FIN",
       "name": "재무 분석가",
-      "fit": 98.1
+      "fit": 96.1
     },
     {
       "job": "MKT",
       "name": "마케팅 매니저",
-      "fit": 97.1
+      "fit": 95.1
     },
     {
       "job": "PM",
@@ -51,16 +51,16 @@
   },
   "diagnosis": {
     "sigma": {
-      "BIZ": 0.9927,
-      "COMM": 0.8614,
-      "DATA": 0.896,
-      "DB": 0.5617,
-      "FIN": 0.9506,
-      "MKT": 0.927,
-      "ML": 0.8282,
-      "OR": 0.8571,
-      "PROG": 0.79,
-      "VIZ": 0.7126
+      "BIZ": 0.9901,
+      "COMM": 0.8095,
+      "DATA": 0.7556,
+      "DB": 0.0,
+      "FIN": 0.9251,
+      "MKT": 0.8899,
+      "ML": 0.5422,
+      "OR": 0.6872,
+      "PROG": 0.6626,
+      "VIZ": 0.1386
     },
     "rho": {
       "BIZ": 0.5661,
@@ -78,66 +78,66 @@
       "BIZ": 0.0,
       "COMM": 0.0,
       "DATA": 0.0,
-      "DB": 0.0,
+      "DB": 0.056,
       "FIN": 0.0,
-      "MKT": 0.073,
+      "MKT": 0.1101,
       "ML": 0.0,
       "OR": 0.0,
       "PROG": 0.0,
-      "VIZ": 0.0
+      "VIZ": 0.0475
     },
     "strengths": [
       {
         "comp": "BIZ",
         "compKo": "비즈니스",
-        "sigma": 0.9927
+        "sigma": 0.9901
       },
       {
         "comp": "FIN",
         "compKo": "재무",
-        "sigma": 0.9506
-      },
-      {
-        "comp": "DATA",
-        "compKo": "데이터분석",
-        "sigma": 0.896
+        "sigma": 0.9251
       },
       {
         "comp": "COMM",
         "compKo": "커뮤니케이션",
-        "sigma": 0.8614
+        "sigma": 0.8095
+      },
+      {
+        "comp": "DATA",
+        "compKo": "데이터분석",
+        "sigma": 0.7556
       },
       {
         "comp": "OR",
         "compKo": "최적화",
-        "sigma": 0.8571
-      },
-      {
-        "comp": "ML",
-        "compKo": "머신러닝",
-        "sigma": 0.8282
+        "sigma": 0.6872
       },
       {
         "comp": "PROG",
         "compKo": "프로그래밍",
-        "sigma": 0.79
+        "sigma": 0.6626
       },
       {
-        "comp": "VIZ",
-        "compKo": "데이터시각화",
-        "sigma": 0.7126
-      },
-      {
-        "comp": "DB",
-        "compKo": "데이터베이스",
-        "sigma": 0.5617
+        "comp": "ML",
+        "compKo": "머신러닝",
+        "sigma": 0.5422
       }
     ],
     "gaps": [
       {
         "comp": "MKT",
         "compKo": "마케팅",
-        "gap": 0.073
+        "gap": 0.1101
+      },
+      {
+        "comp": "DB",
+        "compKo": "데이터베이스",
+        "gap": 0.056
+      },
+      {
+        "comp": "VIZ",
+        "compKo": "데이터시각화",
+        "gap": 0.0475
       }
     ]
   },
@@ -152,7 +152,7 @@
   "timetables": [
     {
       "rank": 1,
-      "careerfit": 0.6234,
+      "careerfit": 0.9411,
       "gradProgress": 13.0,
       "totalCredit": 18,
       "status": "Optimal",
@@ -169,12 +169,12 @@
           "timeRaw": null,
           "offeringDept": "법학부",
           "category": "교선",
-          "score": 0.0461,
+          "score": 0.0696,
           "careerReason": [
             {
               "comp": "MKT",
               "compKo": "마케팅",
-              "value": 0.0461,
+              "value": 0.0696,
               "share": 1.0
             }
           ],
@@ -203,217 +203,12 @@
           "timeRaw": "금678",
           "offeringDept": "경영학전공",
           "category": "교선\n사회와경제",
-          "score": 0.0365,
+          "score": 0.0551,
           "careerReason": [
             {
               "comp": "MKT",
               "compKo": "마케팅",
-              "value": 0.0365,
-              "share": 1.0
-            }
-          ],
-          "gradReason": {
-            "area": "공통교양",
-            "remaining": 7
-          }
-        },
-        {
-          "courseId": "311610",
-          "section": "4",
-          "name": "소비자행동",
-          "credit": 3,
-          "area": "전공선택",
-          "slots": [
-            54,
-            55,
-            56
-          ],
-          "slotsHuman": [
-            "목6",
-            "목7",
-            "목8"
-          ],
-          "professor": "채보연",
-          "timeRaw": "목678",
-          "offeringDept": "경영학전공",
-          "category": "전선",
-          "score": 0.0335,
-          "careerReason": [
-            {
-              "comp": "MKT",
-              "compKo": "마케팅",
-              "value": 0.0335,
-              "share": 1.0
-            }
-          ],
-          "gradReason": {
-            "area": "전공선택",
-            "remaining": 12
-          }
-        },
-        {
-          "courseId": "002151",
-          "section": "2",
-          "name": "광고의이해",
-          "credit": 3,
-          "area": "공통교양",
-          "slots": [
-            38,
-            39,
-            40
-          ],
-          "slotsHuman": [
-            "수6",
-            "수7",
-            "수8"
-          ],
-          "professor": "이승연1",
-          "timeRaw": "수678",
-          "offeringDept": "교양과(서울)",
-          "category": "교선",
-          "score": 0.0325,
-          "careerReason": [
-            {
-              "comp": "MKT",
-              "compKo": "마케팅",
-              "value": 0.0325,
-              "share": 1.0
-            }
-          ],
-          "gradReason": {
-            "area": "공통교양",
-            "remaining": 7
-          }
-        },
-        {
-          "courseId": "002164",
-          "section": "1",
-          "name": "미술마케팅",
-          "credit": 3,
-          "area": "공통교양",
-          "slots": [
-            50,
-            51,
-            52
-          ],
-          "slotsHuman": [
-            "목2",
-            "목3",
-            "목4"
-          ],
-          "professor": "손이천",
-          "timeRaw": "목234",
-          "offeringDept": "회화과",
-          "category": "교선",
-          "score": 0.0308,
-          "careerReason": [
-            {
-              "comp": "MKT",
-              "compKo": "마케팅",
-              "value": 0.0308,
-              "share": 1.0
-            }
-          ],
-          "gradReason": {
-            "area": "공통교양",
-            "remaining": 7
-          }
-        },
-        {
-          "courseId": "311419",
-          "section": "3",
-          "name": "마케팅트렌드",
-          "credit": 3,
-          "area": "전공선택",
-          "slots": [
-            34,
-            35,
-            36
-          ],
-          "slotsHuman": [
-            "수2",
-            "수3",
-            "수4"
-          ],
-          "professor": "이준환",
-          "timeRaw": "수234",
-          "offeringDept": "경영학전공",
-          "category": "전선",
-          "score": 0.0284,
-          "careerReason": [
-            {
-              "comp": "MKT",
-              "compKo": "마케팅",
-              "value": 0.0284,
-              "share": 1.0
-            }
-          ],
-          "gradReason": {
-            "area": "전공선택",
-            "remaining": 12
-          }
-        }
-      ]
-    },
-    {
-      "rank": 2,
-      "careerfit": 0.6234,
-      "gradProgress": 13.0,
-      "totalCredit": 18,
-      "status": "Optimal",
-      "courses": [
-        {
-          "courseId": "002134",
-          "section": "1",
-          "name": "소비자보호와법",
-          "credit": 3,
-          "area": "공통교양",
-          "slots": [],
-          "slotsHuman": [],
-          "professor": "강봉석",
-          "timeRaw": null,
-          "offeringDept": "법학부",
-          "category": "교선",
-          "score": 0.0461,
-          "careerReason": [
-            {
-              "comp": "MKT",
-              "compKo": "마케팅",
-              "value": 0.0461,
-              "share": 1.0
-            }
-          ],
-          "gradReason": {
-            "area": "공통교양",
-            "remaining": 7
-          }
-        },
-        {
-          "courseId": "002177",
-          "section": "1",
-          "name": "마케팅의이해",
-          "credit": 3,
-          "area": "공통교양",
-          "slots": [
-            70,
-            71,
-            72
-          ],
-          "slotsHuman": [
-            "금6",
-            "금7",
-            "금8"
-          ],
-          "professor": "윤나라",
-          "timeRaw": "금678",
-          "offeringDept": "경영학전공",
-          "category": "교선\n사회와경제",
-          "score": 0.0365,
-          "careerReason": [
-            {
-              "comp": "MKT",
-              "compKo": "마케팅",
-              "value": 0.0365,
+              "value": 0.0551,
               "share": 1.0
             }
           ],
@@ -442,12 +237,12 @@
           "timeRaw": "수234",
           "offeringDept": "경영학전공",
           "category": "전선",
-          "score": 0.0335,
+          "score": 0.0506,
           "careerReason": [
             {
               "comp": "MKT",
               "compKo": "마케팅",
-              "value": 0.0335,
+              "value": 0.0506,
               "share": 1.0
             }
           ],
@@ -476,12 +271,12 @@
           "timeRaw": "수678",
           "offeringDept": "교양과(서울)",
           "category": "교선",
-          "score": 0.0325,
+          "score": 0.049,
           "careerReason": [
             {
               "comp": "MKT",
               "compKo": "마케팅",
-              "value": 0.0325,
+              "value": 0.049,
               "share": 1.0
             }
           ],
@@ -510,12 +305,12 @@
           "timeRaw": "목234",
           "offeringDept": "회화과",
           "category": "교선",
-          "score": 0.0308,
+          "score": 0.0465,
           "careerReason": [
             {
               "comp": "MKT",
               "compKo": "마케팅",
-              "value": 0.0308,
+              "value": 0.0465,
               "share": 1.0
             }
           ],
@@ -544,12 +339,12 @@
           "timeRaw": "화234",
           "offeringDept": "경영학전공",
           "category": "전선",
-          "score": 0.0284,
+          "score": 0.0428,
           "careerReason": [
             {
               "comp": "MKT",
               "compKo": "마케팅",
-              "value": 0.0284,
+              "value": 0.0428,
               "share": 1.0
             }
           ],
@@ -561,8 +356,8 @@
       ]
     },
     {
-      "rank": 3,
-      "careerfit": 0.6234,
+      "rank": 2,
+      "careerfit": 0.9411,
       "gradProgress": 13.0,
       "totalCredit": 18,
       "status": "Optimal",
@@ -579,12 +374,12 @@
           "timeRaw": null,
           "offeringDept": "법학부",
           "category": "교선",
-          "score": 0.0461,
+          "score": 0.0696,
           "careerReason": [
             {
               "comp": "MKT",
               "compKo": "마케팅",
-              "value": 0.0461,
+              "value": 0.0696,
               "share": 1.0
             }
           ],
@@ -613,12 +408,12 @@
           "timeRaw": "금678",
           "offeringDept": "경영학전공",
           "category": "교선\n사회와경제",
-          "score": 0.0365,
+          "score": 0.0551,
           "careerReason": [
             {
               "comp": "MKT",
               "compKo": "마케팅",
-              "value": 0.0365,
+              "value": 0.0551,
               "share": 1.0
             }
           ],
@@ -647,12 +442,12 @@
           "timeRaw": "수234",
           "offeringDept": "경영학전공",
           "category": "전선",
-          "score": 0.0335,
+          "score": 0.0506,
           "careerReason": [
             {
               "comp": "MKT",
               "compKo": "마케팅",
-              "value": 0.0335,
+              "value": 0.0506,
               "share": 1.0
             }
           ],
@@ -681,12 +476,12 @@
           "timeRaw": "수678",
           "offeringDept": "교양과(서울)",
           "category": "교선",
-          "score": 0.0325,
+          "score": 0.049,
           "careerReason": [
             {
               "comp": "MKT",
               "compKo": "마케팅",
-              "value": 0.0325,
+              "value": 0.049,
               "share": 1.0
             }
           ],
@@ -715,12 +510,12 @@
           "timeRaw": "목234",
           "offeringDept": "회화과",
           "category": "교선",
-          "score": 0.0308,
+          "score": 0.0465,
           "careerReason": [
             {
               "comp": "MKT",
               "compKo": "마케팅",
-              "value": 0.0308,
+              "value": 0.0465,
               "share": 1.0
             }
           ],
@@ -749,12 +544,217 @@
           "timeRaw": "화678",
           "offeringDept": "경영학전공",
           "category": "전선",
-          "score": 0.0284,
+          "score": 0.0428,
           "careerReason": [
             {
               "comp": "MKT",
               "compKo": "마케팅",
-              "value": 0.0284,
+              "value": 0.0428,
+              "share": 1.0
+            }
+          ],
+          "gradReason": {
+            "area": "전공선택",
+            "remaining": 12
+          }
+        }
+      ]
+    },
+    {
+      "rank": 3,
+      "careerfit": 0.9411,
+      "gradProgress": 13.0,
+      "totalCredit": 18,
+      "status": "Optimal",
+      "courses": [
+        {
+          "courseId": "002134",
+          "section": "1",
+          "name": "소비자보호와법",
+          "credit": 3,
+          "area": "공통교양",
+          "slots": [],
+          "slotsHuman": [],
+          "professor": "강봉석",
+          "timeRaw": null,
+          "offeringDept": "법학부",
+          "category": "교선",
+          "score": 0.0696,
+          "careerReason": [
+            {
+              "comp": "MKT",
+              "compKo": "마케팅",
+              "value": 0.0696,
+              "share": 1.0
+            }
+          ],
+          "gradReason": {
+            "area": "공통교양",
+            "remaining": 7
+          }
+        },
+        {
+          "courseId": "002177",
+          "section": "1",
+          "name": "마케팅의이해",
+          "credit": 3,
+          "area": "공통교양",
+          "slots": [
+            70,
+            71,
+            72
+          ],
+          "slotsHuman": [
+            "금6",
+            "금7",
+            "금8"
+          ],
+          "professor": "윤나라",
+          "timeRaw": "금678",
+          "offeringDept": "경영학전공",
+          "category": "교선\n사회와경제",
+          "score": 0.0551,
+          "careerReason": [
+            {
+              "comp": "MKT",
+              "compKo": "마케팅",
+              "value": 0.0551,
+              "share": 1.0
+            }
+          ],
+          "gradReason": {
+            "area": "공통교양",
+            "remaining": 7
+          }
+        },
+        {
+          "courseId": "311610",
+          "section": "2",
+          "name": "소비자행동",
+          "credit": 3,
+          "area": "전공선택",
+          "slots": [
+            38,
+            39,
+            40
+          ],
+          "slotsHuman": [
+            "수6",
+            "수7",
+            "수8"
+          ],
+          "professor": "Yoon-Na Cho",
+          "timeRaw": "수678",
+          "offeringDept": "경영학전공",
+          "category": "전선",
+          "score": 0.0506,
+          "careerReason": [
+            {
+              "comp": "MKT",
+              "compKo": "마케팅",
+              "value": 0.0506,
+              "share": 1.0
+            }
+          ],
+          "gradReason": {
+            "area": "전공선택",
+            "remaining": 12
+          }
+        },
+        {
+          "courseId": "002151",
+          "section": "1",
+          "name": "광고의이해",
+          "credit": 3,
+          "area": "공통교양",
+          "slots": [
+            34,
+            35,
+            36
+          ],
+          "slotsHuman": [
+            "수2",
+            "수3",
+            "수4"
+          ],
+          "professor": "이승연1",
+          "timeRaw": "수234",
+          "offeringDept": "교양과(서울)",
+          "category": "교선",
+          "score": 0.049,
+          "careerReason": [
+            {
+              "comp": "MKT",
+              "compKo": "마케팅",
+              "value": 0.049,
+              "share": 1.0
+            }
+          ],
+          "gradReason": {
+            "area": "공통교양",
+            "remaining": 7
+          }
+        },
+        {
+          "courseId": "002164",
+          "section": "1",
+          "name": "미술마케팅",
+          "credit": 3,
+          "area": "공통교양",
+          "slots": [
+            50,
+            51,
+            52
+          ],
+          "slotsHuman": [
+            "목2",
+            "목3",
+            "목4"
+          ],
+          "professor": "손이천",
+          "timeRaw": "목234",
+          "offeringDept": "회화과",
+          "category": "교선",
+          "score": 0.0465,
+          "careerReason": [
+            {
+              "comp": "MKT",
+              "compKo": "마케팅",
+              "value": 0.0465,
+              "share": 1.0
+            }
+          ],
+          "gradReason": {
+            "area": "공통교양",
+            "remaining": 7
+          }
+        },
+        {
+          "courseId": "311419",
+          "section": "1",
+          "name": "마케팅트렌드",
+          "credit": 3,
+          "area": "전공선택",
+          "slots": [
+            18,
+            19,
+            20
+          ],
+          "slotsHuman": [
+            "화2",
+            "화3",
+            "화4"
+          ],
+          "professor": "이준환",
+          "timeRaw": "화234",
+          "offeringDept": "경영학전공",
+          "category": "전선",
+          "score": 0.0428,
+          "careerReason": [
+            {
+              "comp": "MKT",
+              "compKo": "마케팅",
+              "value": 0.0428,
               "share": 1.0
             }
           ],

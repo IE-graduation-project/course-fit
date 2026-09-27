@@ -3,7 +3,7 @@
 transcript 모듈을 import 하지 않으며, student/student_course 테이블을 통해서만 연결된다
 (접점=DB). 읽는 것:
 - 후보집합 C: course_section ⋈ course (dept∈{학생dept, COMMON} ∧ area≠일반선택)
-- w_{c,k}: course_competency,  ρ_k: job_competency
+- w_{c,k}: course_competency 의 과목별 상위 3역량 (#31),  ρ_k: job_competency
 - 학생 기수강: student_course 단일 원천
     · σ·선수충족 = matched ∧ passed ∧ ¬superseded
     · 기이수학점(need) = area별 passed ∧ ¬superseded 합. 타 학과 전공 영역은 일반선택으로 (#40)
@@ -15,6 +15,8 @@ from __future__ import annotations
 import sqlite3
 from dataclasses import dataclass
 from pathlib import Path
+
+from . import params
 
 ROOT = Path(__file__).resolve().parent.parent
 DB_PATH = ROOT / "db" / "app.db"
@@ -99,8 +101,13 @@ def comp_ids(conn) -> list[str]:
     return [r["comp_id"] for r in conn.execute("SELECT comp_id FROM competency")]
 
 
-def load_weights(conn, course_ids) -> dict[str, dict[str, float]]:
-    """course_competency에서 주어진 과목들의 역량 가중치 (없으면 빈 dict → σ에 0 기여)."""
+def load_weights(conn, course_ids, *, top_k: int | None = params.COURSE_TOP_K
+                 ) -> dict[str, dict[str, float]]:
+    """course_competency에서 주어진 과목들의 역량 가중치 (없으면 빈 dict → σ에 0 기여).
+
+    σ(기수강)와 Score(후보) 모두 여기를 지나므로 상위 top_k 역량 절단(#31)도 여기서 한 번만
+    건다. top_k=None 은 매핑 원본 그대로 — 전후 비교(recommender.diagnose)용.
+    """
     out: dict[str, dict[str, float]] = {}
     ids = list(course_ids)
     if not ids:
@@ -111,7 +118,9 @@ def load_weights(conn, course_ids) -> dict[str, dict[str, float]]:
         ids,
     ):
         out.setdefault(r["course_id"], {})[r["comp_id"]] = r["weight"]
-    return out
+    if top_k is None:
+        return out
+    return {cid: params.top_k_weights(w, top_k) for cid, w in out.items()}
 
 
 def load_candidates(conn, dept_id: str, *, term: str, grade: int | None) -> list[Candidate]:

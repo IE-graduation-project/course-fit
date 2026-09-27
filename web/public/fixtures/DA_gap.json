@@ -9,27 +9,27 @@
     {
       "job": "DA",
       "name": "데이터 분석가",
-      "fit": 87.8
+      "fit": 62.5
     },
     {
       "job": "DE",
       "name": "데이터 엔지니어",
-      "fit": 85.2
+      "fit": 62.8
     },
     {
       "job": "DS",
       "name": "데이터 사이언티스트",
-      "fit": 93.9
+      "fit": 78.9
     },
     {
       "job": "FIN",
       "name": "재무 분석가",
-      "fit": 98.1
+      "fit": 96.1
     },
     {
       "job": "MKT",
       "name": "마케팅 매니저",
-      "fit": 97.1
+      "fit": 95.1
     },
     {
       "job": "PM",
@@ -51,16 +51,16 @@
   },
   "diagnosis": {
     "sigma": {
-      "BIZ": 0.9927,
-      "COMM": 0.8614,
-      "DATA": 0.896,
-      "DB": 0.5617,
-      "FIN": 0.9506,
-      "MKT": 0.927,
-      "ML": 0.8282,
-      "OR": 0.8571,
-      "PROG": 0.79,
-      "VIZ": 0.7126
+      "BIZ": 0.9901,
+      "COMM": 0.8095,
+      "DATA": 0.7556,
+      "DB": 0.0,
+      "FIN": 0.9251,
+      "MKT": 0.8899,
+      "ML": 0.5422,
+      "OR": 0.6872,
+      "PROG": 0.6626,
+      "VIZ": 0.1386
     },
     "rho": {
       "BIZ": 0.9484,
@@ -77,67 +77,67 @@
     "gap": {
       "BIZ": 0.0,
       "COMM": 0.0,
-      "DATA": 0.0576,
-      "DB": 0.2712,
+      "DATA": 0.1979,
+      "DB": 0.8329,
       "FIN": 0.0,
       "MKT": 0.0,
       "ML": 0.0,
       "OR": 0.0,
       "PROG": 0.0,
-      "VIZ": 0.2874
+      "VIZ": 0.8614
     },
     "strengths": [
       {
         "comp": "BIZ",
         "compKo": "비즈니스",
-        "sigma": 0.9927
+        "sigma": 0.9901
       },
       {
         "comp": "FIN",
         "compKo": "재무",
-        "sigma": 0.9506
+        "sigma": 0.9251
       },
       {
         "comp": "MKT",
         "compKo": "마케팅",
-        "sigma": 0.927
+        "sigma": 0.8899
       },
       {
         "comp": "COMM",
         "compKo": "커뮤니케이션",
-        "sigma": 0.8614
+        "sigma": 0.8095
       },
       {
         "comp": "OR",
         "compKo": "최적화",
-        "sigma": 0.8571
-      },
-      {
-        "comp": "ML",
-        "compKo": "머신러닝",
-        "sigma": 0.8282
+        "sigma": 0.6872
       },
       {
         "comp": "PROG",
         "compKo": "프로그래밍",
-        "sigma": 0.79
+        "sigma": 0.6626
+      },
+      {
+        "comp": "ML",
+        "compKo": "머신러닝",
+        "sigma": 0.5422
       }
     ],
     "gaps": [
       {
         "comp": "VIZ",
         "compKo": "데이터시각화",
-        "gap": 0.2874
+        "gap": 0.8614
       },
       {
         "comp": "DB",
         "compKo": "데이터베이스",
-        "gap": 0.2712
+        "gap": 0.8329
       },
       {
         "comp": "DATA",
         "compKo": "데이터분석",
-        "gap": 0.0576
+        "gap": 0.1979
       }
     ]
   },
@@ -152,7 +152,7 @@
   "timetables": [
     {
       "rank": 1,
-      "careerfit": 1.8304,
+      "careerfit": 4.3708,
       "gradProgress": 10.0,
       "totalCredit": 18,
       "status": "Optimal",
@@ -177,25 +177,19 @@
           "timeRaw": "목678",
           "offeringDept": "교양과(서울)",
           "category": "교선",
-          "score": 0.1632,
+          "score": 0.4337,
           "careerReason": [
             {
               "comp": "VIZ",
               "compKo": "데이터시각화",
-              "value": 0.1371,
-              "share": 0.84
-            },
-            {
-              "comp": "DB",
-              "compKo": "데이터베이스",
-              "value": 0.0195,
-              "share": 0.1197
+              "value": 0.411,
+              "share": 0.9478
             },
             {
               "comp": "DATA",
               "compKo": "데이터분석",
-              "value": 0.0066,
-              "share": 0.0404
+              "value": 0.0226,
+              "share": 0.0522
             }
           ],
           "gradReason": {
@@ -223,25 +217,19 @@
           "timeRaw": "수91011",
           "offeringDept": "산업공학전공",
           "category": "교선",
-          "score": 0.1193,
+          "score": 0.2721,
           "careerReason": [
             {
               "comp": "DB",
               "compKo": "데이터베이스",
-              "value": 0.0771,
-              "share": 0.6465
-            },
-            {
-              "comp": "VIZ",
-              "compKo": "데이터시각화",
-              "value": 0.0319,
-              "share": 0.2676
+              "value": 0.2369,
+              "share": 0.8705
             },
             {
               "comp": "DATA",
               "compKo": "데이터분석",
-              "value": 0.0103,
-              "share": 0.0859
+              "value": 0.0352,
+              "share": 0.1295
             }
           ],
           "gradReason": {
@@ -269,25 +257,19 @@
           "timeRaw": "수678",
           "offeringDept": "경영학전공",
           "category": "전선",
-          "score": 0.0882,
+          "score": 0.2205,
           "careerReason": [
             {
               "comp": "DB",
               "compKo": "데이터베이스",
-              "value": 0.0675,
-              "share": 0.7654
-            },
-            {
-              "comp": "VIZ",
-              "compKo": "데이터시각화",
-              "value": 0.0169,
-              "share": 0.1911
+              "value": 0.2074,
+              "share": 0.9403
             },
             {
               "comp": "DATA",
               "compKo": "데이터분석",
-              "value": 0.0038,
-              "share": 0.0435
+              "value": 0.0132,
+              "share": 0.0597
             }
           ],
           "gradReason": {
@@ -315,25 +297,19 @@
           "timeRaw": "수234",
           "offeringDept": "교양과(서울)",
           "category": "교선",
-          "score": 0.0825,
+          "score": 0.1976,
           "careerReason": [
             {
               "comp": "DB",
               "compKo": "데이터베이스",
-              "value": 0.0525,
-              "share": 0.6365
-            },
-            {
-              "comp": "VIZ",
-              "compKo": "데이터시각화",
-              "value": 0.0194,
-              "share": 0.235
+              "value": 0.1612,
+              "share": 0.8157
             },
             {
               "comp": "DATA",
               "compKo": "데이터분석",
-              "value": 0.0106,
-              "share": 0.1285
+              "value": 0.0364,
+              "share": 0.1843
             }
           ],
           "gradReason": {
@@ -361,25 +337,13 @@
           "timeRaw": "화678",
           "offeringDept": "기계ㆍ시스템디자인공학과",
           "category": "일선",
-          "score": 0.0797,
+          "score": 0.1781,
           "careerReason": [
             {
               "comp": "VIZ",
               "compKo": "데이터시각화",
-              "value": 0.0594,
-              "share": 0.7456
-            },
-            {
-              "comp": "DB",
-              "compKo": "데이터베이스",
-              "value": 0.0156,
-              "share": 0.1959
-            },
-            {
-              "comp": "DATA",
-              "compKo": "데이터분석",
-              "value": 0.0047,
-              "share": 0.0585
+              "value": 0.1781,
+              "share": 1.0
             }
           ],
           "gradReason": {
@@ -407,25 +371,13 @@
           "timeRaw": "목234",
           "offeringDept": "교양과(서울)",
           "category": "교선\n과학과컴퓨터",
-          "score": 0.0772,
+          "score": 0.155,
           "careerReason": [
             {
               "comp": "DB",
               "compKo": "데이터베이스",
-              "value": 0.0505,
-              "share": 0.6535
-            },
-            {
-              "comp": "VIZ",
-              "compKo": "데이터시각화",
-              "value": 0.0238,
-              "share": 0.3085
-            },
-            {
-              "comp": "DATA",
-              "compKo": "데이터분석",
-              "value": 0.0029,
-              "share": 0.038
+              "value": 0.155,
+              "share": 1.0
             }
           ],
           "gradReason": {
@@ -437,7 +389,7 @@
     },
     {
       "rank": 2,
-      "careerfit": 1.8304,
+      "careerfit": 4.3708,
       "gradProgress": 10.0,
       "totalCredit": 18,
       "status": "Optimal",
@@ -462,25 +414,19 @@
           "timeRaw": "목678",
           "offeringDept": "교양과(서울)",
           "category": "교선",
-          "score": 0.1632,
+          "score": 0.4337,
           "careerReason": [
             {
               "comp": "VIZ",
               "compKo": "데이터시각화",
-              "value": 0.1371,
-              "share": 0.84
-            },
-            {
-              "comp": "DB",
-              "compKo": "데이터베이스",
-              "value": 0.0195,
-              "share": 0.1197
+              "value": 0.411,
+              "share": 0.9478
             },
             {
               "comp": "DATA",
               "compKo": "데이터분석",
-              "value": 0.0066,
-              "share": 0.0404
+              "value": 0.0226,
+              "share": 0.0522
             }
           ],
           "gradReason": {
@@ -508,25 +454,19 @@
           "timeRaw": "수91011",
           "offeringDept": "산업공학전공",
           "category": "교선",
-          "score": 0.1193,
+          "score": 0.2721,
           "careerReason": [
             {
               "comp": "DB",
               "compKo": "데이터베이스",
-              "value": 0.0771,
-              "share": 0.6465
-            },
-            {
-              "comp": "VIZ",
-              "compKo": "데이터시각화",
-              "value": 0.0319,
-              "share": 0.2676
+              "value": 0.2369,
+              "share": 0.8705
             },
             {
               "comp": "DATA",
               "compKo": "데이터분석",
-              "value": 0.0103,
-              "share": 0.0859
+              "value": 0.0352,
+              "share": 0.1295
             }
           ],
           "gradReason": {
@@ -536,43 +476,37 @@
         },
         {
           "courseId": "311806",
-          "section": "2",
+          "section": "4",
           "name": "경영정보시스템",
           "credit": 3,
           "area": "전공선택",
           "slots": [
-            38,
-            39,
-            40
+            50,
+            51,
+            52
           ],
           "slotsHuman": [
-            "수6",
-            "수7",
-            "수8"
+            "목2",
+            "목3",
+            "목4"
           ],
-          "professor": "남호헌",
-          "timeRaw": "수678",
+          "professor": "김범열",
+          "timeRaw": "목234",
           "offeringDept": "경영학전공",
           "category": "전선",
-          "score": 0.0882,
+          "score": 0.2205,
           "careerReason": [
             {
               "comp": "DB",
               "compKo": "데이터베이스",
-              "value": 0.0675,
-              "share": 0.7654
-            },
-            {
-              "comp": "VIZ",
-              "compKo": "데이터시각화",
-              "value": 0.0169,
-              "share": 0.1911
+              "value": 0.2074,
+              "share": 0.9403
             },
             {
               "comp": "DATA",
               "compKo": "데이터분석",
-              "value": 0.0038,
-              "share": 0.0435
+              "value": 0.0132,
+              "share": 0.0597
             }
           ],
           "gradReason": {
@@ -600,25 +534,19 @@
           "timeRaw": "수234",
           "offeringDept": "교양과(서울)",
           "category": "교선",
-          "score": 0.0825,
+          "score": 0.1976,
           "careerReason": [
             {
               "comp": "DB",
               "compKo": "데이터베이스",
-              "value": 0.0525,
-              "share": 0.6365
-            },
-            {
-              "comp": "VIZ",
-              "compKo": "데이터시각화",
-              "value": 0.0194,
-              "share": 0.235
+              "value": 0.1612,
+              "share": 0.8157
             },
             {
               "comp": "DATA",
               "compKo": "데이터분석",
-              "value": 0.0106,
-              "share": 0.1285
+              "value": 0.0364,
+              "share": 0.1843
             }
           ],
           "gradReason": {
@@ -628,43 +556,31 @@
         },
         {
           "courseId": "012313",
-          "section": "12",
+          "section": "10",
           "name": "MATLAB프로그래밍및실습",
           "credit": 3,
           "area": "공통교양",
           "slots": [
-            2,
-            3,
-            4
+            38,
+            39,
+            40
           ],
           "slotsHuman": [
-            "월2",
-            "월3",
-            "월4"
+            "수6",
+            "수7",
+            "수8"
           ],
-          "professor": "정승환2",
-          "timeRaw": "월234",
+          "professor": "최형연",
+          "timeRaw": "수678",
           "offeringDept": "기계ㆍ시스템디자인공학과",
           "category": "일선",
-          "score": 0.0797,
+          "score": 0.1781,
           "careerReason": [
             {
               "comp": "VIZ",
               "compKo": "데이터시각화",
-              "value": 0.0594,
-              "share": 0.7456
-            },
-            {
-              "comp": "DB",
-              "compKo": "데이터베이스",
-              "value": 0.0156,
-              "share": 0.1959
-            },
-            {
-              "comp": "DATA",
-              "compKo": "데이터분석",
-              "value": 0.0047,
-              "share": 0.0585
+              "value": 0.1781,
+              "share": 1.0
             }
           ],
           "gradReason": {
@@ -692,25 +608,13 @@
           "timeRaw": "화678",
           "offeringDept": "교양과(서울)",
           "category": "교선\n과학과컴퓨터",
-          "score": 0.0772,
+          "score": 0.155,
           "careerReason": [
             {
               "comp": "DB",
               "compKo": "데이터베이스",
-              "value": 0.0505,
-              "share": 0.6535
-            },
-            {
-              "comp": "VIZ",
-              "compKo": "데이터시각화",
-              "value": 0.0238,
-              "share": 0.3085
-            },
-            {
-              "comp": "DATA",
-              "compKo": "데이터분석",
-              "value": 0.0029,
-              "share": 0.038
+              "value": 0.155,
+              "share": 1.0
             }
           ],
           "gradReason": {
@@ -722,7 +626,7 @@
     },
     {
       "rank": 3,
-      "careerfit": 1.8304,
+      "careerfit": 4.3708,
       "gradProgress": 10.0,
       "totalCredit": 18,
       "status": "Optimal",
@@ -747,25 +651,19 @@
           "timeRaw": "목678",
           "offeringDept": "교양과(서울)",
           "category": "교선",
-          "score": 0.1632,
+          "score": 0.4337,
           "careerReason": [
             {
               "comp": "VIZ",
               "compKo": "데이터시각화",
-              "value": 0.1371,
-              "share": 0.84
-            },
-            {
-              "comp": "DB",
-              "compKo": "데이터베이스",
-              "value": 0.0195,
-              "share": 0.1197
+              "value": 0.411,
+              "share": 0.9478
             },
             {
               "comp": "DATA",
               "compKo": "데이터분석",
-              "value": 0.0066,
-              "share": 0.0404
+              "value": 0.0226,
+              "share": 0.0522
             }
           ],
           "gradReason": {
@@ -793,25 +691,19 @@
           "timeRaw": "수91011",
           "offeringDept": "산업공학전공",
           "category": "교선",
-          "score": 0.1193,
+          "score": 0.2721,
           "careerReason": [
             {
               "comp": "DB",
               "compKo": "데이터베이스",
-              "value": 0.0771,
-              "share": 0.6465
-            },
-            {
-              "comp": "VIZ",
-              "compKo": "데이터시각화",
-              "value": 0.0319,
-              "share": 0.2676
+              "value": 0.2369,
+              "share": 0.8705
             },
             {
               "comp": "DATA",
               "compKo": "데이터분석",
-              "value": 0.0103,
-              "share": 0.0859
+              "value": 0.0352,
+              "share": 0.1295
             }
           ],
           "gradReason": {
@@ -839,25 +731,19 @@
           "timeRaw": "수678",
           "offeringDept": "경영학전공",
           "category": "전선",
-          "score": 0.0882,
+          "score": 0.2205,
           "careerReason": [
             {
               "comp": "DB",
               "compKo": "데이터베이스",
-              "value": 0.0675,
-              "share": 0.7654
-            },
-            {
-              "comp": "VIZ",
-              "compKo": "데이터시각화",
-              "value": 0.0169,
-              "share": 0.1911
+              "value": 0.2074,
+              "share": 0.9403
             },
             {
               "comp": "DATA",
               "compKo": "데이터분석",
-              "value": 0.0038,
-              "share": 0.0435
+              "value": 0.0132,
+              "share": 0.0597
             }
           ],
           "gradReason": {
@@ -885,25 +771,19 @@
           "timeRaw": "수234",
           "offeringDept": "교양과(서울)",
           "category": "교선",
-          "score": 0.0825,
+          "score": 0.1976,
           "careerReason": [
             {
               "comp": "DB",
               "compKo": "데이터베이스",
-              "value": 0.0525,
-              "share": 0.6365
-            },
-            {
-              "comp": "VIZ",
-              "compKo": "데이터시각화",
-              "value": 0.0194,
-              "share": 0.235
+              "value": 0.1612,
+              "share": 0.8157
             },
             {
               "comp": "DATA",
               "compKo": "데이터분석",
-              "value": 0.0106,
-              "share": 0.1285
+              "value": 0.0364,
+              "share": 0.1843
             }
           ],
           "gradReason": {
@@ -913,43 +793,31 @@
         },
         {
           "courseId": "012313",
-          "section": "9",
+          "section": "5",
           "name": "MATLAB프로그래밍및실습",
           "credit": 3,
           "area": "공통교양",
           "slots": [
-            6,
-            7,
-            8
+            68,
+            69,
+            70
           ],
           "slotsHuman": [
-            "월6",
-            "월7",
-            "월8"
+            "금4",
+            "금5",
+            "금6"
           ],
-          "professor": "최형연",
-          "timeRaw": "월678",
+          "professor": "김영호",
+          "timeRaw": "금456",
           "offeringDept": "기계ㆍ시스템디자인공학과",
           "category": "일선",
-          "score": 0.0797,
+          "score": 0.1781,
           "careerReason": [
             {
               "comp": "VIZ",
               "compKo": "데이터시각화",
-              "value": 0.0594,
-              "share": 0.7456
-            },
-            {
-              "comp": "DB",
-              "compKo": "데이터베이스",
-              "value": 0.0156,
-              "share": 0.1959
-            },
-            {
-              "comp": "DATA",
-              "compKo": "데이터분석",
-              "value": 0.0047,
-              "share": 0.0585
+              "value": 0.1781,
+              "share": 1.0
             }
           ],
           "gradReason": {
@@ -977,25 +845,13 @@
           "timeRaw": "목234",
           "offeringDept": "교양과(서울)",
           "category": "교선\n과학과컴퓨터",
-          "score": 0.0772,
+          "score": 0.155,
           "careerReason": [
             {
               "comp": "DB",
               "compKo": "데이터베이스",
-              "value": 0.0505,
-              "share": 0.6535
-            },
-            {
-              "comp": "VIZ",
-              "compKo": "데이터시각화",
-              "value": 0.0238,
-              "share": 0.3085
-            },
-            {
-              "comp": "DATA",
-              "compKo": "데이터분석",
-              "value": 0.0029,
-              "share": 0.038
+              "value": 0.155,
+              "share": 1.0
             }
           ],
           "gradReason": {

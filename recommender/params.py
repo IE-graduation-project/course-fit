@@ -9,6 +9,17 @@ import math
 ALPHA_DEFAULT = 1.5
 NEUTRAL_UNKNOWN = 0.67   # 미상(파싱실패, passed)의 grade_factor — P/N과 분리 (설계 2.3)
 
+# 과목 하나가 σ·Score 에 기여하는 역량 수 (#31, 설계 2.1). 매핑 벡터의 4위 아래는 KoSBERT
+# 유사도가 모든 역량에 고르게 까는 바닥(역량매핑_시행착오 2절)이라, 과목을 쌓을수록 그 바닥이
+# 전 역량 σ 를 같이 밀어 올려 고학년의 직무 간 적합도 차이가 무너졌다.
+COURSE_TOP_K = 3
+
+
+def top_k_weights(weights: dict[str, float], k: int = COURSE_TOP_K) -> dict[str, float]:
+    """가중치가 큰 역량 k개만 남긴다. 0 은 버리고, 동점은 comp_id 순이라 결과가 고정된다."""
+    ranked = sorted(((w, cid) for cid, w in weights.items() if w > 0), key=lambda t: (-t[0], t[1]))
+    return {cid: w for w, cid in ranked[:k]}
+
 
 def grade_factor(grade: float | None, is_pn: int) -> float:
     """성적 → [0,1] 계수. grade/4.5 (학칙 평점 정규화, 설계 2.3).
