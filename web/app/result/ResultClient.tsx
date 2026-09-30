@@ -208,36 +208,40 @@ export default function ResultClient() {
         </p>
       </div>
 
-      <div className="print-hide mt-4 flex flex-wrap items-center gap-x-3 gap-y-3">
-        <span id="mode-label" className="text-sm text-text-muted">
-          성향
-        </span>
-        <div
-          role="group"
-          aria-labelledby="mode-label"
-          className="inline-flex rounded-md border border-border-strong bg-surface-3 p-0.5"
-        >
-          {(ref?.modes ?? []).map((m) => (
-            <button
-              key={m.id}
-              onClick={() => setMode(m.id)}
-              title={m.desc}
-              aria-pressed={m.id === mode}
-              className={
-                "min-h-11 rounded-sm px-4 text-sm transition-colors " +
-                (m.id === mode
-                  ? "bg-surface font-semibold text-text shadow-card"
-                  : "text-text-muted hover:text-text")
-              }
-            >
-              {m.label}
-            </button>
-          ))}
+      <div className="print-hide mt-4 flex flex-wrap items-center gap-x-5 gap-y-3">
+        {/* 라벨과 버튼 묶음을 한 덩어리로 둔다 — 따로 두면 좁은 화면에서 「학점」 라벨만
+            윗줄 끝에 남고 버튼은 아랫줄로 떨어졌다. */}
+        <div className="flex items-center gap-x-3">
+          <span id="mode-label" className="text-sm text-text-muted">
+            성향
+          </span>
+          <div
+            role="group"
+            aria-labelledby="mode-label"
+            className="inline-flex rounded-md border border-border-strong bg-surface-3 p-0.5"
+          >
+            {(ref?.modes ?? []).map((m) => (
+              <button
+                key={m.id}
+                onClick={() => setMode(m.id)}
+                title={m.desc}
+                aria-pressed={m.id === mode}
+                className={
+                  "min-h-11 rounded-sm px-4 text-sm transition-colors " +
+                  (m.id === mode
+                    ? "bg-surface font-semibold text-text shadow-card"
+                    : "text-text-muted hover:text-text")
+                }
+              >
+                {m.label}
+              </button>
+            ))}
+          </div>
         </div>
         {/* 픽스처는 18학점으로만 만들어 두어 고정 데이터일 때는 그리지 않는다 —
             눌러도 결과가 안 바뀌는 버튼이 된다. */}
         {!isMock() && (
-          <>
+          <div className="flex items-center gap-x-3">
             <span id="credits-label" className="text-sm text-text-muted">
               학점
             </span>
@@ -262,7 +266,7 @@ export default function ResultClient() {
                 </button>
               ))}
             </div>
-          </>
+          </div>
         )}
         {/* 설명이 title 에만 있으면 마우스를 올려야 보인다 — 무엇을 고른 건지 항상 읽히게 둔다. */}
         {currentMode && (
