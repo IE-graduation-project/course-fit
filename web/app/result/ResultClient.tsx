@@ -38,8 +38,10 @@ export default function ResultClient() {
    * 깎으면 FALLBACK_MAX 에 걸려 새로고침할 때마다 21 넘는 선택이 기본값으로 돌아갔다.
    */
   const [limit, setLimit] = useState<CreditLimit | null | undefined>(undefined);
-  const limitRead = limit !== undefined;
-  const maxCredits = limit?.max ?? FALLBACK_MAX;
+  /** 시작 화면에서 학생이 넣은 최대학점(클래스넷 값). 있으면 이것이 상한이다 */
+  const [entered, setEntered] = useState<number | null | undefined>(undefined);
+  const limitRead = limit !== undefined && entered !== undefined;
+  const maxCredits = entered ?? limit?.max ?? FALLBACK_MAX;
   const [rec, setRec] = useState<Recommendation | null>(null);
   const [ref, setRef] = useState<Reference | null>(null);
   const [alt, setAlt] = useState(0);
@@ -56,6 +58,8 @@ export default function ResultClient() {
     fetchReference().then(setRef).catch(console.error);
     const raw = sessionStorage.getItem("creditLimit");
     setLimit(raw ? (JSON.parse(raw) as CreditLimit) : null);
+    const max = Number(sessionStorage.getItem("creditMax"));
+    setEntered(Number.isInteger(max) && max >= 12 && max <= 30 ? max : null);
   }, []);
 
   // 주소로 들어온 값이 이 학생의 최대학점을 넘으면 기본값으로 되돌린다
@@ -274,8 +278,15 @@ export default function ResultClient() {
             {currentMode.desc}
           </p>
         )}
-        {/* 최대학점이 어디서 나왔는지. 클래스넷 화면과 같은 항목으로 적어 학생이 맞춰 볼 수 있게 한다 */}
-        {!isMock() && limit && (
+        {/* 최대학점이 어디서 나왔는지. 학생이 넣은 값이면 그렇다고, 계산한 값이면 클래스넷 화면과
+            같은 항목으로 적어 맞춰 볼 수 있게 한다 */}
+        {!isMock() && entered != null && (
+          <p className="basis-full text-caption text-text-soft">
+            이번 학기 최대 <span className="tnum">{entered}</span>학점 (시작할 때 넣은 값, 클래스넷
+            수강신청 → 개인별 수강가능학점 조회)
+          </p>
+        )}
+        {!isMock() && entered == null && limit && (
           <p className="basis-full text-caption text-text-soft">
             이번 학기 최대 <span className="tnum">{limit.max}</span>학점 = 이수한계{" "}
             <span className="tnum">{limit.base}</span>

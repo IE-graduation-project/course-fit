@@ -5,10 +5,14 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { countCourseLines, fetchReference, submitTranscript } from "@/lib/api";
 import { SAMPLE_TRANSCRIPTS } from "@/lib/sample";
-import type { JobRef, ModeRef, ProgramRef, Reference } from "@/lib/types";
+import type { CreditLimit, JobRef, ModeRef, ProgramRef, Reference } from "@/lib/types";
 import { jobRank } from "@/lib/competency";
 
-type Step = "program" | "transcript" | "job" | "mode" | "done";
+type Step = "program" | "transcript" | "credits" | "job" | "mode" | "done";
+
+/** 신청 가능 최대학점으로 받을 수 있는 범위. 한 학기 최소 12학점(학사내규 제4조 ②), API 상한 30 */
+const CREDIT_MIN = 12;
+const CREDIT_MAX = 30;
 
 /**
  * 성적표 입력 — 대화형.
@@ -25,6 +29,10 @@ export default function StartPage() {
   const [job, setJob] = useState<JobRef | null>(null);
   const [mode, setMode] = useState<ModeRef | null>(null);
   const [courseCount, setCourseCount] = useState(0);
+  /** 성적표로 계산한 최대학점(서버). 입력 칸을 미리 채우는 데 쓴다 */
+  const [estimate, setEstimate] = useState<CreditLimit | null>(null);
+  /** 학생이 확인해 넣은 이번 학기 신청 가능 최대학점 */
+  const [creditMax, setCreditMax] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
@@ -58,15 +66,23 @@ export default function StartPage() {
       // 결과 화면의 학점 선택지 상한. 이전 성적표의 값이 남지 않게 없으면 지운다
       if (res.creditLimit) sessionStorage.setItem("creditLimit", JSON.stringify(res.creditLimit));
       else sessionStorage.removeItem("creditLimit");
+      sessionStorage.removeItem("creditMax");
+      setEstimate(res.creditLimit ?? null);
       setCourseCount(res.courseCount);
       setText(value);
-      setStep("job");
+      setStep("credits");
     } catch (e) {
       console.error(e);
       setError("성적표를 읽는 중 문제가 생겼어요. 잠시 후 다시 눌러주세요.");
     } finally {
       setBusy(false);
     }
+  }
+
+  function handleCredits(n: number) {
+    sessionStorage.setItem("creditMax", String(n));
+    setCreditMax(n);
+    setStep("job");
   }
 
   function handleJob(j: JobRef) {
@@ -162,8 +178,17 @@ export default function StartPage() {
             <Bubble delay={0.1}>
               읽었어요. 이렇게 인식했습니다.
               <RecognitionChips dept={program.name} year={year} courses={courseCount} />
-              어떤 일을 하고 싶으세요?
+              <b>이번 학기에 몇 학점까지 신청할 수 있어요?</b>
             </Bubble>
+          </>
+        )}
+
+        {step === "credits" && <CreditsInput estimate={estimate} onPick={handleCredits} />}
+
+        {creditMax !== null && step !== "credits" && (
+          <>
+            <UserBubble>최대 {creditMax}학점</UserBubble>
+            <Bubble delay={0.1}>어떤 일을 하고 싶으세요?</Bubble>
           </>
         )}
 
@@ -288,7 +313,7 @@ function Dot({ d = 0 }: { d?: number }) {
 }
 
 function StepDots({ step }: { step: Step }) {
-  const order: Step[] = ["program", "transcript", "job", "mode", "done"];
+  const order: Step[] = ["program", "transcript", "credits", "job", "mode", "done"];
   const i = order.indexOf(step);
   return (
     <div className="flex gap-1.5">
@@ -302,6 +327,81 @@ function StepDots({ step }: { step: Step }) {
           }}
         />
       ))}
+    </div>
+  );
+}
+
+/**
+ * 이번 학기 신청 가능 최대학점. 학생마다 다르다(직전학기 평점 우수 +3, 남은 학점 이월 최대 +2).
+ * 정답은 클래스넷에 있어 거기서 보고 넣게 한다. 성적표로 계산한 값을 미리 채워 두어
+ * 대부분은 확인만 하고 넘어가고, 다르면 고친다.
+ */
+function CreditsInput({
+  estimate,
+  onPick,
+}: {
+  estimate: CreditLimit | null;
+  onPick: (n: number) => void;
+}) {
+  const [raw, setRaw] = useState(String(estimate?.max ?? 18));
+  const n = Number(raw);
+  const valid = raw.trim() !== "" && Number.isInteger(n) && n >= CREDIT_MIN && n <= CREDIT_MAX;
+  const step = (d: number) =>
+    setRaw(String(Math.min(CREDIT_MAX, Math.max(CREDIT_MIN, (valid ? n : estimate?.max ?? 18) + d))));
+
+  return (
+    <div className="fade-up space-y-3" style={{ animationDelay: "0.3s" }}>
+      <p className="text-sm text-text-muted">
+        클래스넷 → 수강신청 → <b className="text-text">개인별 수강가능학점 조회</b>의
+        「금학기 신청가능 최대학점」이에요.
+      </p>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => step(-1)}
+          aria-label="1학점 줄이기"
+          className="min-h-11 w-11 rounded-md border border-border-strong text-lg font-semibold text-text-muted hover:bg-surface-3"
+        >
+          −
+        </button>
+        <input
+          type="number"
+          inputMode="numeric"
+          min={CREDIT_MIN}
+          max={CREDIT_MAX}
+          value={raw}
+          onChange={(e) => setRaw(e.target.value)}
+          aria-label="이번 학기 신청 가능 최대학점"
+          aria-describedby="credits-hint"
+          className="tnum min-h-11 w-20 rounded-md border border-border bg-surface text-center text-base font-semibold outline-none focus:border-brand-400"
+        />
+        <button
+          type="button"
+          onClick={() => step(1)}
+          aria-label="1학점 늘리기"
+          className="min-h-11 w-11 rounded-md border border-border-strong text-lg font-semibold text-text-muted hover:bg-surface-3"
+        >
+          +
+        </button>
+        <span className="text-sm text-text-muted">학점</span>
+      </div>
+      <p id="credits-hint" className={"text-caption " + (valid ? "text-text-soft" : "text-gap")}>
+        {!valid
+          ? `${CREDIT_MIN}~${CREDIT_MAX} 사이의 수로 넣어 주세요.`
+          : estimate
+            ? `성적표로 계산하면 ${estimate.max}학점이에요 (이수한계 ${estimate.base}` +
+              (estimate.gpaBonus ? ` + 평점 우수 ${estimate.gpaBonus}` : "") +
+              (estimate.carry ? ` + 이월 ${estimate.carry}` : "") +
+              "). 클래스넷 값과 다르면 고쳐 주세요."
+            : "모르겠으면 18 그대로 두셔도 돼요."}
+      </p>
+      <button
+        onClick={() => onPick(n)}
+        disabled={!valid}
+        className="rounded-md bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-35"
+      >
+        {valid ? `${n}학점으로 할게요` : "학점을 넣어 주세요"}
+      </button>
     </div>
   );
 }
