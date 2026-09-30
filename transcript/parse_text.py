@@ -27,6 +27,10 @@ _RETAKE_TOKEN = "재수강"
 _SKIP_PREFIX = ("학수번호", "신청학점", "취득학점", "전체성적조회")
 _TERM_CODE = {"1학기": "1", "2학기": "2", "하계계절학기": "S", "동계계절학기": "W"}
 _REGULAR_SEMESTER = {"1학기": 1, "2학기": 2}
+# 학기 요약 줄. 복붙하면 「신청학점 15 신청평점 3.70」 한 줄로 오지만, 화면에 따라 라벨과 값이
+# 줄을 나눠 올 수도 있어 라벨 뒤의 첫 수를 그 라벨의 값으로 읽는다.
+_SUMMARY_RE = re.compile(r"(신청학점|신청평점)\s*([\d.]+)")
+_NUMBER_RE = re.compile(r"^[\d.]+$")
 MAX_GRADE = 4
 
 
@@ -104,6 +108,8 @@ def parse_transcript_text(
     total_earned: int | None = None
     gpa: float | None = None
     in_overall = False
+    summary: dict[str, dict[str, float]] = {}   # term → {신청학점, 신청평점}
+    pending_label: str | None = None             # 값이 다음 줄로 넘어온 요약 라벨
 
     courses: list[TakenCourse] = []
     for raw in text.splitlines():
@@ -135,6 +141,19 @@ def parse_transcript_text(
                 gpa = float(mm.group(1))
             continue
 
+        term_key = _term_label(cur_year, cur_term) if cur_year and cur_term else None
+        if term_key and (_SUMMARY_RE.search(s) or s in ("신청학점", "신청평점")
+                         or (pending_label and _NUMBER_RE.match(s))):
+            for label, value in _SUMMARY_RE.findall(s):
+                summary.setdefault(term_key, {})[label] = float(value)
+            if s in ("신청학점", "신청평점"):
+                pending_label = s
+            elif pending_label and _NUMBER_RE.match(s):
+                summary.setdefault(term_key, {})[pending_label] = float(s)
+                pending_label = None
+            continue
+        pending_label = None
+
         if s.startswith(_SKIP_PREFIX) or s == "성적경고":
             continue
 
@@ -161,6 +180,12 @@ def parse_transcript_text(
     if admission_year is None:
         admission_year = infer_admission_year(grade_levels)
     current_grade = grade_in_next_semester(regular_terms)
+    last_term, last_level = None, None
+    if regular_terms:
+        year, sem, last_level = max(regular_terms)
+        last_term = f"{year}-{sem}"
+    last = summary.get(last_term or "", {})
+    registered = last.get("신청학점")
 
     meta = StudentMeta(
         student_no=student_no,
@@ -170,6 +195,14 @@ def parse_transcript_text(
         current_grade=current_grade,
         total_earned=total_earned,
         gpa=gpa,
+        last_term=last_term,
+        last_term_level=last_level,
+        last_term_registered=int(registered) if registered is not None else None,
+        last_term_gpa=last.get("신청평점"),
+        # 공란(일반과목 F)과 'F'(P/N 과목 F) 둘 다. 재수강 표시 행은 예전 학기의 시도라 여기 없다
+        last_term_f_count=sum(1 for c in courses if c.term == last_term
+                              and c.grade_letter in (None, "F")),
+        regular_term_count=len({(y, sm) for y, sm, _ in regular_terms}),
     )
     input_hash = mappings.compute_input_hash(meta, courses)
     return TranscriptResult(input_hash=input_hash, meta=meta, courses=courses)

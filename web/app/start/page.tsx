@@ -55,6 +55,9 @@ export default function StartPage() {
         admissionYear: year,
       });
       sessionStorage.setItem("studentId", res.studentId);
+      // 결과 화면의 학점 선택지 상한. 이전 성적표의 값이 남지 않게 없으면 지운다
+      if (res.creditLimit) sessionStorage.setItem("creditLimit", JSON.stringify(res.creditLimit));
+      else sessionStorage.removeItem("creditLimit");
       setCourseCount(res.courseCount);
       setText(value);
       setStep("job");

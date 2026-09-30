@@ -4,12 +4,21 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { fetchRecommendation, fetchReference, isMock } from "@/lib/api";
-import type { ModeId, Recommendation, Reference, Timetable } from "@/lib/types";
+import type { CreditLimit, ModeId, Recommendation, Reference, Timetable } from "@/lib/types";
 import TimetableGrid, { courseKey } from "@/components/TimetableGrid";
 import CompetencyChart from "@/components/CompetencyChart";
 import CourseCard from "@/components/CourseCard";
 import CopyCodes from "@/components/CopyCodes";
 import JobFitBar from "@/components/JobFitBar";
+
+/** 한 학기에 담을 학점 상한. 기본 18, 더 담거나 덜 담고 싶은 학생이 고른다. */
+const DEFAULT_CREDITS = 18;
+/** 수강가능 최대학점을 모를 때(옛 서버 응답)의 상한 */
+const FALLBACK_MAX = 21;
+
+/** 선택지 — 15, 18, 21 과 이 학생의 최대학점 가운데 최대학점 이하인 것 */
+const creditOptions = (max: number) =>
+  [...new Set([15, 18, 21, max])].filter((c) => c <= max).sort((a, b) => a - b);
 
 export default function ResultClient() {
   const params = useSearchParams();
@@ -18,6 +27,13 @@ export default function ResultClient() {
   const [mode, setMode] = useState<ModeId>(
     (params.get("mode") ?? "balanced") as ModeId,
   );
+  const [credits, setCredits] = useState(() => {
+    const v = Number(params.get("credits"));
+    return Number.isInteger(v) && v >= 12 && v <= 30 ? v : DEFAULT_CREDITS;
+  });
+  /** 이번 학기 수강가능 최대학점 — 성적표를 낼 때 서버가 계산해 준 값(sessionStorage) */
+  const [limit, setLimit] = useState<CreditLimit | null>(null);
+  const maxCredits = limit?.max ?? FALLBACK_MAX;
   const [rec, setRec] = useState<Recommendation | null>(null);
   const [ref, setRef] = useState<Reference | null>(null);
   const [alt, setAlt] = useState(0);
@@ -32,7 +48,14 @@ export default function ResultClient() {
 
   useEffect(() => {
     fetchReference().then(setRef).catch(console.error);
+    const raw = sessionStorage.getItem("creditLimit");
+    if (raw) setLimit(JSON.parse(raw) as CreditLimit);
   }, []);
+
+  // 주소로 들어온 값이 이 학생의 최대학점을 넘으면 기본값으로 되돌린다
+  useEffect(() => {
+    if (credits > maxCredits) setCredits(Math.min(DEFAULT_CREDITS, maxCredits));
+  }, [credits, maxCredits]);
 
   useEffect(() => {
     let cancelled = false;
@@ -53,7 +76,7 @@ export default function ResultClient() {
     setLoading(true);
     const studentId = saved ?? "746696b793744f17";
     setError(null);
-    fetchRecommendation({ studentId, job, mode })
+    fetchRecommendation({ studentId, job, mode, maxCredits: credits })
       .then((r) => {
         if (cancelled) return;
         setRec(r);
@@ -70,11 +93,12 @@ export default function ResultClient() {
     return () => {
       cancelled = true;
     };
-  }, [job, mode]);
+  }, [job, mode, credits]);
 
   useEffect(() => {
-    router.replace(`/result?job=${job}&mode=${mode}`, { scroll: false });
-  }, [job, mode, router]);
+    const c = credits === DEFAULT_CREDITS ? "" : `&credits=${credits}`;
+    router.replace(`/result?job=${job}&mode=${mode}${c}`, { scroll: false });
+  }, [job, mode, credits, router]);
 
   if (needTranscript) return <NeedTranscript />;
   if (loading && !rec) return <Analyzing />;
@@ -202,10 +226,54 @@ export default function ResultClient() {
             </button>
           ))}
         </div>
+        {/* 픽스처는 18학점으로만 만들어 두어 고정 데이터일 때는 그리지 않는다 —
+            눌러도 결과가 안 바뀌는 버튼이 된다. */}
+        {!isMock() && (
+          <>
+            <span id="credits-label" className="text-sm text-text-muted">
+              학점
+            </span>
+            <div
+              role="group"
+              aria-labelledby="credits-label"
+              className="inline-flex rounded-md border border-border-strong bg-surface-3 p-0.5"
+            >
+              {creditOptions(maxCredits).map((c) => (
+                <button
+                  key={c}
+                  onClick={() => setCredits(c)}
+                  aria-pressed={c === credits}
+                  className={
+                    "tnum min-h-11 rounded-sm px-4 text-sm transition-colors " +
+                    (c === credits
+                      ? "bg-surface font-semibold text-text shadow-card"
+                      : "text-text-muted hover:text-text")
+                  }
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
         {/* 설명이 title 에만 있으면 마우스를 올려야 보인다 — 무엇을 고른 건지 항상 읽히게 둔다. */}
         {currentMode && (
           <p className="basis-full text-caption text-text-soft">
             {currentMode.desc}
+          </p>
+        )}
+        {/* 최대학점이 어디서 나왔는지. 클래스넷 화면과 같은 항목으로 적어 학생이 맞춰 볼 수 있게 한다 */}
+        {!isMock() && limit && (
+          <p className="basis-full text-caption text-text-soft">
+            이번 학기 최대 <span className="tnum">{limit.max}</span>학점 = 이수한계{" "}
+            <span className="tnum">{limit.base}</span>
+            {limit.gpaBonus > 0 && (
+              <> + 평점 우수 <span className="tnum">{limit.gpaBonus}</span></>
+            )}
+            {limit.carry > 0 && (
+              <> + 이월 <span className="tnum">{limit.carry}</span></>
+            )}
+            {" "}(클래스넷 「개인별 수강가능학점 조회」와 같은 식)
           </p>
         )}
       </div>

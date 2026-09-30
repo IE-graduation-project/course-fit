@@ -154,6 +154,18 @@ def test_recommend_reports_applied_requirement_year(client):
 
 
 # ── /api/recommend — ILP 불변식 ─────────────────────────────────────────────
+@pytest.mark.parametrize("u", [15, 21])
+def test_recommend_fills_up_to_chosen_credits(client, student_id, u):
+    """결과 화면의 학점 선택(15·18·21)이 시간표 학점 상한으로 그대로 간다 — 21 을 골랐는데
+    18 짜리가 오거나 15 를 골랐는데 넘치면 선택지가 거짓말이다."""
+    d = client.post("/api/recommend", json={"studentId": student_id, "job": "DA",
+                                            "maxCredits": u}).json()
+    assert d["params"]["maxCredits"] == u
+    assert d["timetables"], "시간표가 비었다"
+    for tt in d["timetables"]:
+        assert u - 3 < tt["totalCredit"] <= u, tt["totalCredit"]
+
+
 @pytest.mark.parametrize("job", ["DA", "MKT"])
 def test_recommend_respects_hard_constraints(client, student_id, job):
     """응답 JSON만 보고 A1·A2·A3·B1 위반을 잡는다."""
