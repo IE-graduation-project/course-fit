@@ -139,7 +139,243 @@
         "compKo": "데이터시각화",
         "gap": 0.0658
       }
-    ]
+    ],
+    "sources": {
+      "BIZ": [
+        {
+          "courseId": "311309",
+          "name": "조직행동",
+          "share": 0.1644
+        },
+        {
+          "courseId": "311707",
+          "name": "전략경영",
+          "share": 0.1499
+        },
+        {
+          "courseId": "311103",
+          "name": "경영과비젼",
+          "share": 0.1419
+        },
+        {
+          "courseId": "033203",
+          "name": "기업과경영",
+          "share": 0.0835
+        },
+        {
+          "courseId": "311623",
+          "name": "AI를활용한스타트업",
+          "share": 0.0587
+        },
+        {
+          "courseId": "313101",
+          "name": "마케팅",
+          "share": 0.0571
+        }
+      ],
+      "COMM": [
+        {
+          "courseId": "001009",
+          "name": "영어",
+          "share": 0.3394
+        },
+        {
+          "courseId": "002019",
+          "name": "인간관계론",
+          "share": 0.2863
+        },
+        {
+          "courseId": "002059",
+          "name": "현대생활과디자인",
+          "share": 0.1339
+        },
+        {
+          "courseId": "311309",
+          "name": "조직행동",
+          "share": 0.1209
+        },
+        {
+          "courseId": "002604",
+          "name": "교양중국어(2)",
+          "share": 0.1194
+        }
+      ],
+      "DATA": [
+        {
+          "courseId": "311204",
+          "name": "경영통계학",
+          "share": 0.2884
+        },
+        {
+          "courseId": "033103",
+          "name": "경영경제수학",
+          "share": 0.1642
+        },
+        {
+          "courseId": "311822",
+          "name": "디지털마케팅애널리틱스",
+          "share": 0.1488
+        },
+        {
+          "courseId": "311407",
+          "name": "투자론",
+          "share": 0.1187
+        },
+        {
+          "courseId": "311318",
+          "name": "FinanceI",
+          "share": 0.1123
+        },
+        {
+          "courseId": "311623",
+          "name": "AI를활용한스타트업",
+          "share": 0.0932
+        }
+      ],
+      "DB": [],
+      "FIN": [
+        {
+          "courseId": "033104",
+          "name": "회계원리",
+          "share": 0.2494
+        },
+        {
+          "courseId": "311318",
+          "name": "FinanceI",
+          "share": 0.2339
+        },
+        {
+          "courseId": "311203",
+          "name": "재무회계",
+          "share": 0.2259
+        },
+        {
+          "courseId": "311407",
+          "name": "투자론",
+          "share": 0.1685
+        },
+        {
+          "courseId": "033203",
+          "name": "기업과경영",
+          "share": 0.0455
+        },
+        {
+          "courseId": "311406",
+          "name": "생산과경영",
+          "share": 0.0391
+        }
+      ],
+      "MKT": [
+        {
+          "courseId": "313101",
+          "name": "마케팅",
+          "share": 0.282
+        },
+        {
+          "courseId": "311822",
+          "name": "디지털마케팅애널리틱스",
+          "share": 0.2084
+        },
+        {
+          "courseId": "033102",
+          "name": "경제학원론",
+          "share": 0.1252
+        },
+        {
+          "courseId": "002059",
+          "name": "현대생활과디자인",
+          "share": 0.1044
+        },
+        {
+          "courseId": "311103",
+          "name": "경영과비젼",
+          "share": 0.0761
+        },
+        {
+          "courseId": "311309",
+          "name": "조직행동",
+          "share": 0.0687
+        }
+      ],
+      "ML": [
+        {
+          "courseId": "311623",
+          "name": "AI를활용한스타트업",
+          "share": 0.4787
+        },
+        {
+          "courseId": "008750",
+          "name": "컴퓨터프로그래밍(COMP. THINKING)",
+          "share": 0.1963
+        },
+        {
+          "courseId": "001009",
+          "name": "영어",
+          "share": 0.1464
+        },
+        {
+          "courseId": "311204",
+          "name": "경영통계학",
+          "share": 0.1
+        },
+        {
+          "courseId": "002604",
+          "name": "교양중국어(2)",
+          "share": 0.0787
+        }
+      ],
+      "OR": [
+        {
+          "courseId": "311406",
+          "name": "생산과경영",
+          "share": 0.2249
+        },
+        {
+          "courseId": "008750",
+          "name": "컴퓨터프로그래밍(COMP. THINKING)",
+          "share": 0.1081
+        },
+        {
+          "courseId": "033103",
+          "name": "경영경제수학",
+          "share": 0.1032
+        },
+        {
+          "courseId": "311318",
+          "name": "FinanceI",
+          "share": 0.0988
+        },
+        {
+          "courseId": "311707",
+          "name": "전략경영",
+          "share": 0.0966
+        },
+        {
+          "courseId": "033104",
+          "name": "회계원리",
+          "share": 0.0832
+        }
+      ],
+      "PROG": [
+        {
+          "courseId": "008750",
+          "name": "컴퓨터프로그래밍(COMP. THINKING)",
+          "share": 0.6793
+        },
+        {
+          "courseId": "311206",
+          "name": "비즈니스프로그래밍I",
+          "share": 0.3207
+        }
+      ],
+      "VIZ": [
+        {
+          "courseId": "311822",
+          "name": "디지털마케팅애널리틱스",
+          "share": 1.0
+        }
+      ]
+    }
   },
   "need": {
     "SW데이터활용역량": 9,

@@ -142,7 +142,10 @@
     "rho":   { "DB": 0.8329, "VIZ": 1.0,    "...": 0 },   // 직무 요구
     "gap":   { "DB": 0.1579, "VIZ": 0.1532, "...": 0 },   // max(0, ρ−σ)
     "strengths": [{ "comp": "BIZ", "compKo": "비즈니스", "sigma": 0.9971 }],
-    "gaps":      [{ "comp": "DB",  "compKo": "데이터베이스", "gap": 0.1579 }]
+    "gaps":      [{ "comp": "DB",  "compKo": "데이터베이스", "gap": 0.1579 }],
+    // 역량마다 σ 를 쌓은 기수강 과목, 기여 큰 순 최대 6개. 키는 10축 전부, σ 가 0 이면 [].
+    // share = 그 역량에 쌓인 것(Σ 성적계수·가중치) 중 이 과목 몫
+    "sources": { "FIN": [{ "courseId": "...", "name": "회계원리", "share": 0.2494 }], "...": [] }
   },
 
   "need": { "전공선택": 12, "SW데이터활용역량": 9, "특성화교양": 3 },
@@ -180,6 +183,7 @@
 | 시간표 그리드 | `timetables[].courses[].slots` · `name` · `professor` |
 | 성향 토글 | `params.eps` |
 | 역량 진단 막대 | `diagnosis.sigma` · `rho` · `gap` (10축 전부) |
+| 역량을 누르면 펼치는 과목 | `diagnosis.sources` (없으면 누를 거리를 그리지 않는다) |
 | 졸업 진척 | `need` |
 | 과목 근거 막대 | `careerReason[].share` · `compKo` · `comp` |
 | 제약 배지 | `constraints` |
