@@ -14,6 +14,54 @@ import type {
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "";
 
+/** 서버가 준 에러. HTTP 상태와 계약의 error 코드(student_not_found 등)를 들고 다닌다 */
+export class ApiError extends Error {
+  constructor(
+    public status: number,
+    public code: string | null,
+    message: string,
+  ) {
+    super(message);
+  }
+}
+
+/**
+ * 실 API 호출 — 서버가 깨는 동안은 기다렸다가 다시 부른다.
+ *
+ * 백엔드는 Render 무료 인스턴스라 15분 동안 요청이 없으면 잠들고, 깨는 데 1분쯤 걸린다
+ * (render.com/docs/free). 그동안 오는 것은 네트워크 오류, 502/503/504, JSON 이 아닌 대기 페이지다.
+ * 한 번 실패로 포기하면 학생은 「서버에 연결하지 못했어요」를 보고 떠난다. 이런 「아직 깨는 중」
+ * 응답만 WAKE_BUDGET_MS 안에서 다시 부르고, 4xx 같은 진짜 답은 바로 돌려준다.
+ * 다시 불러도 되는 호출만 여기를 지난다 — 성적표 적재는 같은 내용이면 같은 해시(멱등),
+ * 추천과 참조는 읽기다.
+ */
+const WAKE_BUDGET_MS = 90_000;
+
+async function callApi<T>(path: string, init?: RequestInit): Promise<T> {
+  const until = Date.now() + WAKE_BUDGET_MS;
+  let wait = 1500;
+  for (;;) {
+    let res: Response | null = null;
+    try {
+      res = await fetch(`${API_BASE}${path}`, init);
+    } catch {
+      res = null; // 네트워크 오류, 대기 페이지에 CORS 헤더가 없어 막힌 경우
+    }
+    const json = (res?.headers.get("content-type") ?? "").includes("json");
+    const waking = res === null || [502, 503, 504].includes(res.status) || !json;
+    if (res && !waking) {
+      if (res.ok) return res.json() as Promise<T>;
+      const body = (await res.json().catch(() => ({}))) as { error?: string };
+      throw new ApiError(res.status, body.error ?? null, `${path} → ${res.status}`);
+    }
+    if (Date.now() + wait > until) {
+      throw new ApiError(res?.status ?? 0, "server_unavailable", `${path} → 서버가 응답하지 않음`);
+    }
+    await delay(wait);
+    wait = Math.min(wait * 1.5, 8000);
+  }
+}
+
 export const isMock = () => API_BASE === "";
 
 async function getJson<T>(path: string): Promise<T> {
@@ -46,7 +94,7 @@ export async function fetchReference(): Promise<Reference> {
 
   const ref = isMock()
     ? await getJson<Reference>("/fixtures/reference.json")
-    : await getJson<Reference>(`${API_BASE}/api/reference`);
+    : await callApi<Reference>("/api/reference");
 
   if (typeof window !== "undefined") {
     try {
@@ -91,13 +139,11 @@ export async function submitTranscript(
       semesters: [],
     };
   }
-  const res = await fetch(`${API_BASE}/api/transcript`, {
+  return callApi<TranscriptResponse>("/api/transcript", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(req),
   });
-  if (!res.ok) throw new Error(`transcript → ${res.status}`);
-  return res.json();
 }
 
 /** POST /api/recommend */
@@ -108,13 +154,23 @@ export async function fetchRecommendation(
     const mode = req.mode ?? "balanced";
     return getJson<Recommendation>(`/fixtures/${req.job}_${mode}.json`);
   }
-  const res = await fetch(`${API_BASE}/api/recommend`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(req),
-  });
-  if (!res.ok) throw new Error(`recommend → ${res.status}`);
-  return res.json();
+  const call = (r: RecommendRequest) =>
+    callApi<Recommendation>("/api/recommend", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(r),
+    });
+  try {
+    return await call(req);
+  } catch (e) {
+    // 서버가 잠들었다 깨면(또는 재시작하면) 적재한 성적표가 사라져 404 가 난다. 시작 화면이
+    // 이 탭에 둔 성적표를 다시 적재하고 한 번 더 부른다. 같은 성적표는 같은 studentId 다.
+    const saved = typeof window !== "undefined" ? window.sessionStorage.getItem("transcript") : null;
+    if (!(e instanceof ApiError && e.code === "student_not_found") || !saved) throw e;
+    const res = await submitTranscript(JSON.parse(saved) as TranscriptRequest);
+    window.sessionStorage.setItem("studentId", res.studentId);
+    return call({ ...req, studentId: res.studentId });
+  }
 }
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));

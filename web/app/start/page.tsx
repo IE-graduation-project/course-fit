@@ -63,6 +63,12 @@ export default function StartPage() {
         admissionYear: year,
       });
       sessionStorage.setItem("studentId", res.studentId);
+      // 서버는 잠들거나 재시작하면 적재한 성적표를 잃는다(무료 인스턴스의 임시 파일시스템).
+      // 결과 화면이 그때 다시 적재할 수 있게 이 탭에만 둔다 — 탭을 닫으면 사라진다.
+      sessionStorage.setItem(
+        "transcript",
+        JSON.stringify({ text: value, dept: program.dept, admissionYear: year }),
+      );
       // 결과 화면의 학점 선택지 상한. 이전 성적표의 값이 남지 않게 없으면 지운다
       if (res.creditLimit) sessionStorage.setItem("creditLimit", JSON.stringify(res.creditLimit));
       else sessionStorage.removeItem("creditLimit");
@@ -298,7 +304,7 @@ function WaitingForServer() {
         <Dot d={0.2} />
         <Dot d={0.4} />
       </span>
-      학과 목록을 불러오는 중이에요. 처음 열 때는 조금 걸릴 수 있어요.
+      학과 목록을 불러오는 중이에요. 한동안 아무도 안 쓰면 서버가 잠들어서, 깨는 데 1분쯤 걸려요.
     </div>
   );
 }

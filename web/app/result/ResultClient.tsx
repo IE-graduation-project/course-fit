@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { fetchRecommendation, fetchReference, isMock } from "@/lib/api";
+import { ApiError, fetchRecommendation, fetchReference, isMock } from "@/lib/api";
 import type { CreditLimit, ModeId, Recommendation, Reference, Timetable } from "@/lib/types";
 import TimetableGrid, { courseKey } from "@/components/TimetableGrid";
 import CompetencyChart from "@/components/CompetencyChart";
@@ -98,9 +98,19 @@ export default function ResultClient() {
       .catch((e) => {
         if (cancelled) return;
         console.error(e);
-        // 이전 결과는 남긴다 — 화면이 통째로 비면 뭘 보고 있었는지 잃는다.
-        setError("추천을 불러오지 못했어요. 목표를 다시 눌러보세요.");
         setLoading(false);
+        // 서버가 성적표를 잃었고 이 탭에도 없으면(시작 화면을 거치지 않은 탭) 다시 누른다고 풀리지
+        // 않는다 — 막다른 오류 대신 성적표를 넣는 화면으로 보낸다.
+        if (e instanceof ApiError && e.code === "student_not_found") {
+          setNeedTranscript(true);
+          return;
+        }
+        // 이전 결과는 남긴다 — 화면이 통째로 비면 뭘 보고 있었는지 잃는다.
+        setError(
+          e instanceof ApiError && e.code === "server_unavailable"
+            ? "서버가 깨어나지 않았어요. 잠시 뒤 목표를 다시 눌러보세요."
+            : "추천을 불러오지 못했어요. 목표를 다시 눌러보세요.",
+        );
       });
     return () => {
       cancelled = true;
