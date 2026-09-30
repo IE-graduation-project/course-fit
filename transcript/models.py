@@ -20,6 +20,13 @@ class StudentMeta:
     current_grade: int | None = None    # 이번 학기 학년 (마지막 확정 학기의 다음 학기, #42)
     total_earned: int | None = None     # 총 취득학점
     gpa: float | None = None            # 전체 평점평균
+    # 직전학기 = 성적이 나온 마지막 정규학기(계절학기 제외). 수강가능학점 계산용(transcript.credit_limit)
+    last_term: str | None = None            # 예: 2026-1
+    last_term_level: int | None = None       # 그 학기의 학년
+    last_term_registered: int | None = None  # 그 학기 신청학점 (성적표 「신청학점」 줄)
+    last_term_gpa: float | None = None       # 그 학기 신청평점 (성적표 「신청평점」 줄)
+    last_term_f_count: int = 0               # 그 학기 F 과목 수 (2과목 이상이면 학사경고)
+    regular_term_count: int = 0              # 이수한 정규학기 수
 
 
 @dataclass

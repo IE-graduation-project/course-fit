@@ -14,6 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from recommender import data as rdata, params as rparams
 from recommender.recommend import (DEFAULT_PREFERENCE, PREFERENCE_AREA_WEIGHT, PREFERENCE_EPS,
                                    recommend)
+from transcript.credit_limit import credit_limit
 from transcript.load import load_transcript
 from transcript.parse_text import parse_transcript_text
 
@@ -145,6 +146,9 @@ def transcript(req: TranscriptRequest) -> dict:
         "courseCount": len(result.courses),
         "matchedCount": matched,
         "semesters": [],            # 파싱 결과 확인 화면용. 현재 프론트는 쓰지 않는다
+        # 이번 학기 수강가능 최대학점 — 클래스넷 「개인별 수강가능학점 조회」와 같은 식.
+        # 결과 화면의 학점 선택지 상한이 된다
+        "creditLimit": credit_limit(result.meta),
     }
 
 

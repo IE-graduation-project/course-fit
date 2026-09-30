@@ -87,13 +87,19 @@
   "admissionYear": 2022,
   "courseCount": 45,
   "matchedCount": 41,
-  "semesters": []
+  "semesters": [],
+  "creditLimit": { "max": 23, "base": 18, "gpaBonus": 3, "carry": 2,
+                   "lastTerm": "2026-1", "lastRegistered": 15, "lastGpa": 3.7 }
 }
 ```
 
 - `studentId` = `transcript.load` 가 뱉는 `input_hash`. 같은 입력은 같은 해시로 **덮어쓰기**(idempotent).
 - `matchedCount` = catalog 매칭에 성공한 과목 수. 화면에서 "N과목 중 M과목 인식" 으로 쓸 수 있다.
 - `semesters` 는 사용자가 파싱 결과를 확인·수정하는 화면용. **지금 프론트는 안 쓰므로 `[]` 로 둬도 된다.**
+- `creditLimit` = 이번 학기 수강가능 최대학점. 클래스넷 「개인별 수강가능학점 조회」와 같은 식이다 —
+  이수한계(학과 교과과정표의 학년·학기별 「이수학점한계」) + 직전학기 평점 3.5 이상이면 3 +
+  직전학기 이월(직전 이수한계 − 신청학점, 최대 2, 성적경고나 8학기 이상이면 0). 직전학기 값은 성적표의
+  「신청학점」「신청평점」 줄에서 읽는다. 결과 화면 학점 선택지의 상한이 된다(`transcript/credit_limit.py`).
 
 **PDF 트랙**: `transcript/parse.py` 에 골격만 있다. 지금 UI 는 텍스트 복붙만 노출한다
 (5월 합의: "구현은 텍스트 복붙 중심, PDF 는 인터페이스만").

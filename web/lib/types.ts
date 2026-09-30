@@ -77,6 +77,22 @@ export interface TranscriptResponse {
   courseCount: number;
   matchedCount: number;
   semesters: TranscriptSemester[];
+  /** 이번 학기 수강가능 최대학점. 옛 서버 응답엔 없다 */
+  creditLimit?: CreditLimit;
+}
+
+/**
+ * 클래스넷 「개인별 수강가능학점 조회」와 같은 식.
+ * max = base(이번 학기 이수한계) + gpaBonus(직전학기 평점 3.5 이상 3) + carry(직전학기 이월, 최대 2)
+ */
+export interface CreditLimit {
+  max: number;
+  base: number;
+  gpaBonus: number;
+  carry: number;
+  lastTerm: string | null;
+  lastRegistered: number | null;
+  lastGpa: number | null;
 }
 
 export interface TranscriptSemester {

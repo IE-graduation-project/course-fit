@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { fetchRecommendation, fetchReference, isMock } from "@/lib/api";
-import type { ModeId, Recommendation, Reference, Timetable } from "@/lib/types";
+import type { CreditLimit, ModeId, Recommendation, Reference, Timetable } from "@/lib/types";
 import TimetableGrid, { courseKey } from "@/components/TimetableGrid";
 import CompetencyChart from "@/components/CompetencyChart";
 import CourseCard from "@/components/CourseCard";
@@ -12,8 +12,13 @@ import CopyCodes from "@/components/CopyCodes";
 import JobFitBar from "@/components/JobFitBar";
 
 /** 한 학기에 담을 학점 상한. 기본 18, 더 담거나 덜 담고 싶은 학생이 고른다. */
-const CREDIT_OPTIONS = [15, 18, 21];
 const DEFAULT_CREDITS = 18;
+/** 수강가능 최대학점을 모를 때(옛 서버 응답)의 상한 */
+const FALLBACK_MAX = 21;
+
+/** 선택지 — 15, 18, 21 과 이 학생의 최대학점 가운데 최대학점 이하인 것 */
+const creditOptions = (max: number) =>
+  [...new Set([15, 18, 21, max])].filter((c) => c <= max).sort((a, b) => a - b);
 
 export default function ResultClient() {
   const params = useSearchParams();
@@ -24,8 +29,11 @@ export default function ResultClient() {
   );
   const [credits, setCredits] = useState(() => {
     const v = Number(params.get("credits"));
-    return CREDIT_OPTIONS.includes(v) ? v : DEFAULT_CREDITS;
+    return Number.isInteger(v) && v >= 12 && v <= 30 ? v : DEFAULT_CREDITS;
   });
+  /** 이번 학기 수강가능 최대학점 — 성적표를 낼 때 서버가 계산해 준 값(sessionStorage) */
+  const [limit, setLimit] = useState<CreditLimit | null>(null);
+  const maxCredits = limit?.max ?? FALLBACK_MAX;
   const [rec, setRec] = useState<Recommendation | null>(null);
   const [ref, setRef] = useState<Reference | null>(null);
   const [alt, setAlt] = useState(0);
@@ -40,7 +48,14 @@ export default function ResultClient() {
 
   useEffect(() => {
     fetchReference().then(setRef).catch(console.error);
+    const raw = sessionStorage.getItem("creditLimit");
+    if (raw) setLimit(JSON.parse(raw) as CreditLimit);
   }, []);
+
+  // 주소로 들어온 값이 이 학생의 최대학점을 넘으면 기본값으로 되돌린다
+  useEffect(() => {
+    if (credits > maxCredits) setCredits(Math.min(DEFAULT_CREDITS, maxCredits));
+  }, [credits, maxCredits]);
 
   useEffect(() => {
     let cancelled = false;
@@ -223,7 +238,7 @@ export default function ResultClient() {
               aria-labelledby="credits-label"
               className="inline-flex rounded-md border border-border-strong bg-surface-3 p-0.5"
             >
-              {CREDIT_OPTIONS.map((c) => (
+              {creditOptions(maxCredits).map((c) => (
                 <button
                   key={c}
                   onClick={() => setCredits(c)}
@@ -245,6 +260,20 @@ export default function ResultClient() {
         {currentMode && (
           <p className="basis-full text-caption text-text-soft">
             {currentMode.desc}
+          </p>
+        )}
+        {/* 최대학점이 어디서 나왔는지. 클래스넷 화면과 같은 항목으로 적어 학생이 맞춰 볼 수 있게 한다 */}
+        {!isMock() && limit && (
+          <p className="basis-full text-caption text-text-soft">
+            이번 학기 최대 <span className="tnum">{limit.max}</span>학점 = 이수한계{" "}
+            <span className="tnum">{limit.base}</span>
+            {limit.gpaBonus > 0 && (
+              <> + 평점 우수 <span className="tnum">{limit.gpaBonus}</span></>
+            )}
+            {limit.carry > 0 && (
+              <> + 이월 <span className="tnum">{limit.carry}</span></>
+            )}
+            {" "}(클래스넷 「개인별 수강가능학점 조회」와 같은 식)
           </p>
         )}
       </div>
