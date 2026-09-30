@@ -11,6 +11,10 @@ import CourseCard from "@/components/CourseCard";
 import CopyCodes from "@/components/CopyCodes";
 import JobFitBar from "@/components/JobFitBar";
 
+/** 한 학기에 담을 학점 상한. 기본 18, 더 담거나 덜 담고 싶은 학생이 고른다. */
+const CREDIT_OPTIONS = [15, 18, 21];
+const DEFAULT_CREDITS = 18;
+
 export default function ResultClient() {
   const params = useSearchParams();
   const router = useRouter();
@@ -18,6 +22,10 @@ export default function ResultClient() {
   const [mode, setMode] = useState<ModeId>(
     (params.get("mode") ?? "balanced") as ModeId,
   );
+  const [credits, setCredits] = useState(() => {
+    const v = Number(params.get("credits"));
+    return CREDIT_OPTIONS.includes(v) ? v : DEFAULT_CREDITS;
+  });
   const [rec, setRec] = useState<Recommendation | null>(null);
   const [ref, setRef] = useState<Reference | null>(null);
   const [alt, setAlt] = useState(0);
@@ -53,7 +61,7 @@ export default function ResultClient() {
     setLoading(true);
     const studentId = saved ?? "746696b793744f17";
     setError(null);
-    fetchRecommendation({ studentId, job, mode })
+    fetchRecommendation({ studentId, job, mode, maxCredits: credits })
       .then((r) => {
         if (cancelled) return;
         setRec(r);
@@ -70,11 +78,12 @@ export default function ResultClient() {
     return () => {
       cancelled = true;
     };
-  }, [job, mode]);
+  }, [job, mode, credits]);
 
   useEffect(() => {
-    router.replace(`/result?job=${job}&mode=${mode}`, { scroll: false });
-  }, [job, mode, router]);
+    const c = credits === DEFAULT_CREDITS ? "" : `&credits=${credits}`;
+    router.replace(`/result?job=${job}&mode=${mode}${c}`, { scroll: false });
+  }, [job, mode, credits, router]);
 
   if (needTranscript) return <NeedTranscript />;
   if (loading && !rec) return <Analyzing />;
@@ -202,6 +211,36 @@ export default function ResultClient() {
             </button>
           ))}
         </div>
+        {/* 픽스처는 18학점으로만 만들어 두어 고정 데이터일 때는 그리지 않는다 —
+            눌러도 결과가 안 바뀌는 버튼이 된다. */}
+        {!isMock() && (
+          <>
+            <span id="credits-label" className="text-sm text-text-muted">
+              학점
+            </span>
+            <div
+              role="group"
+              aria-labelledby="credits-label"
+              className="inline-flex rounded-md border border-border-strong bg-surface-3 p-0.5"
+            >
+              {CREDIT_OPTIONS.map((c) => (
+                <button
+                  key={c}
+                  onClick={() => setCredits(c)}
+                  aria-pressed={c === credits}
+                  className={
+                    "tnum min-h-11 rounded-sm px-4 text-sm transition-colors " +
+                    (c === credits
+                      ? "bg-surface font-semibold text-text shadow-card"
+                      : "text-text-muted hover:text-text")
+                  }
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
         {/* 설명이 title 에만 있으면 마우스를 올려야 보인다 — 무엇을 고른 건지 항상 읽히게 둔다. */}
         {currentMode && (
           <p className="basis-full text-caption text-text-soft">
