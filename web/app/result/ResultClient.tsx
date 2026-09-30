@@ -16,9 +16,10 @@ const DEFAULT_CREDITS = 18;
 /** 수강가능 최대학점을 모를 때(옛 서버 응답)의 상한 */
 const FALLBACK_MAX = 21;
 
-/** 선택지 — 15, 18, 21 과 이 학생의 최대학점 가운데 최대학점 이하인 것 */
-const creditOptions = (max: number) =>
-  [...new Set([15, 18, 21, max])].filter((c) => c <= max).sort((a, b) => a - b);
+/** 선택지 — 15, 18, 21, 이 학생의 최대학점, 지금 적용 중인 값 가운데 최대학점 이하인 것.
+ *  주소로 22 처럼 목록 밖 값이 오면 그 값도 보여 줘야 무엇이 적용됐는지 읽힌다 */
+const creditOptions = (max: number, current: number) =>
+  [...new Set([15, 18, 21, max, current])].filter((c) => c <= max).sort((a, b) => a - b);
 
 export default function ResultClient() {
   const params = useSearchParams();
@@ -31,8 +32,13 @@ export default function ResultClient() {
     const v = Number(params.get("credits"));
     return Number.isInteger(v) && v >= 12 && v <= 30 ? v : DEFAULT_CREDITS;
   });
-  /** 이번 학기 수강가능 최대학점 — 성적표를 낼 때 서버가 계산해 준 값(sessionStorage) */
-  const [limit, setLimit] = useState<CreditLimit | null>(null);
+  /**
+   * 이번 학기 수강가능 최대학점 — 성적표를 낼 때 서버가 계산해 준 값(sessionStorage).
+   * undefined = 아직 안 읽음, null = 저장된 값 없음(옛 세션). 읽기 전에 주소의 학점을 상한으로
+   * 깎으면 FALLBACK_MAX 에 걸려 새로고침할 때마다 21 넘는 선택이 기본값으로 돌아갔다.
+   */
+  const [limit, setLimit] = useState<CreditLimit | null | undefined>(undefined);
+  const limitRead = limit !== undefined;
   const maxCredits = limit?.max ?? FALLBACK_MAX;
   const [rec, setRec] = useState<Recommendation | null>(null);
   const [ref, setRef] = useState<Reference | null>(null);
@@ -49,15 +55,17 @@ export default function ResultClient() {
   useEffect(() => {
     fetchReference().then(setRef).catch(console.error);
     const raw = sessionStorage.getItem("creditLimit");
-    if (raw) setLimit(JSON.parse(raw) as CreditLimit);
+    setLimit(raw ? (JSON.parse(raw) as CreditLimit) : null);
   }, []);
 
   // 주소로 들어온 값이 이 학생의 최대학점을 넘으면 기본값으로 되돌린다
   useEffect(() => {
-    if (credits > maxCredits) setCredits(Math.min(DEFAULT_CREDITS, maxCredits));
-  }, [credits, maxCredits]);
+    if (limitRead && credits > maxCredits) setCredits(Math.min(DEFAULT_CREDITS, maxCredits));
+  }, [limitRead, credits, maxCredits]);
 
   useEffect(() => {
+    // 최대학점을 읽기 전, 또는 상한을 넘는 값이 깎이기를 기다리는 동안은 부르지 않는다 — 헛요청이다
+    if (!limitRead || credits > maxCredits) return;
     let cancelled = false;
     const saved = sessionStorage.getItem("studentId");
     setDemo(saved === null);
@@ -93,7 +101,7 @@ export default function ResultClient() {
     return () => {
       cancelled = true;
     };
-  }, [job, mode, credits]);
+  }, [job, mode, credits, limitRead, maxCredits]);
 
   useEffect(() => {
     const c = credits === DEFAULT_CREDITS ? "" : `&credits=${credits}`;
@@ -238,7 +246,7 @@ export default function ResultClient() {
               aria-labelledby="credits-label"
               className="inline-flex rounded-md border border-border-strong bg-surface-3 p-0.5"
             >
-              {creditOptions(maxCredits).map((c) => (
+              {creditOptions(maxCredits, credits).map((c) => (
                 <button
                   key={c}
                   onClick={() => setCredits(c)}
