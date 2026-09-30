@@ -1,6 +1,7 @@
 "use client";
 
-import type { CompId, Diagnosis, Reference } from "@/lib/types";
+import { useState } from "react";
+import type { CompId, Diagnosis, Reference, SigmaSource } from "@/lib/types";
 import { GAP_EPSILON } from "@/lib/competency";
 
 /**
@@ -10,6 +11,9 @@ import { GAP_EPSILON } from "@/lib/competency";
  * 색은 두 역할만 나른다 — 쌓인 양 하나, 모자란 만큼 하나. 역량 정체는 글자가 나른다.
  * 부족한 축만 진하게 두고 충족은 눌러 강조로 읽히게 한다.
  * 숫자는 항상 text 토큰이다 — 데이터 색을 글자에 입히지 않는다.
+ *
+ * 역량 이름을 누르면 그 σ 를 쌓은 기수강 과목이 펼쳐진다(diagnosis.sources).
+ * 「충족」이 무엇으로 찼는지 학생이 확인할 수 있어야 숫자를 믿는다.
  */
 export default function CompetencyChart({
   diagnosis,
@@ -21,6 +25,9 @@ export default function CompetencyChart({
   const labels = new Map<string, string>(
     (reference?.competencies ?? []).map((c) => [c.id, c.nameKo]),
   );
+  const [open, setOpen] = useState<CompId | null>(null);
+  const sourcesOf = (k: CompId) => diagnosis.sources?.[k] ?? [];
+  const toggle = (k: CompId) => setOpen((cur) => (cur === k ? null : k));
 
   // 이 직무가 요구하는 축만. 요구 0인 축은 노이즈라 뺀다.
   const asked = (Object.keys(diagnosis.rho) as CompId[])
@@ -42,18 +49,16 @@ export default function CompetencyChart({
           const lacking = gap > GAP_EPSILON;
 
           return (
-            <div
-              key={k}
-              className="grid grid-cols-[6.5rem_1fr_3rem] items-center gap-3"
-            >
-              <span
-                className={
-                  "truncate text-sm " +
-                  (lacking ? "font-semibold text-text" : "text-text-soft")
-                }
-              >
-                {labels.get(k) ?? k}
-              </span>
+            <div key={k}>
+            <div className="grid grid-cols-[6.5rem_1fr_3rem] items-center gap-3">
+              <CompLabel
+                name={labels.get(k) ?? k}
+                clickable={sourcesOf(k).length > 0}
+                expanded={open === k}
+                onToggle={() => toggle(k)}
+                controls={`src-${k}`}
+                className={lacking ? "font-semibold text-text" : "text-text-soft"}
+              />
 
               <div className="relative h-5 overflow-hidden rounded-sm bg-surface-3">
                 {/* σ — 쌓인 양 */}
@@ -96,19 +101,44 @@ export default function CompetencyChart({
                 {lacking ? `−${gap.toFixed(2)}` : "충족"}
               </span>
             </div>
+            {open === k && (
+              <SourceList id={`src-${k}`} name={labels.get(k) ?? k} items={sourcesOf(k)} />
+            )}
+            </div>
           );
         })}
       </div>
 
       {met.length > 0 && (
-        <p className="mt-3 flex items-baseline gap-2 text-caption text-text-muted">
-          <span className="text-success" aria-hidden>✓</span>
-          <span>
-            <span className="tnum font-semibold text-text">{met.length}개</span> 충족 ·{" "}
-            <span className="text-text-soft">
-              {met.map((k) => labels.get(k) ?? k).join(" · ")}
+        <div className="mt-3">
+          <p className="flex items-baseline gap-2 text-caption text-text-muted">
+            <span className="text-success" aria-hidden>✓</span>
+            <span>
+              <span className="tnum font-semibold text-text">{met.length}개</span> 충족 ·{" "}
+              {met.map((k, i) => (
+                <span key={k}>
+                  {i > 0 && <span className="text-text-soft"> · </span>}
+                  <CompLabel
+                    name={labels.get(k) ?? k}
+                    clickable={sourcesOf(k).length > 0}
+                    expanded={open === k}
+                    onToggle={() => toggle(k)}
+                    controls={`src-${k}`}
+                    className="text-text-soft"
+                  />
+                </span>
+              ))}
             </span>
-          </span>
+          </p>
+          {open !== null && met.includes(open) && (
+            <SourceList id={`src-${open}`} name={labels.get(open) ?? open} items={sourcesOf(open)} />
+          )}
+        </div>
+      )}
+
+      {diagnosis.sources && Object.keys(diagnosis.sources).length > 0 && (
+        <p className="mt-2 text-caption text-text-soft">
+          역량 이름을 누르면 어떤 과목으로 쌓였는지 보여요
         </p>
       )}
 
@@ -140,6 +170,76 @@ export default function CompetencyChart({
           직무가 원하는 수준 ρ
         </Legend>
       </div>
+    </div>
+  );
+}
+
+/** 역량 이름. 기여 과목이 있으면 눌러서 펼치는 버튼이 된다. */
+function CompLabel({
+  name,
+  clickable,
+  expanded,
+  onToggle,
+  controls,
+  className,
+}: {
+  name: string;
+  clickable: boolean;
+  expanded: boolean;
+  onToggle: () => void;
+  controls: string;
+  className: string;
+}) {
+  if (!clickable) return <span className={"truncate text-sm " + className}>{name}</span>;
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-expanded={expanded}
+      aria-controls={controls}
+      className={
+        "truncate text-left text-sm underline decoration-dotted underline-offset-4 hover:text-text " +
+        className
+      }
+    >
+      {name}
+    </button>
+  );
+}
+
+/** 받침 있으면 「은」, 없으면 「는」. 한글이 아니면 둘 다 적는다. */
+function topic(word: string): string {
+  const c = word.charCodeAt(word.length - 1);
+  if (!(c >= 0xac00 && c <= 0xd7a3)) return "은(는)";
+  return (c - 0xac00) % 28 ? "은" : "는";
+}
+
+/** 이 역량을 쌓은 기수강 과목. share 는 그 역량에 쌓인 것 중 과목 몫이다. */
+function SourceList({ id, name, items }: { id: string; name: string; items: SigmaSource[] }) {
+  const shown = items.reduce((a, it) => a + it.share, 0);
+  return (
+    <div id={id} className="mt-2 mb-1 rounded-sm bg-surface-3 px-3 py-2.5">
+      <p className="text-caption text-text-muted">
+        <b className="text-text">{name}</b>{topic(name)} 이 과목들로 쌓였어요
+      </p>
+      <ul className="mt-1.5 space-y-1">
+        {items.map((it) => (
+          <li
+            key={it.courseId}
+            className="grid grid-cols-[1fr_3rem] items-center gap-3 text-sm"
+          >
+            <span className="truncate text-text">{it.name}</span>
+            <span className="tnum text-right text-caption text-text-soft">
+              {Math.round(it.share * 100)}%
+            </span>
+          </li>
+        ))}
+      </ul>
+      {shown < 0.995 && (
+        <p className="mt-1.5 text-caption text-text-soft">
+          나머지 <span className="tnum">{Math.round((1 - shown) * 100)}%</span>는 다른 과목들
+        </p>
+      )}
     </div>
   );
 }
