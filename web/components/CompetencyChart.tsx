@@ -136,7 +136,7 @@ export default function CompetencyChart({
         </div>
       )}
 
-      {diagnosis.sources && Object.keys(diagnosis.sources).length > 0 && (
+      {Object.values(diagnosis.sources ?? {}).some((l) => l && l.length > 0) && (
         <p className="mt-2 text-caption text-text-soft">
           역량 이름을 누르면 어떤 과목으로 쌓였는지 보여요
         </p>

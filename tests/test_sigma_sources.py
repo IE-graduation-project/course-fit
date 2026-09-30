@@ -81,12 +81,14 @@ def payload(client):
 
 
 def test_every_built_up_competency_lists_its_courses(payload):
-    """σ 가 0 보다 크면 목록이 있고, 0 이면 없다 — 「충족」을 눌렀는데 비어 있으면 안 된다."""
+    """σ 가 0 보다 크면 목록이 있고, 0 이면 빈 목록이다 — 「충족」을 눌렀는데 비어 있으면 안 된다.
+    키는 역량 전부다. 학생마다 키가 달라지면 픽스처 모양 대조(test_api)가 학생에 따라 깨진다."""
     _, rec = payload
     diag = rec["diagnosis"]
-    assert diag["sources"], "sources 가 비었다"
+    assert set(diag["sources"]) == set(diag["sigma"])
+    assert any(diag["sources"].values()), "sources 가 전부 비었다"
     for k, s in diag["sigma"].items():
-        assert (s > 0) == (k in diag["sources"]), k
+        assert (s > 0) == bool(diag["sources"][k]), k
 
 
 def test_sources_are_taken_courses_ranked_by_share(payload, db_copy):
@@ -95,7 +97,9 @@ def test_sources_are_taken_courses_ranked_by_share(payload, db_copy):
     taken = {r[0] for r in conn.execute(
         "SELECT course_id FROM student_course WHERE input_hash = ? AND passed = 1", (sid,))}
     for k, items in rec["diagnosis"]["sources"].items():
-        assert 0 < len(items) <= 6, k
+        if not items:
+            continue
+        assert len(items) <= 6, k
         shares = [it["share"] for it in items]
         assert shares == sorted(shares, reverse=True), k
         assert all(0 < v <= 1 for v in shares), k

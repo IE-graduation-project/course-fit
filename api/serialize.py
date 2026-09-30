@@ -146,7 +146,8 @@ def sigma_sources(conn, contributions: dict[str, list[tuple[str, float]]], comp_
     """역량마다 σ 를 쌓은 기수강 과목 — 기여 큰 순 상위 limit 개와 그 몫(share).
 
     share = grade_factor·w / Σ(같은 역량의 기여). σ 는 이 합의 단조 함수라 몫이 곧
-    「이 역량에 쌓인 것 중 이 과목 비중」이다. 기여가 없는 역량은 싣지 않는다.
+    「이 역량에 쌓인 것 중 이 과목 비중」이다. 키는 역량 전부이고 σ 가 0 이면 빈 목록이다 —
+    학생마다 키가 달라지면 계약(픽스처 모양)이 학생에 따라 흔들린다.
     """
     ids = sorted({cid for k in comp_ids for cid, _ in contributions.get(k, [])})
     names = {}
@@ -158,8 +159,6 @@ def sigma_sources(conn, contributions: dict[str, list[tuple[str, float]]], comp_
     for k in comp_ids:
         items = [(cid, v) for cid, v in contributions.get(k, []) if v > 0]
         total = sum(v for _, v in items)
-        if total <= 0:
-            continue
         items.sort(key=lambda t: (-t[1], t[0]))
         out[k] = [{"courseId": cid, "name": names.get(cid, cid), "share": round(v / total, 4)}
                   for cid, v in items[:limit]]

@@ -154,7 +154,7 @@ export interface Diagnosis {
   strengths: { comp: CompId; compKo: string; sigma: number }[];
   gaps: { comp: CompId; compKo: string; gap: number }[];
   /**
-   * 역량마다 σ 를 쌓은 기수강 과목, 기여 큰 순 최대 6개. σ 가 0 인 역량은 키가 없다.
+   * 역량마다 σ 를 쌓은 기수강 과목, 기여 큰 순 최대 6개. σ 가 0 인 역량은 빈 목록.
    * 옛 서버 응답엔 없을 수 있어 optional — 없으면 화면이 누를 거리를 그리지 않는다.
    */
   sources?: Partial<Record<CompId, SigmaSource[]>>;
