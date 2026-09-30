@@ -36,6 +36,25 @@ def grade_factor(grade: float | None, is_pn: int) -> float:
     return grade / 4.5
 
 
+def sigma_contributions(
+    passed: dict[str, tuple[float, int]],
+    weights: dict[str, dict[str, float]],
+    comp_ids: list[str],
+) -> dict[str, list[tuple[str, float]]]:
+    """σ_k 의 지수 안 합을 과목별로 쪼갠 것 — 역량마다 [(course_id, grade_factor(c)·w_{c,k})].
+
+    compute_sigma 가 이 목록을 그대로 더하므로 화면의 「이 역량은 어느 과목으로 쌓였나」가
+    σ 와 어긋날 수 없다. 순서는 passed 순서(합산 순서를 바꾸지 않으려고 정렬하지 않는다).
+    """
+    contrib: dict[str, list[tuple[str, float]]] = {k: [] for k in comp_ids}
+    for cid, (grade, is_pn) in passed.items():
+        gf = grade_factor(grade, is_pn)
+        for k, w in weights.get(cid, {}).items():
+            if k in contrib:
+                contrib[k].append((cid, gf * w))
+    return contrib
+
+
 def compute_sigma(
     passed: dict[str, tuple[float, int]],
     weights: dict[str, dict[str, float]],
@@ -46,13 +65,8 @@ def compute_sigma(
 
     매핑(weights)이 없는 기수강 과목은 0 기여(설계 8절 한계).
     """
-    accum = {k: 0.0 for k in comp_ids}
-    for cid, (grade, is_pn) in passed.items():
-        gf = grade_factor(grade, is_pn)
-        for k, w in weights.get(cid, {}).items():
-            if k in accum:
-                accum[k] += gf * w
-    return {k: 1.0 - math.exp(-alpha * accum[k]) for k in comp_ids}
+    contrib = sigma_contributions(passed, weights, comp_ids)
+    return {k: 1.0 - math.exp(-alpha * sum(v for _, v in contrib[k])) for k in comp_ids}
 
 
 def compute_gap(sigma: dict[str, float], rho: dict[str, float], comp_ids: list[str]) -> dict[str, float]:

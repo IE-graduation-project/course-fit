@@ -9,7 +9,7 @@ DB(app.db)와 transcript가 적재한 student* 테이블만 읽는다.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from . import data, params
 from .model import Result, solve_topk
@@ -46,6 +46,8 @@ class Recommendation:
     admission_year: int
     requirement_year: int           # 실제 적용된 교육과정 개정 연도 (결정 ⑨). 화면 고지용
     grade_level: int                # 후보를 거른 학년 (#42). 화면 고지용
+    # 역량별 σ 기여 과목 [(course_id, grade_factor·w)]. 화면의 「무엇으로 쌓였나」용
+    contributions: dict[str, list[tuple[str, float]]] = field(default_factory=dict)
 
     @property
     def result(self) -> Result:
@@ -76,6 +78,7 @@ def recommend(input_hash, job_id, *, db_path=data.DB_PATH, U=18, L=12,
         conn.close()
 
     sigma = params.compute_sigma(student.passed, student.weights, comp, alpha=alpha)
+    contributions = params.sigma_contributions(student.passed, student.weights, comp)
     gap = params.compute_gap(sigma, rho, comp)
     need = params.compute_need(student.earned_by_area, min_credits)
 
@@ -94,5 +97,5 @@ def recommend(input_hash, job_id, *, db_path=data.DB_PATH, U=18, L=12,
     return Recommendation(
         results=results, sigma=sigma, gap=gap, need=need,
         dept_id=student.dept_id, admission_year=student.admission_year,
-        requirement_year=req_year, grade_level=grade,
+        requirement_year=req_year, grade_level=grade, contributions=contributions,
     )

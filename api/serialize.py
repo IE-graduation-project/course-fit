@@ -23,6 +23,8 @@ IDX_TO_DAY = {0: "월", 1: "화", 2: "수", 3: "목", 4: "금", 5: "토", 6: "�
 GAP_EPSILON = 0.03
 # 강점으로 표시할 σ 하한
 STRENGTH_SIGMA = 0.5
+# 역량 하나를 눌렀을 때 보여 줄 기여 과목 수
+SOURCES_PER_COMP = 6
 
 # ε 프리셋의 사용자 표시 문구. eps 값 자체는 recommend.PREFERENCE_EPS가 정본이다.
 MODES = [
@@ -139,6 +141,31 @@ def build_reference(ref: RefData) -> dict:
     }
 
 
+def sigma_sources(conn, contributions: dict[str, list[tuple[str, float]]], comp_ids,
+                  *, limit: int = SOURCES_PER_COMP) -> dict[str, list[dict]]:
+    """역량마다 σ 를 쌓은 기수강 과목 — 기여 큰 순 상위 limit 개와 그 몫(share).
+
+    share = grade_factor·w / Σ(같은 역량의 기여). σ 는 이 합의 단조 함수라 몫이 곧
+    「이 역량에 쌓인 것 중 이 과목 비중」이다. 기여가 없는 역량은 싣지 않는다.
+    """
+    ids = sorted({cid for k in comp_ids for cid, _ in contributions.get(k, [])})
+    names = {}
+    if ids:
+        q = ",".join("?" * len(ids))
+        names = {r["course_id"]: r["course_name"] for r in conn.execute(
+            f"SELECT course_id, course_name FROM course WHERE course_id IN ({q})", ids)}
+    out = {}
+    for k in comp_ids:
+        items = [(cid, v) for cid, v in contributions.get(k, []) if v > 0]
+        total = sum(v for _, v in items)
+        if total <= 0:
+            continue
+        items.sort(key=lambda t: (-t[1], t[0]))
+        out[k] = [{"courseId": cid, "name": names.get(cid, cid), "share": round(v / total, 4)}
+                  for cid, v in items[:limit]]
+    return out
+
+
 def build_payload(conn, rec: Recommendation, ref: RefData, *, job_id: str, mode: str, eps: float,
                   alpha: float = params.ALPHA_DEFAULT, max_credits: int = 18,
                   min_credits: int = 12, top_k: int = 3) -> dict:
@@ -208,6 +235,7 @@ def build_payload(conn, rec: Recommendation, ref: RefData, *, job_id: str, mode:
             "gaps": [{"comp": k, "compKo": COMP_KR[k], "gap": round(rec.gap[k], 4)}
                      for k, _ in sorted(rec.gap.items(), key=lambda x: -x[1])
                      if rec.gap[k] > GAP_EPSILON],
+            "sources": sigma_sources(conn, rec.contributions, comp_ids),
         },
         "need": {a: n for a, n in sorted(rec.need.items()) if n > 0},
         "timetables": timetables,
