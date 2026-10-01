@@ -11,18 +11,36 @@ import type { RecommendedCourse } from "@/lib/types";
  */
 export default function CopyCodes({ courses }: { courses: RecommendedCourse[] }) {
   const [state, setState] = useState<"idle" | "done" | "fail">("idle");
+  /** 복사가 막힌 브라우저(카카오톡 인앱 등)에선 번호를 직접 고를 수 있게 펼쳐 둔다 */
+  const [shown, setShown] = useState(false);
 
   const text = courses
-    .map((c) => `${c.courseId}-${c.section}\t${c.name}\t${c.timeRaw ?? ""}`)
+    .map((c) => `${c.courseId}-${c.section}\t${c.name}\t${c.timeRaw || "시간 미지정"}`)
     .join("\n");
 
   async function copy() {
+    let ok = false;
     try {
       await navigator.clipboard.writeText(text);
-      setState("done");
+      ok = true;
     } catch {
-      setState("fail");
+      // 클립보드 API 가 막힌 곳 — 예전 방식으로 한 번 더
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        ok = document.execCommand("copy");
+      } catch {
+        ok = false;
+      }
+      ta.remove();
     }
+    setState(ok ? "done" : "fail");
+    if (!ok) setShown(true);
     setTimeout(() => setState("idle"), 2200);
   }
 
@@ -39,8 +57,18 @@ export default function CopyCodes({ courses }: { courses: RecommendedCourse[] })
       </button>
       <span aria-live="polite" className="text-caption text-text-muted">
         {state === "done" && "복사했어요. 수강신청 창에 붙여넣으면 됩니다."}
-        {state === "fail" && "복사가 막혔어요. 카드의 번호를 직접 옮겨 적어주세요."}
+        {state === "fail" && "이 브라우저는 자동 복사가 막혀 있어요. 아래 칸을 길게 눌러 복사해 주세요."}
       </span>
+      {shown && (
+        <textarea
+          readOnly
+          value={courses.map((c) => `${c.courseId}-${c.section} ${c.name}`).join("\n")}
+          rows={courses.length}
+          aria-label="추천 과목 학수번호"
+          onFocus={(e) => e.currentTarget.select()}
+          className="tnum w-full resize-none rounded-md border border-border bg-surface p-3 font-mono text-sm"
+        />
+      )}
     </div>
   );
 }

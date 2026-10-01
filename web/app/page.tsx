@@ -31,7 +31,7 @@ export default function Landing() {
         </Link>
 
         <p className="mt-3 text-caption text-text-soft">
-          약 1분 · 로그인 없음 · 성적표는 저장되지 않아요
+          약 1분 · 로그인 없음 · 성적표는 24시간 뒤 자동 삭제
         </p>
       </div>
 

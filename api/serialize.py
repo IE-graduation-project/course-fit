@@ -217,7 +217,9 @@ def build_payload(conn, rec: Recommendation, ref: RefData, *, job_id: str, mode:
                     # 적용된 교육과정 연도. 입학년도와 다를 수 있어 화면에 고지한다(결정 ⑨).
                     "requirementYear": rec.requirement_year,
                     # 후보를 거른 학년(#42). 성적표의 마지막 학기에서 계산해 입학년도와 다를 수 있다.
-                    "gradeLevel": rec.grade_level},
+                    "gradeLevel": rec.grade_level,
+                    # 추천한 분반의 개설 학기("2026-2"). 화면이 「이번 학기」가 언제인지 밝힌다.
+                    "term": data.active_term(conn)},
         "fitByJob": [{"job": jid, "name": jname,
                       "fit": job_fit(rec.sigma, data.load_rho(conn, jid), comp_ids)}
                      for jid, jname in ref.jobs],
