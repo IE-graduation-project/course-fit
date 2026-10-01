@@ -16,10 +16,13 @@ export default function CourseCard({
   course,
   active,
   onHover,
+  areaPlaced,
 }: {
   course: RecommendedCourse;
   active: boolean;
   onHover?: (id: string | null) => void;
+  /** 이 시간표가 이 과목과 같은 영역에 담은 학점 합. 남은 학점보다 많으면 넘친다고 말한다 */
+  areaPlaced?: number;
 }) {
   const key = courseKey(course);
   const reasons = course.careerReason.filter((r) => r.share >= 0.05);
@@ -78,17 +81,30 @@ export default function CourseCard({
         </div>
       )}
 
+      {/* 카드마다 「들어갑니다」라고만 하면 같은 영역 과목이 남은 학점보다 많을 때 과장이 된다
+          (공통교양 남은 7학점에 15학점을 담아도 다섯 카드가 다 「들어갑니다」였다) */}
       {course.gradReason && (
         <p className="mt-3 border-t border-border pt-2.5 text-caption text-text-soft">
-          졸업요건{" "}
-          <span className="text-text-muted">{course.gradReason.area}</span>에
-          들어갑니다
-          {course.gradReason.remaining > 0 && (
+          {course.gradReason.remaining > 0 ? (
             <>
-              {" · "}그 영역 남은 학점{" "}
-              <span className="tnum text-text-muted">
-                {course.gradReason.remaining}
-              </span>
+              졸업요건 <span className="text-text-muted">{course.gradReason.area}</span>에
+              들어갑니다{" · "}그 영역 남은 학점{" "}
+              <span className="tnum text-text-muted">{course.gradReason.remaining}</span>
+              {areaPlaced !== undefined && areaPlaced > course.gradReason.remaining && (
+                <>
+                  {" · "}이 시간표가 이 영역에{" "}
+                  <span className="tnum text-text-muted">{areaPlaced}</span>학점을 담아{" "}
+                  <span className="tnum text-text-muted">
+                    {areaPlaced - course.gradReason.remaining}
+                  </span>
+                  학점은 넘쳐요
+                </>
+              )}
+            </>
+          ) : (
+            <>
+              <span className="text-text-muted">{course.gradReason.area}</span>은(는) 이미 다
+              채웠어요 · 졸업 총학점에만 더해져요
             </>
           )}
         </p>

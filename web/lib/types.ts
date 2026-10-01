@@ -124,6 +124,8 @@ export interface Recommendation {
     admissionYear: number;
     requirementYear: number;
     gradeLevel: number;
+    /** 추천한 분반의 개설 학기 "2026-2". 옛 응답엔 없다 */
+    term?: string;
   };
   job: JobRef;
   /**

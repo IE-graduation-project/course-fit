@@ -63,6 +63,9 @@ export default function StartPage() {
         admissionYear: year,
       });
       sessionStorage.setItem("studentId", res.studentId);
+      // 샘플로 들어왔으면 결과 화면이 「샘플 학생의 결과」라고 밝힌다 — 안 그러면 적합도를 제 것으로 읽는다
+      if (value === SAMPLE_TRANSCRIPTS[program.dept]?.[year]) sessionStorage.setItem("sample", "1");
+      else sessionStorage.removeItem("sample");
       // 서버는 잠들거나 재시작하면 적재한 성적표를 잃는다(무료 인스턴스의 임시 파일시스템).
       // 결과 화면이 그때 다시 적재할 수 있게 이 탭에만 둔다 — 탭을 닫으면 사라진다.
       sessionStorage.setItem(
@@ -435,8 +438,8 @@ function TranscriptInput({
           {[
             "클래스넷(cn.hongik.ac.kr) 로그인",
             "왼쪽 메뉴 → 성적정보 → 전체성적조회",
-            "표 영역에서 Ctrl+A → Ctrl+C",
-            "아래 칸에 Ctrl+V",
+            "표 영역에서 Ctrl+A → Ctrl+C (휴대폰은 길게 눌러 전체 선택 → 복사)",
+            "아래 칸에 Ctrl+V (휴대폰은 길게 눌러 붙여넣기)",
           ].map((s, i) => (
             <li key={i} className="flex gap-2.5">
               <span className="tnum mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-100 text-caption font-bold text-brand-700">
@@ -453,7 +456,7 @@ function TranscriptInput({
         onChange={(e) => setValue(e.target.value)}
         rows={6}
         spellCheck={false}
-        placeholder="여기에 붙여넣기 (Ctrl+V)"
+        placeholder="여기에 붙여넣기"
         aria-describedby="paste-status"
         className="w-full resize-none rounded-lg border border-border bg-surface p-4 font-mono text-sm outline-none transition-colors placeholder:text-text-soft focus:border-brand-400"
       />
@@ -475,8 +478,15 @@ function TranscriptInput({
           ? "붙여넣으면 여기에 인식 결과가 뜹니다."
           : found > 0
             ? `✓ ${found}과목 인식했어요.`
-            : "성적표 형식이 아닌 것 같아요. 표 전체를 Ctrl+A → Ctrl+C 로 복사했는지 확인해 주세요."}
+            : "성적표 형식이 아닌 것 같아요. 전체성적조회 화면 전체를 선택해 복사했는지 확인해 주세요."}
       </p>
+      {/* 화면 일부만 복사하면 과목 몇 개만 잡히고도 그대로 넘어간다. 전체성적조회는 맨 아래에
+          「총 취득학점」 줄이 있어 그게 없으면 잘렸다고 알린다 — 막지는 않는다 */}
+      {found > 0 && !/총\s*취득학점/.test(value) && (
+        <p className="text-caption text-gap">
+          맨 아래 「총 취득학점」 줄이 안 보여요. 성적표 끝까지 복사됐는지 확인해 주세요.
+        </p>
+      )}
 
       <div className="flex flex-wrap gap-2">
         <button
@@ -501,9 +511,11 @@ function TranscriptInput({
       </div>
 
       {/* 결정 ⑧ — 구조가 이러하므로 사실인 문장만 쓴다. 학번·이름은 '전체성적조회'
-          화면에 없어 파서가 가져올 수조차 없고, 적재분은 24시간 뒤 삭제된다. */}
+          화면에 없어 파서가 가져올 수조차 없고, 적재분은 24시간 뒤 삭제된다. 서버가 잠들어 잃었을
+          때 다시 적재하려고 이 탭에도 둔다(#69) — 그것까지 적는다. */}
       <p className="text-caption leading-relaxed text-text-soft">
-        붙여넣은 성적표는 추천 계산에만 쓰이고 <b>24시간 후 자동 삭제</b>됩니다.
+        붙여넣은 성적표는 추천 계산에만 쓰이고 서버에서 <b>24시간 후 자동 삭제</b>됩니다.
+        이 브라우저 탭에도 잠시 남았다가 탭을 닫으면 지워집니다.
         로그인이 없어 학번·이름은 수집하지 않습니다.
       </p>
     </div>

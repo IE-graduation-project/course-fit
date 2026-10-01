@@ -50,12 +50,15 @@ export default function ResultClient() {
   const [loading, setLoading] = useState(true);
   /** 성적표를 낸 적 없이 /result 로 바로 들어왔나 */
   const [demo, setDemo] = useState(false);
+  /** 시작 화면에서 「샘플로 먼저 볼래요」로 들어왔나 */
+  const [sample, setSample] = useState(false);
   /** 성적표가 없어서 애초에 물어볼 수가 없는 상태 (실 API 일 때만) */
   const [needTranscript, setNeedTranscript] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchReference().then(setRef).catch(console.error);
+    setSample(sessionStorage.getItem("sample") === "1");
     const raw = sessionStorage.getItem("creditLimit");
     setLimit(raw ? (JSON.parse(raw) as CreditLimit) : null);
     const max = Number(sessionStorage.getItem("creditMax"));
@@ -180,6 +183,15 @@ export default function ResultClient() {
         </p>
       )}
 
+      {!demo && sample && (
+        <p className="mb-6 rounded-lg border border-border bg-surface-3 px-4 py-3 text-sm text-text-muted">
+          <b className="text-text">샘플 학생</b>의 성적표로 본 결과예요. 적합도와 시간표도 그 학생 것입니다.{" "}
+          <Link href="/start" className="font-semibold text-brand-700 hover:underline">
+            내 성적표로 해보기 →
+          </Link>
+        </p>
+      )}
+
       {demo && (
         <p className="mb-6 rounded-lg border border-border bg-surface-3 px-4 py-3 text-sm text-text-muted">
           성적표를 넣지 않고 들어오셔서 <b className="text-text">샘플 학생</b> 결과를
@@ -192,8 +204,14 @@ export default function ResultClient() {
 
       <h1 className="text-h1 font-bold leading-h">이번 학기, 이렇게 들어보세요</h1>
       <p className="mt-2 text-sm text-text-muted">
-        {rec.student.deptId} {rec.student.admissionYear}학번 ·{" "}
+        {ref?.programs.find((p) => p.dept === rec.student.deptId)?.name ?? rec.student.deptId}{" "}
+        {rec.student.admissionYear}학번 ·{" "}
         <span className="tnum">{rec.student.gradeLevel}학년</span> 기준 ·{" "}
+        {rec.student.term && (
+          <>
+            <span className="tnum">{termLabel(rec.student.term)}</span> 개설 강의 ·{" "}
+          </>
+        )}
         {tt === null ? (
           <span>추천 가능한 시간표 없음</span>
         ) : (
@@ -285,7 +303,8 @@ export default function ResultClient() {
         {/* 설명이 title 에만 있으면 마우스를 올려야 보인다 — 무엇을 고른 건지 항상 읽히게 둔다. */}
         {currentMode && (
           <p className="basis-full text-caption text-text-soft">
-            {currentMode.desc}
+            {/* 좁은 화면에선 학점 줄 밑에 와서 학점 설명처럼 읽힌다 — 어느 성향의 설명인지 붙인다 */}
+            <b className="font-semibold text-text-muted">{currentMode.label}</b>: {currentMode.desc}
           </p>
         )}
         {/* 최대학점이 어디서 나왔는지. 학생이 넣은 값이면 그렇다고, 계산한 값이면 클래스넷 화면과
@@ -293,7 +312,7 @@ export default function ResultClient() {
         {!isMock() && entered != null && (
           <p className="basis-full text-caption text-text-soft">
             이번 학기 최대 <span className="tnum">{entered}</span>학점 (시작할 때 넣은 값, 클래스넷
-            수강신청 → 개인별 수강가능학점 조회)
+            수강신청 → 개인별 수강가능학점 조회) · 추천은 18학점에서 시작해요
           </p>
         )}
         {!isMock() && entered == null && limit && (
@@ -310,6 +329,25 @@ export default function ResultClient() {
           </p>
         )}
       </div>
+
+      {/* 다시 계산하는 동안 이전 결과가 그대로 보이면 「바뀐 게 없다」로 읽힌다. 서버가 깨는 중이면
+          30초 가까이 가는데 아무 말이 없었다 — 무엇을 기다리는지 말한다 */}
+      {loading && rec && (
+        <p
+          role="status"
+          className="print-hide mt-4 flex items-center gap-2.5 text-sm font-semibold text-brand-700"
+        >
+          <span className="flex gap-1" aria-hidden>
+            <Dot />
+            <Dot d={0.2} />
+            <Dot d={0.4} />
+          </span>
+          다시 계산하고 있어요
+          <span className="font-normal text-text-soft">
+            보통 몇 초, 서버가 잠들어 있었으면 1분쯤
+          </span>
+        </p>
+      )}
 
       <section
         className="print-stack mt-6 grid gap-6 transition-opacity duration-200 lg:grid-cols-[1.35fr_1fr]"
@@ -343,7 +381,7 @@ export default function ResultClient() {
           {rec.timetables.length > 1 && hasDistinctAlternatives && (
             <div className="print-hide mt-4 flex flex-wrap items-center gap-2">
               <span className="text-caption text-text-soft">
-                {alternativesShareCourses ? "같은 과목, 다른 시간" : "다른 안"}
+                {alternativesShareCourses ? "같은 과목, 다른 분반" : "다른 안"}
               </span>
               {rec.timetables.map((t, i) => (
                 <button
@@ -361,7 +399,7 @@ export default function ResultClient() {
                   {/* 과목이 같으면 이 값도 셋 다 같다 — 같은 수를 세 번 적으면 노이즈다 */}
                   {!alternativesShareCourses && (
                     <span className="text-text-soft">
-                      <span className="tnum">{t.courses.length}</span>과목 · 적합{" "}
+                      <span className="tnum">{t.courses.length}</span>과목 · 보완{" "}
                       <span className="tnum">{fitIndex(t)}</span>
                     </span>
                   )}
@@ -387,7 +425,7 @@ export default function ResultClient() {
               {/* 어느 교육과정을 기준으로 셌는지 밝힌다. 입학년도와 다를 수 있다 —
                   2025학번 경영은 2022 교육과정을 따른다. 학생이 직접 확인할 수 있어야 한다. */}
               <p className="mt-1 text-caption text-text-soft">
-                {rec.student.requirementYear}학년도 교육과정 기준
+                지금까지 들은 과목 기준(이번 추천 전) · {rec.student.requirementYear}학년도 교육과정
               </p>
               <ul className="mt-3.5 space-y-2.5">
                 {need.map(([area, credits]) => (
@@ -414,7 +452,11 @@ export default function ResultClient() {
         </div>
       </section>
 
-      <section className="mt-12">
+      <section
+        className="mt-12 transition-opacity duration-200"
+        style={{ opacity: loading ? 0.45 : 1 }}
+        aria-busy={loading}
+      >
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="text-h2 font-bold">왜 이 과목들일까요?</h2>
           <button
@@ -441,8 +483,9 @@ export default function ResultClient() {
               목표 직무가 원하는 수준 ρ 에서 모자란 만큼 → 과목마다{" "}
               <b className="text-text">Score = Σ gap × 기여도</b> 를 매기고, 시간 충돌·학점
               상하한·기수강·선수과목·수강 학년을 <b className="text-text">제약</b>으로 걸어 정수계획법으로
-              풉니다. 1순위는 직무 적합, 2순위는 졸업 진척이고 그 사이를 ε 이 조절합니다
-              (지금 ε = <span className="tnum">{rec.params.eps}</span>).
+              풉니다. 먼저 역량 보완이 가장 큰 시간표를 찾고, 그 값을 ε 만큼 양보하는 범위 안에서
+              졸업 반영이 가장 큰 시간표를 고릅니다. ε 이 클수록 졸업 쪽으로 기웁니다(역량 우선 0,
+              균형 0.3, 졸업 우선 0.6 · 지금 <span className="tnum">{rec.params.eps}</span>).
             </p>
             <p className="text-caption">
               ※ ρ 는 직무 안에서의 상대 중요도, σ 는 절대 누적량이라 엄밀히 같은 척도는
@@ -458,6 +501,9 @@ export default function ResultClient() {
               course={c}
               active={active === courseKey(c)}
               onHover={setActive}
+              areaPlaced={(tt?.courses ?? [])
+                .filter((o) => o.area === c.area)
+                .reduce((n, o) => n + o.credit, 0)}
             />
           ))}
         </div>
@@ -479,6 +525,13 @@ export default function ResultClient() {
  * 사실상 0~1 범위다. 그래서 100 을 곱해 그대로 읽을 수 있는 수가 된다.
  * 절대 눈금이 아니라 성향·대안을 견주는 상대 지표로만 쓴다.
  */
+/** "2026-2" → "2026학년도 2학기". 계절학기 코드(S, W)도 읽히게 */
+function termLabel(term: string) {
+  const [y, s] = term.split("-");
+  const name = { "1": "1학기", "2": "2학기", S: "여름 계절학기", W: "겨울 계절학기" }[s] ?? s;
+  return `${y}학년도 ${name}`;
+}
+
 function fitIndex(t: Timetable) {
   if (t.totalCredit <= 0) return 0;
   return Math.round((t.careerfit / t.totalCredit) * 100);
@@ -545,8 +598,8 @@ function TimetableMeters({ tt }: { tt: Timetable }) {
 
   const rows = [
     {
-      label: "직무 적합",
-      hint: "고른 과목이 목표 직무의 부족한 역량을 얼마나 채우는지",
+      label: "역량 보완",
+      hint: "이 시간표가 목표 직무의 모자란 역량을 얼마나 채우나. 위 직무 옆 숫자(지금 적합도)와 다른 값이고, 성향과 대안끼리 견주는 용도",
       value: fit,
       color: "var(--color-gap)",
       right: <span className="tnum">{fit}</span>,
@@ -584,6 +637,8 @@ function TimetableMeters({ tt }: { tt: Timetable }) {
             />
           </dd>
           <dd className="text-right text-sm text-text-muted">{r.right}</dd>
+          {/* 마우스를 올려야만 보이는 설명은 휴대폰에서 영영 안 보인다 */}
+          <dd className="col-span-3 -mt-1.5 text-caption text-text-soft">{r.hint}</dd>
         </div>
       ))}
     </dl>
@@ -644,8 +699,21 @@ function NeedTranscript() {
 
 function Analyzing() {
   const steps = ["성적표 읽는 중", "역량 계산", "직무 갭 진단", "시간표 최적화"];
+  // 목록만 서 있으면 멈춘 화면인지 계산 중인지 모른다 — 움직이는 표시와 걸리는 시간을 같이 둔다
   return (
-    <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center px-6">
+    <main
+      role="status"
+      aria-live="polite"
+      className="mx-auto flex min-h-dvh max-w-md flex-col justify-center px-6"
+    >
+      <p className="mb-5 flex items-center gap-2.5 text-sm font-semibold text-text">
+        <span className="flex gap-1" aria-hidden>
+          <Dot />
+          <Dot d={0.2} />
+          <Dot d={0.4} />
+        </span>
+        시간표를 계산하고 있어요
+      </p>
       <div className="space-y-3">
         {steps.map((s, i) => (
           <div
@@ -658,7 +726,19 @@ function Analyzing() {
           </div>
         ))}
       </div>
+      <p className="mt-5 text-caption leading-relaxed text-text-soft">
+        보통 몇 초면 끝나요. 한동안 아무도 안 썼다면 서버가 깨는 데 1분쯤 걸려요.
+      </p>
     </main>
+  );
+}
+
+function Dot({ d = 0 }: { d?: number }) {
+  return (
+    <span
+      className="inline-block h-1.5 w-1.5 rounded-full bg-brand-500"
+      style={{ animation: `fadeIn .6s ${d}s infinite alternate` }}
+    />
   );
 }
 

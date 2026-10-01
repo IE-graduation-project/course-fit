@@ -3,7 +3,9 @@
  *   slot = 요일idx × 16 + 교시   (월=0 … 일=6, 교시 1..15)
  */
 export const DAY_STRIDE = 16;
-export const DAYS = ["월", "화", "수", "목", "금"] as const;
+export const DAYS = ["월", "화", "수", "목", "금", "토", "일"] as const;
+/** 기본은 월~금. 토·일 분반이 있으면 그 요일까지 넓힌다 — 안 넓히면 격자 밖에 그려졌다 */
+export const WEEKDAYS = 5;
 
 export interface Placed {
   day: number; // 0..4

@@ -1,7 +1,7 @@
 "use client";
 
 import type { RecommendedCourse } from "@/lib/types";
-import { DAYS, periodRange, periodTime, toBlocks } from "@/lib/slots";
+import { DAYS, WEEKDAYS, periodRange, periodTime, toBlocks } from "@/lib/slots";
 
 export function courseKey(c: RecommendedCourse) {
   return `${c.courseId}-${c.section}`;
@@ -15,7 +15,7 @@ interface Props {
 }
 
 /**
- * 월~금 × 교시 시간표.
+ * 월~금(토·일 분반이 있으면 그 요일까지) × 교시 시간표.
  *
  * 격자(빈 칸)를 먼저 깔고, 과목 블록을 grid 명시 배치로 그 위에 얹는다.
  * 그래야 연강이 칸마다 쪼개지지 않고 한 덩어리로 읽힌다.
@@ -30,6 +30,7 @@ export default function TimetableGrid({ courses, activeId, onHover }: Props) {
   const blocks = courses.flatMap((course) =>
     toBlocks(course.slots).map((b) => ({ course, ...b })),
   );
+  const days = DAYS.slice(0, Math.max(WEEKDAYS, ...blocks.map((b) => b.day + 1)));
 
   const unscheduled = courses.filter((c) => c.slots.length === 0);
 
@@ -55,13 +56,13 @@ export default function TimetableGrid({ courses, activeId, onHover }: Props) {
       <div
         className="grid overflow-hidden rounded-lg border border-border bg-surface"
         style={{
-          gridTemplateColumns: "3rem repeat(5, minmax(0, 1fr))",
+          gridTemplateColumns: `3rem repeat(${days.length}, minmax(0, 1fr))`,
           gridTemplateRows: `auto repeat(${periods.length}, minmax(3.25rem, auto))`,
         }}
       >
         {/* 헤더 */}
         <div className="border-b border-border bg-surface-2" />
-        {DAYS.map((d) => (
+        {days.map((d) => (
           <div
             key={d}
             className="border-b border-l border-border bg-surface-2 py-2 text-center text-sm font-medium text-text-muted"
@@ -82,7 +83,7 @@ export default function TimetableGrid({ courses, activeId, onHover }: Props) {
           </div>
         ))}
         {periods.map((p, r) =>
-          DAYS.map((_, day) => (
+          days.map((_, day) => (
             <div
               key={`cell-${day}-${p}`}
               className="border-b border-l border-border"
