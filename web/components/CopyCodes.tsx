@@ -56,7 +56,7 @@ export default function CopyCodes({ courses }: { courses: RecommendedCourse[] })
         학수번호 {courses.length}개 복사
       </button>
       <span aria-live="polite" className="text-caption text-text-muted">
-        {state === "done" && "복사했어요. 수강신청 창에 붙여넣으면 됩니다."}
+        {state === "done" && "복사했어요. 한 줄에 학수번호-분반, 과목명, 시간 순서예요."}
         {state === "fail" && "이 브라우저는 자동 복사가 막혀 있어요. 아래 칸을 길게 눌러 복사해 주세요."}
       </span>
       {shown && (

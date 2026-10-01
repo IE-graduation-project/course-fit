@@ -312,7 +312,7 @@ export default function ResultClient() {
         {!isMock() && entered != null && (
           <p className="basis-full text-caption text-text-soft">
             이번 학기 최대 <span className="tnum">{entered}</span>학점 (시작할 때 넣은 값, 클래스넷
-            수강신청 → 개인별 수강가능학점 조회)
+            수강신청 → 개인별 수강가능학점 조회) · 추천은 18학점에서 시작해요
           </p>
         )}
         {!isMock() && entered == null && limit && (
@@ -329,6 +329,25 @@ export default function ResultClient() {
           </p>
         )}
       </div>
+
+      {/* 다시 계산하는 동안 이전 결과가 그대로 보이면 「바뀐 게 없다」로 읽힌다. 서버가 깨는 중이면
+          30초 가까이 가는데 아무 말이 없었다 — 무엇을 기다리는지 말한다 */}
+      {loading && rec && (
+        <p
+          role="status"
+          className="print-hide mt-4 flex items-center gap-2.5 text-sm font-semibold text-brand-700"
+        >
+          <span className="flex gap-1" aria-hidden>
+            <Dot />
+            <Dot d={0.2} />
+            <Dot d={0.4} />
+          </span>
+          다시 계산하고 있어요
+          <span className="font-normal text-text-soft">
+            보통 몇 초, 서버가 잠들어 있었으면 1분쯤
+          </span>
+        </p>
+      )}
 
       <section
         className="print-stack mt-6 grid gap-6 transition-opacity duration-200 lg:grid-cols-[1.35fr_1fr]"
@@ -433,7 +452,11 @@ export default function ResultClient() {
         </div>
       </section>
 
-      <section className="mt-12">
+      <section
+        className="mt-12 transition-opacity duration-200"
+        style={{ opacity: loading ? 0.45 : 1 }}
+        aria-busy={loading}
+      >
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="text-h2 font-bold">왜 이 과목들일까요?</h2>
           <button
@@ -460,8 +483,9 @@ export default function ResultClient() {
               목표 직무가 원하는 수준 ρ 에서 모자란 만큼 → 과목마다{" "}
               <b className="text-text">Score = Σ gap × 기여도</b> 를 매기고, 시간 충돌·학점
               상하한·기수강·선수과목·수강 학년을 <b className="text-text">제약</b>으로 걸어 정수계획법으로
-              풉니다. 1순위는 역량 보완, 2순위는 졸업 반영이고 그 사이를 ε 이 조절합니다
-              (지금 ε = <span className="tnum">{rec.params.eps}</span>).
+              풉니다. 먼저 역량 보완이 가장 큰 시간표를 찾고, 그 값을 ε 만큼 양보하는 범위 안에서
+              졸업 반영이 가장 큰 시간표를 고릅니다. ε 이 클수록 졸업 쪽으로 기웁니다(역량 우선 0,
+              균형 0.3, 졸업 우선 0.6 · 지금 <span className="tnum">{rec.params.eps}</span>).
             </p>
             <p className="text-caption">
               ※ ρ 는 직무 안에서의 상대 중요도, σ 는 절대 누적량이라 엄밀히 같은 척도는
@@ -477,6 +501,9 @@ export default function ResultClient() {
               course={c}
               active={active === courseKey(c)}
               onHover={setActive}
+              areaPlaced={(tt?.courses ?? [])
+                .filter((o) => o.area === c.area)
+                .reduce((n, o) => n + o.credit, 0)}
             />
           ))}
         </div>
