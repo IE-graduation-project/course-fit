@@ -49,3 +49,25 @@ def test_alternatives_stay_in_lexicographic_order():
     rs = _solve(cands, scores, {"공통교양": 3, "MSC": 3}, U=6, L=6, k=3)
     keys = [(round(r.gradprogress, 6), round(r.careerfit, 6)) for r in rs]
     assert keys == sorted(keys, reverse=True), keys
+
+
+def test_full_ties_pick_the_same_timetable_whatever_the_order():
+    """점수까지 같은 해가 여럿이면 후보 순서와 무관하게 같은 안이 나온다 (#73).
+
+    CBC 는 동점 최적해 중 무엇을 낼지 변수 순서와 실행 환경에 따라 달리 골랐다. 순서를 섞어
+    그 차이를 흉내 낸다 — 같은 과목의 분반 다섯, 점수·영역·학점이 같은 다른 과목 넷.
+    """
+    import random
+
+    sections = [Candidate(course_id="A", section=str(s), course_name="A", credit=3, area="전공선택",
+                          slots=(s,), prereqs=(), weights={}) for s in range(1, 6)]
+    others = [_cand(f"B{i}", "공통교양", 3, 10 + i) for i in range(4)]
+    scores = {"A": 0.5, **{f"B{i}": 0.2 for i in range(4)}}
+    need = {"전공선택": 3, "공통교양": 3}
+    picks = set()
+    for seed in range(8):
+        cands = sections + others
+        random.Random(seed).shuffle(cands)
+        rs = _solve(cands, scores, need, U=6, L=6, k=3)
+        picks.add(tuple(tuple(sorted(f"{c.course_id}-{c.section}" for c in r.selected)) for r in rs))
+    assert len(picks) == 1, picks

@@ -3,10 +3,12 @@
 [1순위] max CareerFit → V*
 [2순위] max GradProgress  s.t. CareerFit ≥ (1−ε)·V*
 [3순위] 2순위가 같으면 CareerFit 이 높은 쪽 — 목적에 δ·CareerFit 을 섞는다 (#45)
+[4순위] 그래도 같으면 분반별 고정 가중의 합이 가장 작은 쪽 — 실행 환경과 무관하게 같은 안 (#73)
 hard 제약 A1(시간충돌)·A2(분반택1)·A3/A3'(학점상한/하한). B1·B2는 후보 사전필터로 처리.
 """
 from __future__ import annotations
 
+import hashlib
 from dataclasses import dataclass
 
 import pulp
@@ -46,6 +48,12 @@ def _objective_value(expr) -> float:
     접는 자리를 한 곳으로 모아, 호출부마다 `or 0.0` 을 반복하지 않는다.
     """
     return float(pulp.value(expr) or 0.0)
+
+
+def _tie_weight(c) -> float:
+    """분반마다 정해진 [1, 2) 의 가중. 학수번호와 분반만으로 정해져 실행 환경·후보 순서와 무관하다."""
+    h = hashlib.sha256(f"{c.course_id}-{c.section}".encode()).digest()
+    return 1.0 + int.from_bytes(h[:4], "big") / 2**32
 
 
 def _add_base_constraints(prob, x, cands, U, L):
@@ -138,10 +146,14 @@ def solve_topk(candidates, score_by_course, need, *, U=18, L=12,
     # 차이가 0 이 아니면 최소 1 이고, CareerFit ≤ U·max Score 이므로 δ = 0.5/(U·max Score)
     # 면 δ·CareerFit 의 폭이 0.5 를 넘지 않아 졸업 반영을 한 학점도 내주지 않는다.
     max_score = max((score_by_course[c.course_id] for c in cands), default=0.0)
-    if careerfit_is_empty or max_score <= 0:
-        p2 += objective
-    else:
-        p2 += objective + (0.5 / (U * max_score)) * careerfit
+    if not (careerfit_is_empty or max_score <= 0):
+        objective = objective + (0.5 / (U * max_score)) * careerfit
+    total = pulp.lpSum(c.credit * x[i] for i, c in enumerate(cands))
+    tie = pulp.lpSum(_tie_weight(c) * x[i] for i, c in enumerate(cands))
+    # 목적이 비면(전 후보 Score 0, need 없음) 어떤 해든 최적이라 4순위가 곧 목적이다. 빈 목적을
+    # 그대로 두면 solve() 가 끼운 `__dummy` 가 문제에 남아 다음 풀이의 LP 파일을 깨뜨린다.
+    objective_is_empty = len(objective) == 0
+    p2 += -tie if objective_is_empty else objective
     _add_base_constraints(p2, x, cands, U, L)
     # careerfit 이 빈 식이면(전 후보 Score 0) 이 제약은 0 >= -1e-6 이라 항상 참이다.
     # 그런데 PuLP 는 변수가 없는 제약·목적에 `__dummy` 를 끼워 넣는다. 목적식(gradprog)도
@@ -156,11 +168,20 @@ def solve_topk(candidates, score_by_course, need, *, U=18, L=12,
         if pulp.LpStatus[p2.status] != "Optimal":
             break
         sel_idx = [i for i in range(len(cands)) if (x[i].value() or 0) > 0.5]
+        # 4순위 — 목적값이 같은 해가 여럿이면 CBC 가 어느 것을 내는지는 실행 환경마다 달라,
+        # 같은 입력이 로컬과 배포 서버에서 다른 시간표를 냈다(#73, 36가지 중 33가지). 목적값과
+        # 총 학점을 방금 찾은 값에 묶고 고정 가중 합이 가장 작은 해로 고른다. 점수는 그대로다.
+        if not objective_is_empty:
+            sel_idx = _break_tie(p2, solver, x, sel_idx, objective, total, tie,
+                                 credit=sum(cands[i].credit for i in sel_idx), it=it)
         selected = [cands[i] for i in sel_idx]
+        # 값은 고른 분반에서 바로 센다. 4순위 풀이가 Optimal 이 아니면 변수 값은 그 풀이의
+        # 것이라 sel_idx 와 맞지 않고, 4순위에선 f_g 가 목적에 없어 min(need, 담은 학점)까지 안 올라간다.
         results.append(Result(
             selected=selected,
-            careerfit=_objective_value(careerfit),
-            gradprogress=_objective_value(gradprog),
+            careerfit=float(sum(c.credit * score_by_course[c.course_id] for c in selected)),
+            gradprogress=float(sum(min(need[a], sum(c.credit for c in selected if c.area == a))
+                                   for a in need_areas)),
             total_credit=sum(c.credit for c in selected),
             status="Optimal",
         ))
@@ -168,6 +189,26 @@ def solve_topk(candidates, score_by_course, need, *, U=18, L=12,
         p2 += pulp.lpSum(x[i] for i in sel_idx) <= len(sel_idx) - 1, f"nogood_{it}"
 
     return results or [Result([], 0.0, 0.0, 0, "Infeasible")]
+
+
+def _break_tie(prob, solver, x, sel_idx, objective, total, tie, *, credit, it):
+    """목적값·총 학점을 지금 해에 묶고 tie 를 최소화해 고른 해의 인덱스. prob 는 원래대로 돌려 놓는다.
+
+    상한 시간에 걸리는 등 Optimal 이 아니면 2순위가 낸 해(sel_idx)를 그대로 쓴다.
+    """
+    floor, cap = f"tie_floor_{it}", f"tie_credit_{it}"
+    prob += objective >= _objective_value(objective) - 1e-6, floor  # 부동소수 여유
+    prob += total == credit, cap
+    prob.sense = pulp.LpMinimize
+    prob.setObjective(tie)
+    prob.solve(solver)
+    if pulp.LpStatus[prob.status] == "Optimal":
+        sel_idx = [i for i in range(len(x)) if (x[i].value() or 0) > 0.5]
+    for name in (floor, cap):
+        del prob.constraints[name]
+    prob.sense = pulp.LpMaximize
+    prob.setObjective(objective)
+    return sel_idx
 
 
 def solve(candidates, score_by_course, need, *, U=18, L=12,
