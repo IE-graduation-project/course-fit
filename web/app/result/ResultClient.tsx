@@ -10,6 +10,8 @@ import CompetencyChart from "@/components/CompetencyChart";
 import CourseCard from "@/components/CourseCard";
 import CopyCodes from "@/components/CopyCodes";
 import JobFitBar from "@/components/JobFitBar";
+import InfoTip from "@/components/InfoTip";
+import { describeShape, diffFromFirst, shape } from "@/lib/altdiff";
 
 /** 한 학기에 담을 학점 상한. 기본 18, 더 담거나 덜 담고 싶은 학생이 고른다. */
 const DEFAULT_CREDITS = 18;
@@ -405,6 +407,10 @@ export default function ResultClient() {
                   )}
                 </button>
               ))}
+              {/* 무엇이 다른지는 눌러 보기 전엔 몰랐다(#75). 늘 펼쳐 두기엔 길어서 ⓘ 로 연다 */}
+              <InfoTip label="안마다 무엇이 다른지">
+                <AltDiffs timetables={rec.timetables} />
+              </InfoTip>
             </div>
           )}
         </div>
@@ -530,6 +536,35 @@ function termLabel(term: string) {
   const [y, s] = term.split("-");
   const name = { "1": "1학기", "2": "2학기", S: "여름 계절학기", W: "겨울 계절학기" }[s] ?? s;
   return `${y}학년도 ${name}`;
+}
+
+/** ⓘ 안의 내용 — 안 1의 한 주 모양, 그리고 안 2·3이 그와 다른 점 */
+function AltDiffs({ timetables }: { timetables: Timetable[] }) {
+  const MAX_LINES = 4;
+  return (
+    <span className="block space-y-2">
+      <span className="block">
+        <b className="font-semibold text-text">안 1</b> {describeShape(shape(timetables[0]))}
+      </span>
+      {diffFromFirst(timetables).map((d) => {
+        const lines = [...d.changes, ...d.week];
+        return (
+          <span key={d.rank} className="block">
+            <b className="font-semibold text-text">안 {d.rank}</b>
+            {lines.length === 0 && " 안 1과 같은 시간"}
+            {lines.slice(0, MAX_LINES).map((l) => (
+              <span key={l} className="block pl-3">
+                {l}
+              </span>
+            ))}
+            {lines.length > MAX_LINES && (
+              <span className="block pl-3 text-text-soft">외 {lines.length - MAX_LINES}개</span>
+            )}
+          </span>
+        );
+      })}
+    </span>
+  );
 }
 
 function fitIndex(t: Timetable) {

@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { countCourseLines, fetchReference, submitTranscript } from "@/lib/api";
 import { SAMPLE_TRANSCRIPTS } from "@/lib/sample";
@@ -9,33 +9,112 @@ import type { CreditLimit, JobRef, ModeRef, ProgramRef, Reference } from "@/lib/
 import { jobRank } from "@/lib/competency";
 
 type Step = "program" | "transcript" | "credits" | "job" | "mode" | "done";
+/** 주소(`?step=`)로 오가는 단계. done 은 결과 화면으로 넘어가는 순간이라 기록에 안 올린다 */
+const ORDER = ["program", "transcript", "credits", "job", "mode"] as const;
 
 /** 신청 가능 최대학점으로 받을 수 있는 범위. 한 학기 최소 12학점(학사내규 제4조 ②), API 상한 30 */
 const CREDIT_MIN = 12;
 const CREDIT_MAX = 30;
+
+/** 이 탭에 두는 답. 결과 화면에서 뒤로 오면 페이지가 새로 그려져서, 이게 없으면 처음부터 다시 묻는다 */
+const FLOW_KEY = "startFlow";
+interface Flow {
+  dept: string | null;
+  year: number | null;
+  courseCount: number;
+  estimate: CreditLimit | null;
+  creditMax: number | null;
+  jobId: string | null;
+  modeId: string | null;
+}
+interface SavedTranscript {
+  text: string;
+  dept: string;
+  admissionYear: number;
+}
+
+/** useSearchParams 를 쓰는 화면은 Suspense 안에 있어야 정적 빌드가 된다 */
+export default function StartPage() {
+  return (
+    <Suspense>
+      <StartFlow />
+    </Suspense>
+  );
+}
 
 /**
  * 성적표 입력 — 대화형.
  * 입력만 대화로 받고, 결과는 /result 에서 한 화면에 정적으로 보여준다.
  * 긴 폼 하나를 마주하는 것보다 세 번 물어보는 쪽이 이탈이 적다.
  */
-export default function StartPage() {
+function StartFlow() {
   const router = useRouter();
+  const params = useSearchParams();
   const [ref, setRef] = useState<Reference | null>(null);
-  const [step, setStep] = useState<Step>("program");
-  const [program, setProgram] = useState<ProgramRef | null>(null);
+  const [dept, setDept] = useState<string | null>(null);
   const [year, setYear] = useState<number | null>(null);
-  const [text, setText] = useState("");
-  const [job, setJob] = useState<JobRef | null>(null);
-  const [mode, setMode] = useState<ModeRef | null>(null);
+  /** 마지막으로 서버에 넣은 성적표. 학과·학번이 그대로면 성적표 단계로 돌아왔을 때 칸을 채운다 */
+  const [saved, setSaved] = useState<SavedTranscript | null>(null);
+  const [jobId, setJobId] = useState<string | null>(null);
+  const [modeId, setModeId] = useState<string | null>(null);
   const [courseCount, setCourseCount] = useState(0);
   /** 성적표로 계산한 최대학점(서버). 입력 칸을 미리 채우는 데 쓴다 */
   const [estimate, setEstimate] = useState<CreditLimit | null>(null);
   /** 학생이 확인해 넣은 이번 학기 신청 가능 최대학점 */
   const [creditMax, setCreditMax] = useState<number | null>(null);
+  /** 성향까지 골라 결과 화면으로 넘어가는 중 */
+  const [submitting, setSubmitting] = useState(false);
+  const [restored, setRestored] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
+
+  const program = ref?.programs.find((p) => p.dept === dept) ?? null;
+  const job = ref?.jobs.find((j) => j.id === jobId) ?? null;
+  const mode = ref?.modes.find((m) => m.id === modeId) ?? null;
+  const transcriptDone =
+    saved !== null && saved.dept === dept && saved.admissionYear === year && courseCount > 0;
+
+  // 지금 단계는 주소가 정한다. 뒤로 가기·앞으로 가기가 단계를 오가게 하려고 — 상태만 바꾸면
+  // 브라우저 기록에 안 남아 뒤로 가기가 앞 질문이 아니라 랜딩으로 나갔다(#75).
+  // 답이 없는 단계로 바로 들어오면(새로고침, 학과를 바꾼 뒤 앞으로 가기) 채울 수 있는 데까지만 간다.
+  const ready = [true, program !== null && year !== null, transcriptDone, creditMax !== null, job !== null];
+  const asked = Math.max(0, ORDER.indexOf(params.get("step") as (typeof ORDER)[number]));
+  let at = 0;
+  while (at < asked && ready[at + 1]) at++;
+  const step: Step = submitting ? "done" : ORDER[at];
+  /** 그 단계를 지나왔나 — 지나온 단계만 답 말풍선을 그린다 */
+  const passed = (s: Step) => (submitting ? ORDER.length : at) > ORDER.indexOf(s as (typeof ORDER)[number]);
+
+  function go(next: Step) {
+    window.history.pushState(null, "", next === "program" ? "/start" : `/start?step=${next}`);
+  }
+
+  // 첫 렌더는 서버 렌더와 같아야 해서 저장해 둔 답은 마운트 뒤에 읽는다
+  useEffect(() => {
+    try {
+      const f = JSON.parse(sessionStorage.getItem(FLOW_KEY) ?? "null") as Flow | null;
+      if (f) {
+        setDept(f.dept);
+        setYear(f.year);
+        setCourseCount(f.courseCount);
+        setEstimate(f.estimate);
+        setCreditMax(f.creditMax);
+        setJobId(f.jobId);
+        setModeId(f.modeId);
+      }
+      setSaved(JSON.parse(sessionStorage.getItem("transcript") ?? "null"));
+    } catch {
+      // 깨진 값이면 처음부터 묻는다
+    }
+    setRestored(true);
+  }, []);
+
+  useEffect(() => {
+    if (!restored) return;
+    const f: Flow = { dept, year, courseCount, estimate, creditMax, jobId, modeId };
+    sessionStorage.setItem(FLOW_KEY, JSON.stringify(f));
+  }, [restored, dept, year, courseCount, estimate, creditMax, jobId, modeId]);
 
   // 실패를 삼키면 화면이 그냥 비어 버린다 — 사용자는 뭘 눌러야 할지도 모른 채 멈춘다.
   // (CORS 차단은 서버에 200으로 기록되기까지 해서, 화면에 안 띄우면 원인을 찾을 수 없다.)
@@ -68,18 +147,17 @@ export default function StartPage() {
       else sessionStorage.removeItem("sample");
       // 서버는 잠들거나 재시작하면 적재한 성적표를 잃는다(무료 인스턴스의 임시 파일시스템).
       // 결과 화면이 그때 다시 적재할 수 있게 이 탭에만 둔다 — 탭을 닫으면 사라진다.
-      sessionStorage.setItem(
-        "transcript",
-        JSON.stringify({ text: value, dept: program.dept, admissionYear: year }),
-      );
+      const t: SavedTranscript = { text: value, dept: program.dept, admissionYear: year };
+      sessionStorage.setItem("transcript", JSON.stringify(t));
       // 결과 화면의 학점 선택지 상한. 이전 성적표의 값이 남지 않게 없으면 지운다
       if (res.creditLimit) sessionStorage.setItem("creditLimit", JSON.stringify(res.creditLimit));
       else sessionStorage.removeItem("creditLimit");
       sessionStorage.removeItem("creditMax");
       setEstimate(res.creditLimit ?? null);
       setCourseCount(res.courseCount);
-      setText(value);
-      setStep("credits");
+      setCreditMax(null);
+      setSaved(t);
+      go("credits");
     } catch (e) {
       console.error(e);
       setError("성적표를 읽는 중 문제가 생겼어요. 잠시 후 다시 눌러주세요.");
@@ -91,17 +169,17 @@ export default function StartPage() {
   function handleCredits(n: number) {
     sessionStorage.setItem("creditMax", String(n));
     setCreditMax(n);
-    setStep("job");
+    go("job");
   }
 
   function handleJob(j: JobRef) {
-    setJob(j);
-    setStep("mode");
+    setJobId(j.id);
+    go("mode");
   }
 
   function handleMode(m: ModeRef) {
-    setMode(m);
-    setStep("done");
+    setModeId(m.id);
+    setSubmitting(true);
     setTimeout(() => {
       router.push(`/result?job=${job!.id}&mode=${m.id}`);
     }, 900);
@@ -143,17 +221,17 @@ export default function StartPage() {
             programs={ref.programs}
             picked={program}
             onPickProgram={(p) => {
-              setProgram(p);
+              setDept(p.dept);
               setYear(null);
             }}
             onPickYear={(y) => {
               setYear(y);
-              setStep("transcript");
+              go("transcript");
             }}
           />
         )}
 
-        {step !== "program" && program && year !== null && (
+        {passed("program") && program && year !== null && (
           <>
             <UserBubble>
               {program.name} {year}학번
@@ -171,6 +249,8 @@ export default function StartPage() {
             <TranscriptInput
               busy={busy}
               onSubmit={handleTranscript}
+              // 돌아왔으면 넣었던 성적표를 채워 둔다. 샘플이었으면 비운다 — 이번엔 제 것을 넣으러 온 것이다
+              initial={transcriptDone && sessionStorage.getItem("sample") !== "1" ? saved!.text : ""}
               sample={program && year !== null ? (SAMPLE_TRANSCRIPTS[program.dept]?.[year] ?? null) : null}
             />
             {error && (
@@ -181,7 +261,7 @@ export default function StartPage() {
           </>
         )}
 
-        {step !== "program" && step !== "transcript" && program && year !== null && (
+        {passed("transcript") && program && year !== null && (
           <>
             <UserBubble>성적표 붙여넣기 완료</UserBubble>
             <Bubble delay={0.1}>
@@ -192,9 +272,11 @@ export default function StartPage() {
           </>
         )}
 
-        {step === "credits" && <CreditsInput estimate={estimate} onPick={handleCredits} />}
+        {step === "credits" && (
+          <CreditsInput estimate={estimate} initial={creditMax} onPick={handleCredits} />
+        )}
 
-        {creditMax !== null && step !== "credits" && (
+        {passed("credits") && creditMax !== null && (
           <>
             <UserBubble>최대 {creditMax}학점</UserBubble>
             <Bubble delay={0.1}>어떤 일을 하고 싶으세요?</Bubble>
@@ -203,7 +285,7 @@ export default function StartPage() {
 
         {step === "job" && ref && <JobPicker jobs={ref.jobs} onPick={handleJob} />}
 
-        {job && step !== "job" && (
+        {passed("job") && job && (
           <>
             <UserBubble>{job.name}</UserBubble>
             <Bubble delay={0.1}>
@@ -214,7 +296,7 @@ export default function StartPage() {
 
         {step === "mode" && ref && <ModePicker modes={ref.modes} onPick={handleMode} />}
 
-        {mode && step === "done" && (
+        {submitting && mode && (
           <>
             <UserBubble>{mode.label}</UserBubble>
             <Bubble delay={0.1}>
@@ -347,12 +429,15 @@ function StepDots({ step }: { step: Step }) {
  */
 function CreditsInput({
   estimate,
+  initial,
   onPick,
 }: {
   estimate: CreditLimit | null;
+  /** 이미 넣었던 값(뒤로 돌아온 경우) */
+  initial: number | null;
   onPick: (n: number) => void;
 }) {
-  const [raw, setRaw] = useState(String(estimate?.max ?? 18));
+  const [raw, setRaw] = useState(String(initial ?? estimate?.max ?? 18));
   const n = Number(raw);
   const valid = raw.trim() !== "" && Number.isInteger(n) && n >= CREDIT_MIN && n <= CREDIT_MAX;
   const step = (d: number) =>
@@ -419,13 +504,15 @@ function TranscriptInput({
   busy,
   onSubmit,
   sample,
+  initial,
 }: {
   busy: boolean;
   onSubmit: (v: string) => void;
   /** 고른 학과의 샘플. 학과가 다른 샘플을 넣으면 학번·학년·과목이 어긋나서 없으면 버튼을 숨긴다(#41) */
   sample: string | null;
+  initial: string;
 }) {
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState(initial);
   const found = countCourseLines(value);
 
   return (
