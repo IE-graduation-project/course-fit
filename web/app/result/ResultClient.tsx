@@ -13,7 +13,7 @@ import JobFitBar from "@/components/JobFitBar";
 import InfoTip from "@/components/InfoTip";
 import { describeShape, diffFromFirst, shape } from "@/lib/altdiff";
 
-/** 한 학기에 담을 학점 상한. 기본 18, 더 담거나 덜 담고 싶은 학생이 고른다. */
+/** 시작 화면에서 넣은 학점이 없을 때(옛 세션, 주소로 바로 들어옴) 담을 학점 상한 */
 const DEFAULT_CREDITS = 18;
 /** 수강가능 최대학점을 모를 때(옛 서버 응답)의 상한 */
 const FALLBACK_MAX = 21;
@@ -30,9 +30,10 @@ export default function ResultClient() {
   const [mode, setMode] = useState<ModeId>(
     (params.get("mode") ?? "balanced") as ModeId,
   );
-  const [credits, setCredits] = useState(() => {
+  /** 결과 화면에서 고른 학점(주소의 `credits=`). null = 안 골랐다 — 시작 화면에서 넣은 값으로 간다 */
+  const [picked, setCredits] = useState<number | null>(() => {
     const v = Number(params.get("credits"));
-    return Number.isInteger(v) && v >= 12 && v <= 30 ? v : DEFAULT_CREDITS;
+    return Number.isInteger(v) && v >= 12 && v <= 30 ? v : null;
   });
   /**
    * 이번 학기 수강가능 최대학점 — 성적표를 낼 때 서버가 계산해 준 값(sessionStorage).
@@ -44,6 +45,9 @@ export default function ResultClient() {
   const [entered, setEntered] = useState<number | null | undefined>(undefined);
   const limitRead = limit !== undefined && entered !== undefined;
   const maxCredits = entered ?? limit?.max ?? FALLBACK_MAX;
+  /** 추천이 시작하는 학점 — 시작 화면에서 넣은 값 그대로. 18 로 고정하면 20 을 넣고도 18학점 추천을 받았다 */
+  const startCredits = entered ?? Math.min(DEFAULT_CREDITS, maxCredits);
+  const credits = picked ?? startCredits;
   const [rec, setRec] = useState<Recommendation | null>(null);
   const [ref, setRef] = useState<Reference | null>(null);
   const [alt, setAlt] = useState(0);
@@ -67,9 +71,9 @@ export default function ResultClient() {
     setEntered(Number.isInteger(max) && max >= 12 && max <= 30 ? max : null);
   }, []);
 
-  // 주소로 들어온 값이 이 학생의 최대학점을 넘으면 기본값으로 되돌린다
+  // 주소로 들어온 값이 이 학생의 최대학점을 넘으면 시작 화면에서 넣은 값으로 되돌린다
   useEffect(() => {
-    if (limitRead && credits > maxCredits) setCredits(Math.min(DEFAULT_CREDITS, maxCredits));
+    if (limitRead && credits > maxCredits) setCredits(null);
   }, [limitRead, credits, maxCredits]);
 
   useEffect(() => {
@@ -123,9 +127,9 @@ export default function ResultClient() {
   }, [job, mode, credits, limitRead, maxCredits]);
 
   useEffect(() => {
-    const c = credits === DEFAULT_CREDITS ? "" : `&credits=${credits}`;
+    const c = picked === null || picked === startCredits ? "" : `&credits=${picked}`;
     router.replace(`/result?job=${job}&mode=${mode}${c}`, { scroll: false });
-  }, [job, mode, credits, router]);
+  }, [job, mode, picked, startCredits, router]);
 
   if (needTranscript) return <NeedTranscript />;
   if (loading && !rec) return <Analyzing />;
@@ -314,7 +318,7 @@ export default function ResultClient() {
         {!isMock() && entered != null && (
           <p className="basis-full text-caption text-text-soft">
             이번 학기 최대 <span className="tnum">{entered}</span>학점 (시작할 때 넣은 값, 클래스넷
-            수강신청 → 개인별 수강가능학점 조회) · 추천은 18학점에서 시작해요
+            수강신청 → 개인별 수강가능학점 조회)
           </p>
         )}
         {!isMock() && entered == null && limit && (
