@@ -287,15 +287,25 @@ export default function ResultClient() {
         )}
       </p>
 
+      {/* 학생이 고른 조건(직무·성향·학점·공강)을 한 패널로 묶는다. 결과와 한 흐름으로 이어져 있어
+          화면이 부담스러웠다(10/11 팀 점검). 시작 화면에서 학생 답 말풍선이 쓰던 brand 계열로 칠해
+          「내가 넣은 것」이 같은 색으로 읽히게 한다 */}
+      <section
+        aria-labelledby="cond-head"
+        className="print-hide mt-6 rounded-xl border border-brand-100 bg-brand-50 p-4 sm:p-5"
+      >
+        <h2 id="cond-head" className="text-caption font-semibold text-brand-700">
+          내가 고른 조건
+        </h2>
       {/* 목표 — 6종을 한 줄에 놓고 적합도까지 같이 (switch and see) */}
-      <div className="print-hide mt-5">
+      <div className="mt-2.5">
         <JobFitBar fits={rec.fitByJob} active={job} onChange={setJob} />
         <p className="mt-1.5 text-caption text-text-soft">
           옆 숫자는 지금 성적으로 그 직무에 얼마나 맞는지 (0~100)
         </p>
       </div>
 
-      <div className="print-hide mt-4 flex flex-wrap items-center gap-x-5 gap-y-3">
+      <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-3">
         {/* 라벨과 버튼 묶음을 한 덩어리로 둔다 — 따로 두면 좁은 화면에서 「학점」 라벨만
             윗줄 끝에 남고 버튼은 아랫줄로 떨어졌다. */}
         <div className="flex items-center gap-x-3">
@@ -420,6 +430,7 @@ export default function ResultClient() {
           </p>
         )}
       </div>
+      </section>
 
       {/* 다시 계산하는 동안 이전 결과가 그대로 보이면 「바뀐 게 없다」로 읽힌다. 서버가 깨는 중이면
           30초 가까이 가는데 아무 말이 없었다 — 무엇을 기다리는지 말한다 */}
@@ -440,8 +451,11 @@ export default function ResultClient() {
         </p>
       )}
 
+      <h2 className="print-hide mt-8 text-caption font-semibold text-text-muted">
+        추천 결과
+      </h2>
       <section
-        className="print-stack mt-6 grid gap-6 transition-opacity duration-200 lg:grid-cols-[1.35fr_1fr]"
+        className="print-stack mt-2.5 grid gap-6 transition-opacity duration-200 lg:grid-cols-[1.35fr_1fr]"
         style={{ opacity: loading ? 0.45 : 1 }}
         aria-busy={loading}
       >
@@ -543,7 +557,7 @@ export default function ResultClient() {
                         }}
                       />
                     </span>
-                    <span className="tnum text-right text-sm">{credits}학점</span>
+                    <span className="tnum text-right text-sm font-semibold text-grad-ink">{credits}학점</span>
                   </li>
                 ))}
               </ul>
@@ -731,6 +745,7 @@ function TimetableMeters({ tt }: { tt: Timetable }) {
       hint: "이 시간표가 목표 직무의 모자란 역량을 얼마나 채우나. 위 직무 옆 숫자(지금 적합도)와 다른 값이고, 성향과 대안끼리 견주는 용도",
       value: fit,
       color: "var(--color-gap)",
+      ink: "text-gap-ink",
       right: <span className="tnum">{fit}</span>,
     },
     {
@@ -738,6 +753,7 @@ function TimetableMeters({ tt }: { tt: Timetable }) {
       hint: `${tt.totalCredit}학점 중 졸업요건에 실제로 꽂히는 학점`,
       value: gradPct,
       color: "var(--color-grad)",
+      ink: "text-grad-ink",
       right: (
         <span className="tnum">
           {tt.gradProgress}/{tt.totalCredit}
@@ -753,7 +769,7 @@ function TimetableMeters({ tt }: { tt: Timetable }) {
           key={r.label}
           className="grid grid-cols-[5rem_1fr_3.25rem] items-center gap-3"
         >
-          <dt className="text-sm text-text-muted" title={r.hint}>
+          <dt className={"text-sm font-semibold " + r.ink} title={r.hint}>
             {r.label}
           </dt>
           <dd className="h-1.5 overflow-hidden rounded-full bg-surface-3">
@@ -765,7 +781,7 @@ function TimetableMeters({ tt }: { tt: Timetable }) {
               }}
             />
           </dd>
-          <dd className="text-right text-sm text-text-muted">{r.right}</dd>
+          <dd className={"text-right text-sm font-semibold " + r.ink}>{r.right}</dd>
           {/* 마우스를 올려야만 보이는 설명은 휴대폰에서 영영 안 보인다 */}
           <dd className="col-span-3 -mt-1.5 text-caption text-text-soft">{r.hint}</dd>
         </div>

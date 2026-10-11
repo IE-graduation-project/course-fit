@@ -44,13 +44,18 @@
    * 카테고리 팔레트를 두지 않는다. 축·블록에 이름이 이미 적혀 있어서
    * 색이 식별을 하지 않고, 8색을 넘기면 CVD 에서 구분이 무너진다.
    * 남는 건 넷뿐 — 보유(σ) · 부족(gap) · 졸업 · 강조.
-   * 값 텍스트는 절대 이 색을 입지 않는다(text 토큰만 쓴다).
+   * 같은 뜻의 숫자와 라벨은 막대와 같은 색 계열을 입는다 — 회색이면 어느 숫자가 어느 막대
+   * 얘기인지 한 번 더 읽어야 했다(9/28 피드백). 막대 색은 작은 글자에 대비가 모자라(gap 3.3:1)
+   * 글자에는 같은 색상에서 밝기만 낮춘 *-ink 를 쓴다(흰 바탕 5:1 이상).
    */
   --color-have: oklch(56% 0.09 245);   /* σ — 쌓인 양. 한 hue, 순차 램프의 중간 */
   --color-have-soft: oklch(84% 0.04 245);
+  --color-have-ink: oklch(48% 0.10 245);
   --color-gap: oklch(66% 0.16 52);     /* gap — 모자람. 상태(주의)라 status 계열 */
   --color-gap-soft: oklch(90% 0.06 52);
+  --color-gap-ink: oklch(52% 0.15 52);
   --color-grad: oklch(60% 0.10 285);   /* 졸업요건 진척 */
+  --color-grad-ink: oklch(48% 0.12 285);
 
   /* 근거 막대용 순차 3단 — share 는 identity 가 아니라 magnitude 다 */
   --color-seq-1: oklch(50% 0.13 245);
@@ -58,6 +63,7 @@
   --color-seq-3: oklch(76% 0.07 245);
 
   --color-success: oklch(58% 0.14 150);
+  --color-success-ink: oklch(50% 0.13 150);
   --color-warning: oklch(72% 0.15 70);
   --color-danger: oklch(58% 0.2 27);
 
