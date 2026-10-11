@@ -45,13 +45,13 @@ export function toBlocks(slots: number[]): Placed[] {
   return out;
 }
 
-/** 그리드에 그릴 교시 범위 — 실제 배치된 교시만 (빈 새벽·야간 줄 제거) */
+/** 그리드에 그릴 교시 범위 — 1교시부터 마지막 수업까지 (빈 야간 줄 제거).
+ *  첫 수업부터 그리면 대안 시간표마다 격자가 2교시·1교시로 다르게 시작해 견주기 어렵다 */
 export function periodRange(allSlots: number[]): number[] {
   const periods = allSlots.map((s) => decode(s).period);
   if (periods.length === 0) return [1, 2, 3, 4, 5, 6, 7, 8, 9];
-  const lo = Math.min(...periods);
   const hi = Math.max(...periods);
-  return Array.from({ length: hi - lo + 1 }, (_, i) => lo + i);
+  return Array.from({ length: hi }, (_, i) => 1 + i);
 }
 
 /** 교시 → 실제 시각. 홍익대 1교시 09:00 시작, 1시간 단위. */
