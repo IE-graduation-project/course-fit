@@ -24,3 +24,4 @@ class RecommendRequest(BaseModel):
     maxCredits: int = Field(default=18, ge=1, le=30)
     minCredits: int = Field(default=12, ge=0, le=30)
     topK: int = Field(default=3, ge=1, le=10)
+    freeDays: list[int] = Field(default_factory=list)   # 공강으로 비울 요일. 0=월 … 4=금

@@ -4,7 +4,7 @@
 [2순위] max GradProgress  s.t. CareerFit ≥ (1−ε)·V*
 [3순위] 2순위가 같으면 CareerFit 이 높은 쪽 — 목적에 δ·CareerFit 을 섞는다 (#45)
 [4순위] 그래도 같으면 분반별 고정 가중의 합이 가장 작은 쪽 — 실행 환경과 무관하게 같은 안 (#73)
-hard 제약 A1(시간충돌)·A2(분반택1)·A3/A3'(학점상한/하한). B1·B2는 후보 사전필터로 처리.
+hard 제약 A1(시간충돌)·A2(분반택1)·A3/A3'(학점상한/하한). B1·B2·B3는 후보 사전필터로 처리.
 """
 from __future__ import annotations
 
@@ -12,6 +12,9 @@ import hashlib
 from dataclasses import dataclass
 
 import pulp
+
+# slot = 요일idx × 16 + 교시 (월=0 … 일=6). crawlers/courses/preprocess_time_slots.py 와 같은 규약
+DAY_STRIDE = 16
 
 
 @dataclass
@@ -23,13 +26,20 @@ class Result:
     status: str             # PuLP 상태 문자열 또는 'no_candidates'
 
 
-def filter_candidates(candidates, taken_ids, passed_ids):
-    """B1(기수강 제외)·B2(선수 미충족 제외) 사전필터."""
+def filter_candidates(candidates, taken_ids, passed_ids, free_days=()):
+    """B1(기수강 제외)·B2(선수 미충족 제외)·B3(공강 요일 수업 제외) 사전필터.
+
+    free_days 는 비워 둘 요일 인덱스(월=0 … 금=4). 그 요일에 한 교시라도 걸친 분반을 뺀다.
+    시간 미지정 분반(slots=())은 학교에 나올 일이 없어 남긴다.
+    """
+    free = set(free_days)
     out = []
     for c in candidates:
         if c.course_id in taken_ids:                                  # B1
             continue
         if c.prereqs and not all(p in passed_ids for p in c.prereqs):  # B2
+            continue
+        if free and any(s // DAY_STRIDE in free for s in c.slots):     # B3
             continue
         out.append(c)
     return out
@@ -84,7 +94,8 @@ def _add_base_constraints(prob, x, cands, U, L):
 def solve_topk(candidates, score_by_course, need, *, U=18, L=12,
                taken_ids, passed_ids, eps=0.0, k=3, msg=False,
                time_limit: float | None = None,
-               area_weight: dict[str, int] | None = None) -> list[Result]:
+               area_weight: dict[str, int] | None = None,
+               free_days=()) -> list[Result]:
     """상위 k개 시간표를 반환 (1등이 [0]). k-best via no-good cut.
 
     1순위(CareerFit)로 V*를 고정한 뒤, 2순위(GradProgress)를 풀고 → 그 해를 배제하는
@@ -98,8 +109,10 @@ def solve_topk(candidates, score_by_course, need, *, U=18, L=12,
     time_limit(초)은 CBC 1회 풀이의 상한이다. None이면 무제한(CLI·테스트 기본). 웹 서버는
     반드시 지정해야 한다 — 탐색이 폭발하는 입력이 오면 요청이 무한정 물린다. 상한에 걸리면
     CBC가 그때까지의 최선해를 반환하므로 status가 Optimal이 아닐 수 있다.
+
+    free_days 는 공강으로 비울 요일(월=0 … 금=4). 후보에서 미리 빼므로(B3) 식은 그대로다.
     """
-    cands = filter_candidates(candidates, taken_ids, passed_ids)
+    cands = filter_candidates(candidates, taken_ids, passed_ids, free_days)
     if not cands:
         return [Result([], 0.0, 0.0, 0, "no_candidates")]
 

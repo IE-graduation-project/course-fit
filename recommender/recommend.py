@@ -58,7 +58,8 @@ class Recommendation:
 def recommend(input_hash, job_id, *, db_path=data.DB_PATH, U=18, L=12,
               alpha=params.ALPHA_DEFAULT, eps=0.0, k=3,
               time_limit: float | None = None,
-              area_weight: dict[str, int] | None = None) -> Recommendation:
+              area_weight: dict[str, int] | None = None,
+              free_days=()) -> Recommendation:
     """파라미터 사전계산(σ/gap/Score/need) → 2단계 ILP(top-k) → Recommendation.
 
     dept/입학년도는 student 테이블에서 읽으므로 인자로 받지 않는다.
@@ -92,7 +93,7 @@ def recommend(input_hash, job_id, *, db_path=data.DB_PATH, U=18, L=12,
         U=U, L=L,
         taken_ids=student.taken_ids,
         passed_ids=set(student.passed.keys()),
-        eps=eps, k=k, time_limit=time_limit, area_weight=area_weight,
+        eps=eps, k=k, time_limit=time_limit, area_weight=area_weight, free_days=free_days,
     )
     return Recommendation(
         results=results, sigma=sigma, gap=gap, need=need,

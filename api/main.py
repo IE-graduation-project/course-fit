@@ -33,6 +33,8 @@ DEFAULT_ORIGINS = (
 # CBC 1회 풀이 상한(초). 로컬 실측 0.6초라 여유가 크지만, 탐색이 폭발하는 입력에
 # 워커가 영구히 물리는 것만 막으면 된다(결정 ⑤).
 SOLVE_TIME_LIMIT = 30.0
+# 공강으로 고를 수 있는 요일 — 월(0)~금(4). 토요일 분반은 선택지에 두지 않는다
+FREE_DAY_RANGE = range(5)
 
 
 def cors_origins() -> list[str]:
@@ -164,6 +166,10 @@ def recommend_endpoint(req: RecommendRequest) -> dict:
     if req.minCredits > req.maxCredits:
         raise ApiError(400, "bad_credit_bounds",
                        f"최소학점({req.minCredits})이 최대학점({req.maxCredits})보다 큽니다.")
+    if any(d not in FREE_DAY_RANGE for d in req.freeDays):
+        raise ApiError(400, "bad_free_days",
+                       f"공강 요일은 0(월)~4(금) 이어야 합니다: {req.freeDays}")
+    free_days = sorted(set(req.freeDays))
 
     mode = req.mode or DEFAULT_PREFERENCE
     eps = req.eps if req.eps is not None else PREFERENCE_EPS[mode]
@@ -184,9 +190,9 @@ def recommend_endpoint(req: RecommendRequest) -> dict:
         rec = recommend(req.studentId, req.job, db_path=str(db.db_path()),
                         U=req.maxCredits, L=req.minCredits, alpha=rparams.ALPHA_DEFAULT,
                         eps=eps, k=req.topK, time_limit=SOLVE_TIME_LIMIT,
-                        area_weight=PREFERENCE_AREA_WEIGHT.get(mode))
+                        area_weight=PREFERENCE_AREA_WEIGHT.get(mode), free_days=free_days)
         return build_payload(conn, rec, app.state.ref, job_id=req.job, mode=mode, eps=eps,
                              alpha=rparams.ALPHA_DEFAULT, max_credits=req.maxCredits,
-                             min_credits=req.minCredits, top_k=req.topK)
+                             min_credits=req.minCredits, top_k=req.topK, free_days=free_days)
     finally:
         conn.close()
