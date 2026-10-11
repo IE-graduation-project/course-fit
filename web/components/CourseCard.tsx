@@ -71,6 +71,12 @@ export default function CourseCard({
             {reasons.map((r, i) => (
               <span key={r.comp}>
                 {i > 0 && <span className="text-text-soft"> · </span>}
+                {/* 위 막대 조각과 같은 색 — 연한 두 단은 글자에 대비가 모자라 글자 대신 견본에 입힌다 */}
+                <span
+                  aria-hidden
+                  className="mr-1 inline-block h-2 w-2 rounded-[2px] align-[0.05em]"
+                  style={{ background: seqColor(i) }}
+                />
                 <span className="text-text">{r.compKo}</span>{" "}
                 <span className="tnum text-text-soft">
                   {Math.round(r.share * 100)}%
@@ -87,7 +93,7 @@ export default function CourseCard({
         <p className="mt-3 border-t border-border pt-2.5 text-caption text-text-soft">
           {course.gradReason.remaining > 0 ? (
             <>
-              졸업요건 <span className="text-text-muted">{course.gradReason.area}</span>에
+              졸업요건 <span className="font-semibold text-grad-ink">{course.gradReason.area}</span>에
               들어갑니다{" · "}그 영역 남은 학점{" "}
               <span className="tnum text-text-muted">{course.gradReason.remaining}</span>
               {areaPlaced !== undefined && areaPlaced > course.gradReason.remaining && (
@@ -103,7 +109,7 @@ export default function CourseCard({
             </>
           ) : (
             <>
-              <span className="text-text-muted">{course.gradReason.area}</span>은(는) 이미 다
+              <span className="font-semibold text-grad-ink">{course.gradReason.area}</span>은(는) 이미 다
               채웠어요 · 졸업 총학점에만 더해져요
             </>
           )}

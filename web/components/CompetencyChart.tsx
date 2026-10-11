@@ -10,7 +10,8 @@ import { GAP_EPSILON } from "@/lib/competency";
  *
  * 색은 두 역할만 나른다 — 쌓인 양 하나, 모자란 만큼 하나. 역량 정체는 글자가 나른다.
  * 부족한 축만 진하게 두고 충족은 눌러 강조로 읽히게 한다.
- * 숫자는 항상 text 토큰이다 — 데이터 색을 글자에 입히지 않는다.
+ * 모자란 만큼(−0.86)과 범례 글자는 막대와 같은 색 계열(*-ink)이다 — 회색이면 숫자와 막대를
+ * 한 번 더 이어 읽어야 했다(9/28 피드백).
  *
  * 역량 이름을 누르면 그 σ 를 쌓은 기수강 과목이 펼쳐진다(diagnosis.sources).
  * 「충족」이 무엇으로 찼는지 학생이 확인할 수 있어야 숫자를 믿는다.
@@ -95,7 +96,7 @@ export default function CompetencyChart({
               <span
                 className={
                   "tnum text-right text-caption " +
-                  (lacking ? "font-semibold text-text" : "text-text-soft")
+                  (lacking ? "font-semibold text-gap-ink" : "text-success-ink")
                 }
               >
                 {lacking ? `−${gap.toFixed(2)}` : "충족"}
@@ -112,9 +113,9 @@ export default function CompetencyChart({
       {met.length > 0 && (
         <div className="mt-3">
           <p className="flex items-baseline gap-2 text-caption text-text-muted">
-            <span className="text-success" aria-hidden>✓</span>
+            <span className="text-success-ink" aria-hidden>✓</span>
             <span>
-              <span className="tnum font-semibold text-text">{met.length}개</span> 충족 ·{" "}
+              <span className="tnum font-semibold text-success-ink">{met.length}개 충족</span> ·{" "}
               {met.map((k, i) => (
                 <span key={k}>
                   {i > 0 && <span className="text-text-soft"> · </span>}
@@ -151,7 +152,7 @@ export default function CompetencyChart({
             />
           }
         >
-          쌓은 것 σ
+          <span className="text-have-ink">쌓은 것 σ</span>
         </Legend>
         <Legend
           swatch={
@@ -164,7 +165,7 @@ export default function CompetencyChart({
             />
           }
         >
-          모자란 만큼 gap
+          <span className="text-gap-ink">모자란 만큼 gap</span>
         </Legend>
         <Legend swatch={<span className="h-3.5 w-0.5 bg-ink" />}>
           직무가 원하는 수준 ρ
