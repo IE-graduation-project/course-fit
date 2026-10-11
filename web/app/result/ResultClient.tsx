@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ApiError, fetchRecommendation, fetchReference, isMock } from "@/lib/api";
@@ -18,10 +18,10 @@ const DEFAULT_CREDITS = 18;
 /** 수강가능 최대학점을 모를 때(옛 서버 응답)의 상한 */
 const FALLBACK_MAX = 21;
 
-/** 선택지 — 15, 18, 21, 이 학생의 최대학점, 지금 적용 중인 값 가운데 최대학점 이하인 것.
- *  주소로 22 처럼 목록 밖 값이 오면 그 값도 보여 줘야 무엇이 적용됐는지 읽힌다 */
-const creditOptions = (max: number, current: number) =>
-  [...new Set([15, 18, 21, max, current])].filter((c) => c <= max).sort((a, b) => a - b);
+/** 한 학기 최소 학점(학사내규 제4조 ②). 시작 화면의 CREDIT_MIN 과 같다 */
+const MIN_CREDITS = 12;
+/** −/+ 를 누른 뒤 추천을 부르기까지 기다리는 시간. 세 번 누르면 최적화를 세 번 푸는 걸 막는다 */
+const STEP_DELAY_MS = 700;
 
 export default function ResultClient() {
   const params = useSearchParams();
@@ -48,6 +48,12 @@ export default function ResultClient() {
   /** 추천이 시작하는 학점 — 시작 화면에서 넣은 값 그대로. 18 로 고정하면 20 을 넣고도 18학점 추천을 받았다 */
   const startCredits = entered ?? Math.min(DEFAULT_CREDITS, maxCredits);
   const credits = picked ?? startCredits;
+  /** 방금 −/+ 로 학점을 바꿨나 — 그때만 추천 요청을 늦춘다 */
+  const stepped = useRef(false);
+  const stepCredits = (d: number) => {
+    stepped.current = true;
+    setCredits(Math.min(maxCredits, Math.max(MIN_CREDITS, credits + d)));
+  };
   const [rec, setRec] = useState<Recommendation | null>(null);
   const [ref, setRef] = useState<Reference | null>(null);
   const [alt, setAlt] = useState(0);
@@ -97,32 +103,37 @@ export default function ResultClient() {
     setLoading(true);
     const studentId = saved ?? "746696b793744f17";
     setError(null);
-    fetchRecommendation({ studentId, job, mode, maxCredits: credits })
-      .then((r) => {
-        if (cancelled) return;
-        setRec(r);
-        setAlt(0);
-        setLoading(false);
-      })
-      .catch((e) => {
-        if (cancelled) return;
-        console.error(e);
-        setLoading(false);
-        // 서버가 성적표를 잃었고 이 탭에도 없으면(시작 화면을 거치지 않은 탭) 다시 누른다고 풀리지
-        // 않는다 — 막다른 오류 대신 성적표를 넣는 화면으로 보낸다.
-        if (e instanceof ApiError && e.code === "student_not_found") {
-          setNeedTranscript(true);
-          return;
-        }
-        // 이전 결과는 남긴다 — 화면이 통째로 비면 뭘 보고 있었는지 잃는다.
-        setError(
-          e instanceof ApiError && e.code === "server_unavailable"
-            ? "서버가 깨어나지 않았어요. 잠시 뒤 목표를 다시 눌러보세요."
-            : "추천을 불러오지 못했어요. 목표를 다시 눌러보세요.",
-        );
-      });
+    const wait = stepped.current ? STEP_DELAY_MS : 0;
+    stepped.current = false;
+    const timer = setTimeout(() => {
+      fetchRecommendation({ studentId, job, mode, maxCredits: credits })
+        .then((r) => {
+          if (cancelled) return;
+          setRec(r);
+          setAlt(0);
+          setLoading(false);
+        })
+        .catch((e) => {
+          if (cancelled) return;
+          console.error(e);
+          setLoading(false);
+          // 서버가 성적표를 잃었고 이 탭에도 없으면(시작 화면을 거치지 않은 탭) 다시 누른다고 풀리지
+          // 않는다 — 막다른 오류 대신 성적표를 넣는 화면으로 보낸다.
+          if (e instanceof ApiError && e.code === "student_not_found") {
+            setNeedTranscript(true);
+            return;
+          }
+          // 이전 결과는 남긴다 — 화면이 통째로 비면 뭘 보고 있었는지 잃는다.
+          setError(
+            e instanceof ApiError && e.code === "server_unavailable"
+              ? "서버가 깨어나지 않았어요. 잠시 뒤 목표를 다시 눌러보세요."
+              : "추천을 불러오지 못했어요. 목표를 다시 눌러보세요.",
+          );
+        });
+    }, wait);
     return () => {
       cancelled = true;
+      clearTimeout(timer);
     };
   }, [job, mode, credits, limitRead, maxCredits]);
 
@@ -283,26 +294,29 @@ export default function ResultClient() {
             <span id="credits-label" className="text-sm text-text-muted">
               학점
             </span>
-            <div
-              role="group"
-              aria-labelledby="credits-label"
-              className="inline-flex rounded-md border border-border-strong bg-surface-3 p-0.5"
-            >
-              {creditOptions(maxCredits, credits).map((c) => (
-                <button
-                  key={c}
-                  onClick={() => setCredits(c)}
-                  aria-pressed={c === credits}
-                  className={
-                    "tnum min-h-11 rounded-sm px-4 text-sm transition-colors " +
-                    (c === credits
-                      ? "bg-surface font-semibold text-text shadow-card"
-                      : "text-text-muted hover:text-text")
-                  }
-                >
-                  {c}
-                </button>
-              ))}
+            {/* 시작 화면에서 넣을 때와 같은 모양 — 그때 넣은 값을 여기서 줄여 보는 것이라는 게 읽힌다 */}
+            <div role="group" aria-labelledby="credits-label" className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => stepCredits(-1)}
+                disabled={credits <= MIN_CREDITS}
+                aria-label="1학점 줄이기"
+                className="min-h-11 w-11 rounded-md border border-border-strong text-lg font-semibold text-text-muted hover:bg-surface-3 disabled:cursor-not-allowed disabled:opacity-35"
+              >
+                −
+              </button>
+              <span aria-live="polite" className="tnum w-9 text-center text-sm font-semibold text-text">
+                {credits}
+              </span>
+              <button
+                type="button"
+                onClick={() => stepCredits(1)}
+                disabled={credits >= maxCredits}
+                aria-label="1학점 늘리기"
+                className="min-h-11 w-11 rounded-md border border-border-strong text-lg font-semibold text-text-muted hover:bg-surface-3 disabled:cursor-not-allowed disabled:opacity-35"
+              >
+                +
+              </button>
             </div>
           </div>
         )}
@@ -318,7 +332,7 @@ export default function ResultClient() {
         {!isMock() && entered != null && (
           <p className="basis-full text-caption text-text-soft">
             이번 학기 최대 <span className="tnum">{entered}</span>학점 (시작할 때 넣은 값, 클래스넷
-            수강신청 → 개인별 수강가능학점 조회)
+            수강신청 → 개인별 수강가능학점 조회) · <span className="tnum">{MIN_CREDITS}</span>학점까지 줄여 볼 수 있어요
           </p>
         )}
         {!isMock() && entered == null && limit && (
