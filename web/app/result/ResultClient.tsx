@@ -12,6 +12,7 @@ import CopyCodes from "@/components/CopyCodes";
 import JobFitBar from "@/components/JobFitBar";
 import InfoTip from "@/components/InfoTip";
 import { describeShape, diffFromFirst, shape } from "@/lib/altdiff";
+import { DAYS, WEEKDAYS } from "@/lib/slots";
 
 /** 시작 화면에서 넣은 학점이 없을 때(옛 세션, 주소로 바로 들어옴) 담을 학점 상한 */
 const DEFAULT_CREDITS = 18;
@@ -20,8 +21,16 @@ const FALLBACK_MAX = 21;
 
 /** 한 학기 최소 학점(학사내규 제4조 ②). 시작 화면의 CREDIT_MIN 과 같다 */
 const MIN_CREDITS = 12;
-/** −/+ 를 누른 뒤 추천을 부르기까지 기다리는 시간. 세 번 누르면 최적화를 세 번 푸는 걸 막는다 */
+/** 학점 −/+ 나 공강 요일을 누른 뒤 추천을 부르기까지 기다리는 시간. 세 번 누르면 최적화를 세 번 푸는 걸 막는다 */
 const STEP_DELAY_MS = 700;
+/** 공강으로 고를 수 있는 요일 — 월~금 */
+const FREE_DAY_OPTIONS = DAYS.slice(0, WEEKDAYS);
+
+/** 요일 인덱스 목록으로 읽는다. 0~4 의 정수만 남기고 정렬한다 */
+const toFreeDays = (v: unknown): number[] =>
+  Array.isArray(v)
+    ? [...new Set(v.map(Number).filter((d) => Number.isInteger(d) && d >= 0 && d < WEEKDAYS))].sort()
+    : [];
 
 export default function ResultClient() {
   const params = useSearchParams();
@@ -43,13 +52,28 @@ export default function ResultClient() {
   const [limit, setLimit] = useState<CreditLimit | null | undefined>(undefined);
   /** 시작 화면에서 학생이 넣은 최대학점(클래스넷 값). 있으면 이것이 상한이다 */
   const [entered, setEntered] = useState<number | null | undefined>(undefined);
-  const limitRead = limit !== undefined && entered !== undefined;
+  /** 결과 화면에서 고른 공강 요일(주소의 `free=`). null = 안 골랐다 — 시작 화면에서 넣은 값으로 간다 */
+  const [pickedFree, setPickedFree] = useState<number[] | null>(() => {
+    const v = params.get("free");
+    return v === null ? null : toFreeDays(v.split(",").filter(Boolean));
+  });
+  /** 시작 화면에서 고른 공강 요일. undefined = 아직 안 읽음 */
+  const [enteredFree, setEnteredFree] = useState<number[] | undefined>(undefined);
+  const freeDays = pickedFree ?? enteredFree ?? [];
+  const freeKey = freeDays.join(",");
+  const limitRead = limit !== undefined && entered !== undefined && enteredFree !== undefined;
   const maxCredits = entered ?? limit?.max ?? FALLBACK_MAX;
   /** 추천이 시작하는 학점 — 시작 화면에서 넣은 값 그대로. 18 로 고정하면 20 을 넣고도 18학점 추천을 받았다 */
   const startCredits = entered ?? Math.min(DEFAULT_CREDITS, maxCredits);
   const credits = picked ?? startCredits;
-  /** 방금 −/+ 로 학점을 바꿨나 — 그때만 추천 요청을 늦춘다 */
+  /** 방금 학점 −/+ 나 공강 요일을 눌렀나 — 그때만 추천 요청을 늦춘다 */
   const stepped = useRef(false);
+  const toggleFree = (day: number) => {
+    stepped.current = true;
+    setPickedFree(
+      freeDays.includes(day) ? freeDays.filter((d) => d !== day) : [...freeDays, day].sort(),
+    );
+  };
   const stepCredits = (d: number) => {
     stepped.current = true;
     setCredits(Math.min(maxCredits, Math.max(MIN_CREDITS, credits + d)));
@@ -75,6 +99,11 @@ export default function ResultClient() {
     setLimit(raw ? (JSON.parse(raw) as CreditLimit) : null);
     const max = Number(sessionStorage.getItem("creditMax"));
     setEntered(Number.isInteger(max) && max >= 12 && max <= 30 ? max : null);
+    try {
+      setEnteredFree(toFreeDays(JSON.parse(sessionStorage.getItem("freeDays") ?? "[]")));
+    } catch {
+      setEnteredFree([]);
+    }
   }, []);
 
   // 주소로 들어온 값이 이 학생의 최대학점을 넘으면 시작 화면에서 넣은 값으로 되돌린다
@@ -106,7 +135,13 @@ export default function ResultClient() {
     const wait = stepped.current ? STEP_DELAY_MS : 0;
     stepped.current = false;
     const timer = setTimeout(() => {
-      fetchRecommendation({ studentId, job, mode, maxCredits: credits })
+      fetchRecommendation({
+        studentId,
+        job,
+        mode,
+        maxCredits: credits,
+        freeDays: freeKey === "" ? [] : freeKey.split(",").map(Number),
+      })
         .then((r) => {
           if (cancelled) return;
           setRec(r);
@@ -135,12 +170,15 @@ export default function ResultClient() {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [job, mode, credits, limitRead, maxCredits]);
+  }, [job, mode, credits, freeKey, limitRead, maxCredits]);
 
   useEffect(() => {
     const c = picked === null || picked === startCredits ? "" : `&credits=${picked}`;
-    router.replace(`/result?job=${job}&mode=${mode}${c}`, { scroll: false });
-  }, [job, mode, picked, startCredits, router]);
+    // 시작 화면에서 고른 요일과 같으면 생략한다. 다 끈 것은 `free=` 로 남긴다 — 없으면 고른 요일로 돌아간다
+    const f =
+      pickedFree === null || freeKey === (enteredFree ?? []).join(",") ? "" : `&free=${freeKey}`;
+    router.replace(`/result?job=${job}&mode=${mode}${c}${f}`, { scroll: false });
+  }, [job, mode, picked, startCredits, pickedFree, freeKey, enteredFree, router]);
 
   if (needTranscript) return <NeedTranscript />;
   if (loading && !rec) return <Analyzing />;
@@ -320,6 +358,39 @@ export default function ResultClient() {
             </div>
           </div>
         )}
+        {/* 픽스처는 공강 없이 만든 결과뿐이라 고정 데이터일 때는 그리지 않는다 */}
+        {!isMock() && (
+          <div className="flex items-center gap-x-3">
+            <span id="free-label" className="text-sm text-text-muted">
+              공강
+            </span>
+            <div
+              role="group"
+              aria-labelledby="free-label"
+              className="inline-flex rounded-md border border-border-strong bg-surface-3 p-0.5"
+            >
+              {FREE_DAY_OPTIONS.map((d, day) => {
+                const on = freeDays.includes(day);
+                return (
+                  <button
+                    key={d}
+                    onClick={() => toggleFree(day)}
+                    aria-pressed={on}
+                    aria-label={`${d}요일 공강`}
+                    className={
+                      "min-h-11 min-w-11 rounded-sm px-3 text-sm transition-colors " +
+                      (on
+                        ? "bg-surface font-semibold text-text shadow-card"
+                        : "text-text-muted hover:text-text")
+                    }
+                  >
+                    {d}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
         {/* 설명이 title 에만 있으면 마우스를 올려야 보인다 — 무엇을 고른 건지 항상 읽히게 둔다. */}
         {currentMode && (
           <p className="basis-full text-caption text-text-soft">
@@ -377,10 +448,15 @@ export default function ResultClient() {
         <div>
           <div className="print-keep">
           {tt === null ? (
-            <Infeasible mode={mode} onRelax={() => setMode("graduation")} />
+            <Infeasible freeDays={rec.params.freeDays ?? []} />
           ) : (
             <>
-              <TimetableGrid courses={tt.courses} activeId={active} onHover={setActive} />
+              <TimetableGrid
+                courses={tt.courses}
+                activeId={active}
+                onHover={setActive}
+                freeDays={rec.params.freeDays ?? []}
+              />
 
               {/* 제약 — 응답의 constraints 를 실제로 읽는다. 우리가 보증한다고 내건 것이라
                   고정 문자열로 두면 백엔드가 false 를 줘도 화면은 계속 충족했다고 말한다. */}
@@ -703,26 +779,27 @@ function TimetableMeters({ tt }: { tt: Timetable }) {
  * "서비스 고장" 과 "조건이 빡세다" 는 학생에게 완전히 다른 말이라 화면도 달라야 한다.
  */
 function Infeasible({
-  mode,
-  onRelax,
+  freeDays,
 }: {
-  mode: ModeId;
-  onRelax: () => void;
+  /** 이 결과에 적용된 공강 요일 */
+  freeDays: number[];
 }) {
   return (
     <div className="rounded-lg border border-border bg-surface p-8 text-center">
       <p className="text-h3 font-semibold">조건에 맞는 시간표가 없어요</p>
-      <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-text-muted">
-        학점 범위·시간 충돌·선수과목·수강 학년을 모두 만족하는 조합을 못 찾았습니다.
-        남은 과목이 적거나 개설 분반이 겹칠 때 이렇게 됩니다.
-      </p>
-      {mode !== "graduation" && (
-        <button
-          onClick={onRelax}
-          className="mt-5 inline-flex min-h-11 items-center rounded-md bg-brand-600 px-5 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
-        >
-          졸업 우선으로 바꿔서 다시 찾기
-        </button>
+      {/* 성향은 가능한 조합 가운데 무엇을 고를지만 정해서, 바꿔도 없던 조합이 생기지 않는다 —
+          「졸업 우선으로 다시 찾기」 버튼은 같은 화면만 다시 냈다. 학생이 풀 수 있는 조건은 공강뿐이다 */}
+      {freeDays.length > 0 ? (
+        <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-text-muted">
+          <b className="text-text">{freeDays.map((d) => DAYS[d]).join("·")}요일</b>을 비우고는 한 학기
+          최소 <span className="tnum">{MIN_CREDITS}</span>학점을 채우는 시간표를 못 찾았어요. 위에서
+          공강 요일을 줄여 보세요.
+        </p>
+      ) : (
+        <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-text-muted">
+          학점 범위·시간 충돌·선수과목·수강 학년을 모두 만족하는 조합을 못 찾았습니다.
+          남은 과목이 적거나 개설 분반이 겹칠 때 이렇게 됩니다.
+        </p>
       )}
     </div>
   );

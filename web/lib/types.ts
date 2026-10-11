@@ -111,6 +111,8 @@ export interface RecommendRequest {
   maxCredits?: number; // 기본 18
   minCredits?: number; // 기본 12
   topK?: number; // 기본 3
+  /** 공강으로 비울 요일. 0=월 … 4=금. 그 요일에 수업이 있는 분반은 추천에서 빠진다 */
+  freeDays?: number[];
 }
 
 /** POST /api/recommend 응답 = recommender.explain.build_explanation 확장판 */
@@ -141,6 +143,8 @@ export interface Recommendation {
     maxCredits: number;
     minCredits: number;
     topK: number;
+    /** 적용된 공강 요일(0=월 … 4=금). 고정 데이터(픽스처)엔 없다 */
+    freeDays?: number[];
   };
   diagnosis: Diagnosis;
   /** 졸업요건 영역별 남은 부족학점. params.compute_need */
