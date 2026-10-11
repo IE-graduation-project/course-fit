@@ -20,6 +20,17 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      # Vercel 프로젝트가 Hobby(개인) 팀이라 팀원이 아닌 사람이 작성한 커밋의 배포는 막혀
+      # 「Building…」에서 멈춘다(#81). 토큰 문제가 아니다. 미리 알린다.
+      - name: Check commit author
+        run: |
+          author="$(git log -1 --format='%an <%ae>')"
+          echo "HEAD 작성자: $author"
+          case "$author" in
+            *yeongjunyoo*) ;;
+            *) echo "::warning title=Vercel 배포가 막힐 수 있음::HEAD 작성자($author)가 Vercel 팀 소유자(yeongjunyoo)가 아닙니다. Hobby 플랜은 팀원이 아닌 작성자의 배포를 막습니다. yeongjunyoo 가 PR 을 머지하거나, yeongjunyoo 로 빈 커밋을 올린 뒤 이 워크플로를 다시 실행하세요." ;;
+          esac
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -40,4 +51,9 @@ jobs:
 
       - name: Deploy Project Artifacts to Vercel
         working-directory: ./web
+        timeout-minutes: 8
         run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Explain deploy failure
+        if: failure()
+        run: echo "::error title=Vercel 배포 실패::보통 1~2분이면 끝난다. Building 에서 멈췄다면 커밋 작성자가 Vercel 팀 소유자(yeongjunyoo)가 아니어서다(Hobby 플랜, #81). yeongjunyoo 가 빈 커밋을 올리고 Actions 에서 이 워크플로를 다시 실행하면 된다."
