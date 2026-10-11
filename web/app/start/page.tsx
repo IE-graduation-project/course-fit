@@ -7,10 +7,11 @@ import { countCourseLines, fetchReference, submitTranscript } from "@/lib/api";
 import { SAMPLE_TRANSCRIPTS } from "@/lib/sample";
 import type { CreditLimit, JobRef, ModeRef, ProgramRef, Reference } from "@/lib/types";
 import { jobRank } from "@/lib/competency";
+import { DAYS, WEEKDAYS } from "@/lib/slots";
 
-type Step = "program" | "transcript" | "credits" | "job" | "mode" | "done";
+type Step = "program" | "transcript" | "credits" | "free" | "job" | "mode" | "done";
 /** 주소(`?step=`)로 오가는 단계. done 은 결과 화면으로 넘어가는 순간이라 기록에 안 올린다 */
-const ORDER = ["program", "transcript", "credits", "job", "mode"] as const;
+const ORDER = ["program", "transcript", "credits", "free", "job", "mode"] as const;
 
 /** 신청 가능 최대학점으로 받을 수 있는 범위. 한 학기 최소 12학점(학사내규 제4조 ②), API 상한 30 */
 const CREDIT_MIN = 12;
@@ -24,6 +25,8 @@ interface Flow {
   courseCount: number;
   estimate: CreditLimit | null;
   creditMax: number | null;
+  /** 옛 세션엔 없다 */
+  freeDays?: number[] | null;
   jobId: string | null;
   modeId: string | null;
 }
@@ -45,7 +48,7 @@ export default function StartPage() {
 /**
  * 성적표 입력 — 대화형.
  * 입력만 대화로 받고, 결과는 /result 에서 한 화면에 정적으로 보여준다.
- * 긴 폼 하나를 마주하는 것보다 세 번 물어보는 쪽이 이탈이 적다.
+ * 긴 폼 하나를 마주하는 것보다 몇 번 나눠 물어보는 쪽이 이탈이 적다.
  */
 function StartFlow() {
   const router = useRouter();
@@ -62,6 +65,8 @@ function StartFlow() {
   const [estimate, setEstimate] = useState<CreditLimit | null>(null);
   /** 학생이 확인해 넣은 이번 학기 신청 가능 최대학점 */
   const [creditMax, setCreditMax] = useState<number | null>(null);
+  /** 공강으로 비울 요일(0=월 … 4=금). null = 아직 안 물었다, [] = 공강 없이 */
+  const [freeDays, setFreeDays] = useState<number[] | null>(null);
   /** 성향까지 골라 결과 화면으로 넘어가는 중 */
   const [submitting, setSubmitting] = useState(false);
   const [restored, setRestored] = useState(false);
@@ -78,7 +83,14 @@ function StartFlow() {
   // 지금 단계는 주소가 정한다. 뒤로 가기·앞으로 가기가 단계를 오가게 하려고 — 상태만 바꾸면
   // 브라우저 기록에 안 남아 뒤로 가기가 앞 질문이 아니라 랜딩으로 나갔다(#75).
   // 답이 없는 단계로 바로 들어오면(새로고침, 학과를 바꾼 뒤 앞으로 가기) 채울 수 있는 데까지만 간다.
-  const ready = [true, program !== null && year !== null, transcriptDone, creditMax !== null, job !== null];
+  const ready = [
+    true,
+    program !== null && year !== null,
+    transcriptDone,
+    creditMax !== null,
+    freeDays !== null,
+    job !== null,
+  ];
   const asked = Math.max(0, ORDER.indexOf(params.get("step") as (typeof ORDER)[number]));
   let at = 0;
   while (at < asked && ready[at + 1]) at++;
@@ -100,6 +112,7 @@ function StartFlow() {
         setCourseCount(f.courseCount);
         setEstimate(f.estimate);
         setCreditMax(f.creditMax);
+        setFreeDays(f.freeDays ?? null);
         setJobId(f.jobId);
         setModeId(f.modeId);
       }
@@ -112,9 +125,9 @@ function StartFlow() {
 
   useEffect(() => {
     if (!restored) return;
-    const f: Flow = { dept, year, courseCount, estimate, creditMax, jobId, modeId };
+    const f: Flow = { dept, year, courseCount, estimate, creditMax, freeDays, jobId, modeId };
     sessionStorage.setItem(FLOW_KEY, JSON.stringify(f));
-  }, [restored, dept, year, courseCount, estimate, creditMax, jobId, modeId]);
+  }, [restored, dept, year, courseCount, estimate, creditMax, freeDays, jobId, modeId]);
 
   // 실패를 삼키면 화면이 그냥 비어 버린다 — 사용자는 뭘 눌러야 할지도 모른 채 멈춘다.
   // (CORS 차단은 서버에 200으로 기록되기까지 해서, 화면에 안 띄우면 원인을 찾을 수 없다.)
@@ -169,6 +182,13 @@ function StartFlow() {
   function handleCredits(n: number) {
     sessionStorage.setItem("creditMax", String(n));
     setCreditMax(n);
+    go("free");
+  }
+
+  function handleFree(days: number[]) {
+    // 결과 화면이 첫 추천에 쓴다
+    sessionStorage.setItem("freeDays", JSON.stringify(days));
+    setFreeDays(days);
     go("job");
   }
 
@@ -279,6 +299,19 @@ function StartFlow() {
         {passed("credits") && creditMax !== null && (
           <>
             <UserBubble>최대 {creditMax}학점</UserBubble>
+            <Bubble delay={0.1}>
+              <b>비워 두고 싶은 요일이 있어요?</b>
+            </Bubble>
+          </>
+        )}
+
+        {step === "free" && <FreeDaysInput initial={freeDays} onPick={handleFree} />}
+
+        {passed("free") && freeDays !== null && (
+          <>
+            <UserBubble>
+              {freeDays.length > 0 ? `${freeDays.map((d) => DAYS[d]).join("·")} 공강` : "공강 없음"}
+            </UserBubble>
             <Bubble delay={0.1}>어떤 일을 하고 싶으세요?</Bubble>
           </>
         )}
@@ -404,7 +437,7 @@ function Dot({ d = 0 }: { d?: number }) {
 }
 
 function StepDots({ step }: { step: Step }) {
-  const order: Step[] = ["program", "transcript", "credits", "job", "mode", "done"];
+  const order: Step[] = ["program", "transcript", "credits", "free", "job", "mode", "done"];
   const i = order.indexOf(step);
   return (
     <div className="flex gap-1.5">
@@ -495,6 +528,61 @@ function CreditsInput({
         className="rounded-md bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-35"
       >
         {valid ? `${n}학점으로 할게요` : "학점을 넣어 주세요"}
+      </button>
+    </div>
+  );
+}
+
+/**
+ * 공강으로 비울 요일. 고른 요일에 수업이 있는 분반은 추천에서 빠진다.
+ * 대부분은 없거나 하루라, 안 고르고 넘어가는 길을 같은 버튼에 둔다.
+ */
+function FreeDaysInput({
+  initial,
+  onPick,
+}: {
+  /** 이미 골랐던 요일(뒤로 돌아온 경우) */
+  initial: number[] | null;
+  onPick: (days: number[]) => void;
+}) {
+  const [days, setDays] = useState<number[]>(initial ?? []);
+  const toggle = (day: number) =>
+    setDays(days.includes(day) ? days.filter((d) => d !== day) : [...days, day].sort());
+
+  return (
+    <div className="fade-up space-y-3" style={{ animationDelay: "0.3s" }}>
+      <p className="text-sm text-text-muted">
+        고른 요일에 수업이 있는 분반은 추천에서 빼요. 여러 날을 골라도 되고, 결과 화면에서 바꿀 수 있어요.
+      </p>
+      <div role="group" aria-label="공강으로 비울 요일" className="flex flex-wrap gap-2">
+        {DAYS.slice(0, WEEKDAYS).map((d, day) => {
+          const on = days.includes(day);
+          return (
+            <button
+              key={d}
+              type="button"
+              onClick={() => toggle(day)}
+              aria-pressed={on}
+              aria-label={`${d}요일`}
+              className={`min-h-11 min-w-11 rounded-lg border px-4 text-sm font-semibold transition-colors ${
+                on
+                  ? "border-brand-400 bg-brand-50 text-brand-700"
+                  : "border-border bg-surface hover:border-brand-400 hover:bg-brand-50"
+              }`}
+            >
+              {d}
+            </button>
+          );
+        })}
+      </div>
+      <p className="text-caption text-text-soft">
+        많이 비울수록 고를 수 있는 과목이 줄어, 시간표가 안 나올 수 있어요.
+      </p>
+      <button
+        onClick={() => onPick(days)}
+        className="rounded-md bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
+      >
+        {days.length > 0 ? `${days.map((d) => DAYS[d]).join("·")}요일 비울게요` : "공강 없이 할게요"}
       </button>
     </div>
   );

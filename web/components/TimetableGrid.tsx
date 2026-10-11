@@ -12,10 +12,12 @@ interface Props {
   /** 마우스 올린 과목 — 과목 카드와 양방향 연동 */
   activeId?: string | null;
   onHover?: (id: string | null) => void;
+  /** 공강으로 비운 요일(0=월 … 4=금). 그 열을 칠해 일부러 비운 날이라는 걸 밝힌다 */
+  freeDays?: number[];
 }
 
 /**
- * 월~금(토·일 분반이 있으면 그 요일까지) × 교시 시간표.
+ * 월~금(토·일 분반이 있으면 그 요일까지) × 교시 시간표. 공강으로 비운 요일은 열을 칠한다.
  *
  * 격자(빈 칸)를 먼저 깔고, 과목 블록을 grid 명시 배치로 그 위에 얹는다.
  * 그래야 연강이 칸마다 쪼개지지 않고 한 덩어리로 읽힌다.
@@ -23,7 +25,7 @@ interface Props {
  * 블록에 과목명이 이미 적혀 있어서 색은 식별을 하지 않는다 — 그래서 과목마다
  * hue 를 돌리지 않고 전부 중립으로 두고, 강조(호버)에만 accent 하나를 쓴다.
  */
-export default function TimetableGrid({ courses, activeId, onHover }: Props) {
+export default function TimetableGrid({ courses, activeId, onHover, freeDays = [] }: Props) {
   const periods = periodRange(courses.flatMap((c) => c.slots));
   const rowOf = new Map(periods.map((p, i) => [p, i]));
 
@@ -62,12 +64,15 @@ export default function TimetableGrid({ courses, activeId, onHover }: Props) {
       >
         {/* 헤더 */}
         <div className="border-b border-border bg-surface-2" />
-        {days.map((d) => (
+        {days.map((d, day) => (
           <div
             key={d}
             className="border-b border-l border-border bg-surface-2 py-2 text-center text-sm font-medium text-text-muted"
           >
             {d}
+            {freeDays.includes(day) && (
+              <span className="ml-1.5 text-caption font-semibold text-brand-700">공강</span>
+            )}
           </div>
         ))}
 
@@ -86,7 +91,9 @@ export default function TimetableGrid({ courses, activeId, onHover }: Props) {
           days.map((_, day) => (
             <div
               key={`cell-${day}-${p}`}
-              className="border-b border-l border-border"
+              className={
+                "border-b border-l border-border" + (freeDays.includes(day) ? " bg-surface-3" : "")
+              }
               style={{ gridColumn: day + 2, gridRow: r + 2 }}
             />
           )),

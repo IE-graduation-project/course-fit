@@ -167,7 +167,8 @@ def sigma_sources(conn, contributions: dict[str, list[tuple[str, float]]], comp_
 
 def build_payload(conn, rec: Recommendation, ref: RefData, *, job_id: str, mode: str, eps: float,
                   alpha: float = params.ALPHA_DEFAULT, max_credits: int = 18,
-                  min_credits: int = 12, top_k: int = 3) -> dict:
+                  min_credits: int = 12, top_k: int = 3,
+                  free_days: list[int] | None = None) -> dict:
     """POST /api/recommend 응답. explain.build_explanation의 확장판.
 
     근거의 원천이 전부 모델 내부값이라 사후 합리화가 아니다 — careerReason은 Score_c의 축별
@@ -225,7 +226,9 @@ def build_payload(conn, rec: Recommendation, ref: RefData, *, job_id: str, mode:
                      for jid, jname in ref.jobs],
         "job": {"id": job_id, "name": job_name},
         "params": {"mode": mode, "eps": eps, "alpha": alpha,
-                   "maxCredits": max_credits, "minCredits": min_credits, "topK": top_k},
+                   "maxCredits": max_credits, "minCredits": min_credits, "topK": top_k,
+                   # 공강으로 비운 요일(0=월 … 4=금). 화면이 무엇이 적용됐는지 밝힌다
+                   "freeDays": list(free_days or [])},
         "diagnosis": {
             "sigma": {k: round(rec.sigma[k], 4) for k in comp_ids},
             "rho": {k: round(rho.get(k, 0.0), 4) for k in comp_ids},

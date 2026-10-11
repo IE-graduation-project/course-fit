@@ -26,7 +26,7 @@
 | `unsupported_year` | 400 | 그 학과의 지원 시작 연도 이전 학번 |
 | `empty_transcript` | 400 | 성적표에서 0과목 파싱 |
 | `student_not_found` | 404 | 없는 `studentId` (TTL 만료 포함) |
-| `unknown_job` / `unknown_mode` / `bad_credit_bounds` | 400 | 요청 값 오류 |
+| `unknown_job` / `unknown_mode` / `bad_credit_bounds` / `bad_free_days` | 400 | 요청 값 오류 |
 - 인증 없음 (프로토타입). 학생 식별은 `studentId` = `transcript` 의 `input_hash`.
 
 ---
@@ -121,6 +121,7 @@
 | `eps` | | | 주면 `mode` 무시 |
 | `maxCredits` / `minCredits` | | 18 / 12 | `U` / `L` |
 | `topK` | | 3 | `k` |
+| `freeDays` | | `[]` | 공강으로 비울 요일. 0=월 … 4=금(그 밖은 400 `bad_free_days`). 그 요일에 한 교시라도 걸친 분반을 후보에서 뺀다. 시간 미지정 분반과 토요일 분반은 그대로다 |
 
 **응답** — `recommender.explain.build_explanation()` 의 확장판.
 전체 예시는 `web/public/fixtures/DA_balanced.json`.
@@ -143,7 +144,8 @@
   "fitByJob": [{ "job": "DA", "name": "데이터 분석가", "fit": 93.7 }],
 
   "params": { "mode": "balanced", "eps": 0.3, "alpha": 1.5,
-              "maxCredits": 18, "minCredits": 12, "topK": 3 },
+              "maxCredits": 18, "minCredits": 12, "topK": 3,
+              "freeDays": [] },          // 적용된 공강 요일 (중복 제거·정렬)
 
   "diagnosis": {
     "sigma": { "DB": 0.675, "VIZ": 0.8468, "...": 0 },   // 학생 보유
@@ -204,6 +206,8 @@
 
 ILP 가 못 풀면 `timetables: []` 에 `status` 를 담아 **200 으로** 준다.
 (학생 입장에서 500 은 "서비스 고장", 빈 결과는 "조건이 빡세다" 라 메시지가 달라야 한다.)
+공강(`freeDays`) 때문에 12학점을 못 채워도 같다 — 서버는 조건을 풀어 다시 풀지 않는다. 화면이
+`params.freeDays` 를 읽어 공강을 줄여 보라고 안내한다.
 
 ---
 
