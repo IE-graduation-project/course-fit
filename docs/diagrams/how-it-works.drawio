@@ -1,0 +1,89 @@
+<mxfile host="app.diagrams.net" scale="1" border="0">
+  <diagram id="how-it-works" name="how-it-works">
+    <mxGraphModel dx="1405" dy="684" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="transcript" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;strokeWidth=1.5;fillColor=#FFF7ED;strokeColor=#F97316;" value="&lt;b style=&quot;font-size:14px;color:#0F172A&quot;&gt;성적표&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#64748B&quot; style=&quot;font-size:11px&quot;&gt;이수 과목 · 성적&lt;/font&gt;" vertex="1">
+          <mxGeometry height="64" width="160" x="40" y="198" as="geometry" />
+        </mxCell>
+        <mxCell id="diagnose" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;strokeWidth=1.5;fillColor=#FFFFFF;strokeColor=#2563EB;" value="&lt;b style=&quot;font-size:14px;color:#0F172A&quot;&gt;현재 역량 진단&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#64748B&quot; style=&quot;font-size:11px&quot;&gt;10개 역량&lt;/font&gt;" vertex="1">
+          <mxGeometry height="64" width="160" x="250" y="198" as="geometry" />
+        </mxCell>
+        <mxCell id="job" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;strokeWidth=1.5;fillColor=#FFF7ED;strokeColor=#F97316;" value="&lt;b style=&quot;font-size:14px;color:#0F172A&quot;&gt;목표 직무&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#64748B&quot; style=&quot;font-size:11px&quot;&gt;채용공고 기반 요구 역량&lt;/font&gt;" vertex="1">
+          <mxGeometry height="64" width="160" x="250" y="86" as="geometry" />
+        </mxCell>
+        <mxCell id="gap" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;strokeWidth=1.5;fillColor=#FFFFFF;strokeColor=#2563EB;" value="&lt;b style=&quot;font-size:14px;color:#0F172A&quot;&gt;부족한 역량&lt;/b&gt;" vertex="1">
+          <mxGeometry height="64" width="160" x="460" y="142" as="geometry" />
+        </mxCell>
+        <mxCell id="score" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;strokeWidth=1.5;fillColor=#FFFFFF;strokeColor=#2563EB;" value="&lt;b style=&quot;font-size:14px;color:#0F172A&quot;&gt;과목 점수&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#64748B&quot; style=&quot;font-size:11px&quot;&gt;이번 학기 개설 과목&lt;/font&gt;" vertex="1">
+          <mxGeometry height="64" width="160" x="670" y="142" as="geometry" />
+        </mxCell>
+        <mxCell id="cond" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;strokeWidth=1.5;fillColor=#FFF7ED;strokeColor=#F97316;" value="&lt;b style=&quot;font-size:14px;color:#0F172A&quot;&gt;수강 조건&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#64748B&quot; style=&quot;font-size:11px&quot;&gt;학점 · 공강 · 졸업요건&lt;/font&gt;" vertex="1">
+          <mxGeometry height="64" width="160" x="670" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ilp" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;strokeWidth=1.5;fillColor=#FFFFFF;strokeColor=#2563EB;" value="&lt;b style=&quot;font-size:14px;color:#0F172A&quot;&gt;최적화&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#64748B&quot; style=&quot;font-size:11px&quot;&gt;정수계획법 (ILP)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="64" width="160" x="880" y="86" as="geometry" />
+        </mxCell>
+        <mxCell id="result" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;strokeWidth=1.5;fillColor=#2563EB;strokeColor=#1D4ED8;" value="&lt;b style=&quot;font-size:14px;color:#FFFFFF&quot;&gt;추천 시간표&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#DBEAFE&quot; style=&quot;font-size:11px&quot;&gt;+ 과목별 근거&lt;/font&gt;" vertex="1">
+          <mxGeometry height="64" width="160" x="1090" y="86" as="geometry" />
+        </mxCell>
+        <mxCell id="e-transcript-diagnose" edge="1" parent="1" source="transcript" style="html=1;strokeColor=#475569;strokeWidth=1.8;endArrow=block;endFill=1;endSize=7;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="diagnose">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-job-gap" edge="1" parent="1" source="job" style="html=1;strokeColor=#475569;strokeWidth=1.8;endArrow=block;endFill=1;endSize=7;exitX=1;exitY=0.5;exitDx=0;exitDy=0;curved=1;entryX=0.1;entryY=0;entryDx=0;entryDy=0;" target="gap">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="438" y="118" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-diagnose-gap" edge="1" parent="1" source="diagnose" style="html=1;strokeColor=#475569;strokeWidth=1.8;endArrow=block;endFill=1;endSize=7;exitX=1;exitY=0.5;exitDx=0;exitDy=0;curved=1;entryX=0.1;entryY=1;entryDx=0;entryDy=0;" target="gap">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="438" y="230" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-gap-score" edge="1" parent="1" source="gap" style="html=1;strokeColor=#475569;strokeWidth=1.8;endArrow=block;endFill=1;endSize=7;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="score">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-cond-ilp" edge="1" parent="1" source="cond" style="html=1;strokeColor=#475569;strokeWidth=1.8;endArrow=block;endFill=1;endSize=7;exitX=1;exitY=0.5;exitDx=0;exitDy=0;curved=1;entryX=0.1;entryY=0;entryDx=0;entryDy=0;" target="ilp">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="858" y="62" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-score-ilp" edge="1" parent="1" source="score" style="html=1;strokeColor=#475569;strokeWidth=1.8;endArrow=block;endFill=1;endSize=7;exitX=1;exitY=0.5;exitDx=0;exitDy=0;curved=1;entryX=0.1;entryY=1;entryDx=0;entryDy=0;" target="ilp">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="858" y="174" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-ilp-result" edge="1" parent="1" source="ilp" style="html=1;strokeColor=#475569;strokeWidth=1.8;endArrow=block;endFill=1;endSize=7;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="result">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-0" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;strokeWidth=1.5;fillColor=#FFF7ED;strokeColor=#F97316;" value="" vertex="1">
+          <mxGeometry height="14" width="22" x="860" y="228" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-0-t" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=12;fontColor=#475569;" value="학생 입력" vertex="1">
+          <mxGeometry height="22" width="80" x="888" y="224" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;strokeWidth=1.5;fillColor=#FFFFFF;strokeColor=#2563EB;" value="" vertex="1">
+          <mxGeometry height="14" width="22" x="978" y="228" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-1-t" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=12;fontColor=#475569;" value="처리 단계" vertex="1">
+          <mxGeometry height="22" width="80" x="1006" y="224" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;strokeWidth=1.5;fillColor=#2563EB;strokeColor=#1D4ED8;" value="" vertex="1">
+          <mxGeometry height="14" width="22" x="1096" y="228" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-2-t" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=12;fontColor=#475569;" value="추천 결과" vertex="1">
+          <mxGeometry height="22" width="80" x="1124" y="224" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
