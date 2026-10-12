@@ -44,16 +44,9 @@ Course Fit은 이수 과목과 성적을 바탕으로 **학생의 현재 역량�
 
 ## ⚙️ 동작 원리
 
-```mermaid
-flowchart LR
-    A["📋 성적표<br>이수 과목·성적"] --> B["현재 역량 진단<br>10개 역량"]
-    J["🎯 목표 직무<br>채용공고 기반 요구 역량"] --> C
-    B --> C["부족한 역량"]
-    C --> D["과목 점수<br>이번 학기 개설 과목"]
-    P["🗓️ 수강 조건<br>학점·공강·졸업요건"] --> E
-    D --> E["최적화<br>정수계획법(ILP)"]
-    E --> F["✅ 추천 시간표<br>+ 과목별 근거"]
-```
+<p align="center">
+  <img src="docs/readme/how-it-works.drawio.png" alt="동작 원리" width="900">
+</p>
 
 1. **현재 역량 진단**: 이수한 과목과 성적으로 10개 역량(프로그래밍, 데이터분석, 머신러닝, 데이터베이스,
    데이터시각화, 비즈니스, 재무, 마케팅, 최적화, 커뮤니케이션)의 보유 수준을 계산합니다.
@@ -103,9 +96,9 @@ course-fit/
 2026년 홍익대학교 산업데이터공학과 졸업 프로젝트
 
 <table>
-  <tr><th align="center">이름</th><th align="center">역할</th><th align="center">담당 기능</th></tr>
+  <tr><th align="center">팀원</th><th align="center">역할</th><th align="center">담당 기능</th></tr>
   <tr>
-    <td rowspan="4" align="center"><img src="https://github.com/soyeoneeii.png?size=80" width="80" alt="박소연"><br><b>박소연</b><br><a href="https://github.com/soyeoneeii">@soyeoneeii</a></td>
+    <td rowspan="4" align="center"><img src="https://github.com/soyeoneeii.png?size=80" width="80" alt="@soyeoneeii"><br><a href="https://github.com/soyeoneeii">@soyeoneeii</a></td>
     <td align="left">DB 스키마 설계 및 구축</td>
     <td align="left">학과·과목·졸업요건 데이터 모델 정의</td>
   </tr>
@@ -122,7 +115,7 @@ course-fit/
     <td align="left">API 서버, 배포 컨테이너화 (Docker)</td>
   </tr>
   <tr>
-    <td rowspan="3" align="center"><img src="https://github.com/yeongjunyoo.png?size=80" width="80" alt="유영준"><br><b>유영준</b><br><a href="https://github.com/yeongjunyoo">@yeongjunyoo</a></td>
+    <td rowspan="3" align="center"><img src="https://github.com/yeongjunyoo.png?size=80" width="80" alt="@yeongjunyoo"><br><a href="https://github.com/yeongjunyoo">@yeongjunyoo</a></td>
     <td align="left">데이터 수집 및 전처리</td>
     <td align="left">채용공고·개설 과목 수집, 직무 6종 선정, 성적표 파싱</td>
   </tr>
