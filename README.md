@@ -24,36 +24,9 @@ Course Fit은 이수 과목과 성적을 바탕으로 **학생의 현재 역량�
 
 ## 🧱 Architecture
 
-```mermaid
-flowchart TB
-    U["👤 학생 (브라우저)"]
-
-    subgraph FE["Frontend · Vercel"]
-        W["Next.js 15<br>시작 화면 · 결과 화면"]
-    end
-
-    subgraph BE["Backend · Render (Docker)"]
-        API["FastAPI<br>API Server"]
-        T["transcript<br>성적표 파싱"]
-        R["recommender<br>역량 진단 · 과목 점수"]
-        ILP["PuLP · CBC<br>ILP 최적화"]
-        DB[("SQLite<br>개설 과목 · 졸업요건<br>직무 역량 · 성적표")]
-    end
-
-    subgraph PIPE["Data Pipeline · 오프라인"]
-        C["crawlers<br>개설 과목 · 졸업요건 · 채용공고"]
-        M["mapping<br>과목 · 직무 → 역량"]
-        CSV["data/*.csv"]
-    end
-
-    U --> W
-    W -- "REST API" --> API
-    API --> T --> DB
-    API --> R --> ILP
-    R --> DB
-    C --> M --> CSV
-    CSV -- "db/ingest.py" --> DB
-```
+<p align="center">
+  <img src="docs/readme/architecture.drawio.png" alt="시스템 아키텍처" width="900">
+</p>
 
 ## ✨ 주요 기능
 
