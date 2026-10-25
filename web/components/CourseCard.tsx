@@ -55,6 +55,12 @@ export default function CourseCard({
 
       {reasons.length > 0 && (
         <div className="mt-3.5">
+          {/* 막대만 있으면 이 숫자가 뭔지 모른다 — 이 과목이 어느 직무 역량 갭을 채우는지가
+              추천의 핵심 근거라, 라벨을 붙여 항상 보이게 둔다(설문: 「직무 역량 반영」 3.6/5,
+              「왜 이 과목이 이 역량을 채우는지가 화면에 안 보인다」). 진단 막대의 gap 과 같은 말이다 */}
+          <p className="mb-1.5 text-caption font-semibold text-text-muted">
+            이 과목이 채우는 직무 역량 갭
+          </p>
           <div className="flex h-2 gap-0.5">
             {reasons.map((r, i) => (
               <div
