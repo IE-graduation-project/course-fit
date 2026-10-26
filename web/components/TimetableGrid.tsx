@@ -149,7 +149,10 @@ export default function TimetableGrid({ courses, activeId, onHover, freeDays = [
                   {b.course.name}
                 </span>
                 {b.course.professor && (
-                  <span className="mt-0.5 text-caption leading-tight text-text-soft sm:text-[0.625rem]">
+                  // 좁은 모바일 칸에서 긴 영문 교수명이 글자 단위로 쪼개졌다("Brandon M. Harkins" → "Brand/on M./Harkin/s").
+                  // body 의 overflow-wrap:break-word 가 칸보다 긴 단어를 중간에서 끊은 것 — 여기선 normal 로 되돌려
+                  // 어절(공백) 경계에서만 끊고, keep-all 은 그대로 둬 한글 교수명은 어절째 유지한다.
+                  <span className="mt-0.5 break-keep [overflow-wrap:normal] text-caption leading-tight text-text-soft sm:text-[0.625rem]">
                     {b.course.professor}
                   </span>
                 )}
