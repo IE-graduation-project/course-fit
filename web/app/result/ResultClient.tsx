@@ -188,6 +188,14 @@ export default function ResultClient() {
   const need = Object.entries(rec.need).sort((a, b) => b[1] - a[1]);
   const needMax = Math.max(1, ...Object.values(rec.need));
 
+  /** 졸업까지 남은 학점 = 졸업 총학점 − 총 취득학점. 영역별 need 합은 자유 영역과 매핑
+   *  과목 0 개인 영역(특성화교양·SW데이터활용역량)을 빼먹어 실제의 절반쯤으로 작다 —
+   *  그래서 그 합을 총계로 쓰지 않는다. 백엔드가 두 값을 다 줄 때만 센다(옛 응답이면 null). */
+  const creditsToGraduation =
+    rec.student.totalRequired != null && rec.student.totalEarned != null
+      ? Math.max(0, rec.student.totalRequired - rec.student.totalEarned)
+      : null;
+
   /** 격자에 자리가 없는 과목 — 비대면·논문·실습 분반은 시간 슬롯이 없다.
    *  헤드라인 과목 수와 격자 칸 수가 어긋나 보이는 원인이라 분해해서 적는다(9/14 피드백 ②). */
   const unscheduled = tt?.courses.filter((c) => c.slots.length === 0) ?? [];
@@ -495,8 +503,8 @@ export default function ResultClient() {
             <div className="print-hide mt-4">
               <p className="mb-2 text-caption text-text-soft">
                 {alternativesShareCourses
-                  ? "같은 과목, 수업 시간만 달라요 — 편한 쪽으로 고르세요"
-                  : "이 조건에 맞는 시간표예요 — 생활 패턴만 달라요"}
+                  ? "같은 과목이고 분반만 달라요 — 수업 시간·교수님이 다르니 편한 쪽으로 고르세요"
+                  : "담긴 과목 구성이 조금씩 달라요 — 끌리는 쪽으로 고르세요"}
               </p>
               <div className="flex flex-wrap items-stretch gap-2">
                 {(() => {
@@ -547,12 +555,18 @@ export default function ResultClient() {
                   제목 옆에 남은 학점 합계를 둬서 먼저 읽히게 한다. */}
               <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
                 <h2 className="text-h3 font-semibold">졸업까지 남은 것</h2>
-                <span className="text-sm text-text-muted">
-                  남은 학점{" "}
-                  <b className="tnum text-h3 font-bold text-grad-ink">
-                    {need.reduce((sum, [, credits]) => sum + credits, 0)}
-                  </b>
-                </span>
+                {/* 졸업 총학점(132)−취득학점. 영역별 부족분의 단순 합은 자유 영역과 매핑
+                    과목 0 개인 영역을 빼먹어 틀린 수라, 두 값이 다 올 때만 총계를 보인다.
+                    옛 응답이면 이 줄을 숨기고 아래 영역별 목록만 둔다 — 틀린 합은 띄우지 않는다. */}
+                {creditsToGraduation !== null && (
+                  <span className="text-sm text-text-muted">
+                    남은{" "}
+                    <b className="tnum text-h3 font-bold text-grad-ink">
+                      {creditsToGraduation}
+                    </b>
+                    학점
+                  </span>
+                )}
               </div>
               {/* 어느 교육과정을 기준으로 셌는지 밝힌다. 입학년도와 다를 수 있다 —
                   2025학번 경영은 2022 교육과정을 따른다. 학생이 직접 확인할 수 있어야 한다. */}
@@ -824,18 +838,19 @@ function TimetableMeters({
       {rows.map((r, i) => (
         <div
           key={r.label}
-          // 우선 미터가 아닌 쪽은 눌러 둔다 — 성향을 바꾸면 선명한 미터가 옮겨가며 차이가 드러난다
-          className={
-            "grid grid-cols-[5rem_1fr_3.25rem] items-center gap-3 transition-opacity duration-300 " +
-            (primary !== null && i !== primary ? "opacity-45" : "")
-          }
+          className="grid grid-cols-[5rem_1fr_3.25rem] items-center gap-3"
         >
           <dt className={"text-sm font-semibold " + r.ink} title={r.hint}>
             {r.label}
           </dt>
+          {/* 우선 미터가 아닌 쪽은 '막대만' 눌러 둔다 — 성향을 바꾸면 선명한 막대가
+              옮겨가 차이가 드러나되, 라벨·숫자 글자는 그대로라 대비(WCAG AA)가 유지된다 */}
           <dd className="h-1.5 overflow-hidden rounded-full bg-surface-3">
             <span
-              className="block h-full rounded-full transition-[width] duration-300"
+              className={
+                "block h-full rounded-full transition-[width,opacity] duration-300 " +
+                (primary !== null && i !== primary ? "opacity-45" : "")
+              }
               style={{
                 width: `${Math.max(0, Math.min(100, r.value))}%`,
                 background: r.color,

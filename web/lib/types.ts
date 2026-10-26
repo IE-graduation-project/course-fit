@@ -128,6 +128,10 @@ export interface Recommendation {
     gradeLevel: number;
     /** 추천한 분반의 개설 학기 "2026-2". 옛 응답엔 없다 */
     term?: string;
+    /** 성적표 총 취득학점(영역 매핑과 무관). 옛 성적표/옛 DB 응답엔 없다 */
+    totalEarned?: number;
+    /** 학과 졸업 총학점(department.total_credits_required, 132). 옛 응답엔 없다 */
+    totalRequired?: number;
   };
   job: JobRef;
   /**

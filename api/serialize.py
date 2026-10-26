@@ -213,14 +213,26 @@ def build_payload(conn, rec: Recommendation, ref: RefData, *, job_id: str, mode:
             "courses": courses,
         })
 
+    student_payload = {
+        "deptId": rec.dept_id, "admissionYear": rec.admission_year,
+        # 적용된 교육과정 연도. 입학년도와 다를 수 있어 화면에 고지한다(결정 ⑨).
+        "requirementYear": rec.requirement_year,
+        # 후보를 거른 학년(#42). 성적표의 마지막 학기에서 계산해 입학년도와 다를 수 있다.
+        "gradeLevel": rec.grade_level,
+        # 추천한 분반의 개설 학기("2026-2"). 화면이 「이번 학기」가 언제인지 밝힌다.
+        "term": data.active_term(conn),
+    }
+    # 졸업까지 남은 학점 = totalRequired − totalEarned. 영역별 need 합은 자유 영역과
+    # 매핑 과목 0 개인 영역(특성화교양·SW데이터활용역량)을 빼먹어 실제의 절반쯤으로 작다.
+    # 둘 다 있을 때만 내보낸다 — 하나라도 없으면(옛 성적표·옛 DB) 화면이 총계를 숨기고
+    # 영역별 목록만 그린다. 영역 합을 총계로 그리는 일은 없다.
+    if rec.total_earned is not None:
+        student_payload["totalEarned"] = rec.total_earned
+    if rec.total_required is not None:
+        student_payload["totalRequired"] = rec.total_required
+
     payload = {
-        "student": {"deptId": rec.dept_id, "admissionYear": rec.admission_year,
-                    # 적용된 교육과정 연도. 입학년도와 다를 수 있어 화면에 고지한다(결정 ⑨).
-                    "requirementYear": rec.requirement_year,
-                    # 후보를 거른 학년(#42). 성적표의 마지막 학기에서 계산해 입학년도와 다를 수 있다.
-                    "gradeLevel": rec.grade_level,
-                    # 추천한 분반의 개설 학기("2026-2"). 화면이 「이번 학기」가 언제인지 밝힌다.
-                    "term": data.active_term(conn)},
+        "student": student_payload,
         "fitByJob": [{"job": jid, "name": jname,
                       "fit": job_fit(rec.sigma, data.load_rho(conn, jid), comp_ids)}
                      for jid, jname in ref.jobs],

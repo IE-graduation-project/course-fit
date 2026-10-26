@@ -48,7 +48,20 @@ function changedCourse(d: AltDiff | undefined): string {
   }
   if (c.startsWith("+ ")) return c.slice(2).split(" (")[0] + " 추가";
   if (c.startsWith("− ")) return c.slice(2) + " 빠짐";
-  return c.split(":")[0] + " 다른 시간";
+  // c 는 `${name}: ${detail}` 꼴. detail 로 안끼리를 가른다 — 같은 과목의 다른 분반이면
+  // 바뀐 시간(또는 교수)이 안마다 달라 라벨이 서로 겹치지 않는다(#75 중복 라벨).
+  const sep = c.indexOf(": ");
+  if (sep < 0) return c + " 다른 시간";
+  const name = c.slice(0, sep);
+  const detail = c.slice(sep + 2);
+  // diffFromFirst 가 분반만 바뀌고 시간은 같을 때 내보내는 꼴: "같은 시간, 교수 X → Y"
+  if (detail.startsWith("같은 시간, 교수")) {
+    const prof = detail.split(" → ")[1];
+    return prof ? `${name} 교수 ${prof}` : `${name} 교수 바뀜`;
+  }
+  // 시간이 바뀐 경우: detail 은 "wb → wc". 옮겨 간 시간(wc)으로 가른다.
+  const dest = detail.split(" → ")[1];
+  return dest ? `${name} ${dest}` : `${name} 다른 시간`;
 }
 
 /**
@@ -70,7 +83,7 @@ export function altChips(timetables: Timetable[]): string[] {
     if (vary.day) parts.push(`주 ${dayCount(s)}일`);
     if (vary.weekend) parts.push(s.weekend > 0 ? "주말 포함" : "주중만");
     if (vary.evening) parts.push(s.evening > 0 ? "저녁 있음" : "저녁 없음");
-    if (vary.morning) parts.push(s.morning > 0 ? "오전부터" : "오전 없음");
+    if (vary.morning) parts.push(s.morning > 0 ? "9시 수업 있음" : "9시 수업 없음");
     return parts.slice(0, 2).join(" · ");
   });
   const diffs = diffFromFirst(timetables); // timetables[1..] 에 정렬

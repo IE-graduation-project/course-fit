@@ -2,36 +2,40 @@ name: Keepalive (백엔드 콜드스타트 방지)
 
 # 왜 — 백엔드(api/main.py)는 Render 무료 인스턴스(https://course-fit-api-server.onrender.com)에
 # 떠 있고, 15분 동안 요청이 없으면 잠든다(render.com/docs/free). 깨는 데 20~60초 걸려
-# 졸업 전시에서 첫 사용자가 빈 화면을 본다. 그래서 10분마다 /health 를 한 번 눌러 깨어 있게 한다.
+# 졸업 전시에서 첫 사용자가 빈 화면을 본다. 그래서 낮 시간대에 10분마다 /health 를 눌러 깨어 있게 한다.
 # /health 는 DB를 열어 시드 행 수까지 확인하므로(api/main.py) HTTP 계층만이 아니라 스택 전체가
 # 데워진다. 읽기 전용이라 부작용이 없다.
 #
 # 한계 (전시 전에 알고 있어야 하는 것):
 #  - cron 최소 간격은 5분이고 GitHub Actions 스케줄은 부하에 따라 수 분 지연·누락될 수 있다.
-#    15분 슬립 창에 맞춰 10분 간격으로 여유를 둔다. 그래도 전시 당일처럼 확실히 깨워야 하면
-#    시작 10여 분 전에 "Run workflow"(workflow_dispatch)로 손수 한 번 눌러 둔다.
+#    15분 슬립 창에 맞춰 10분 간격으로 여유를 둔다. 전시 당일처럼 확실히 깨워야 하면
+#    시작 10여 분 전에 "Run workflow"(workflow_dispatch)로 손수 눌러 둔다.
+#  - 스케줄은 KST 9~24시(UTC 0~15시)만 돈다 — 밤에는 접속이 거의 없어 Render/Actions 사용량을 아낀다.
+#    이른 아침·심야 심사가 잡히면 그 시간은 workflow_dispatch 로 예열한다.
 #  - 이 repo 가 60일간 커밋/활동이 없으면 GitHub 가 스케줄 워크플로를 자동 중단한다.
 #    전시가 그보다 멀면 그 전에 아무 커밋이나 workflow_dispatch 로 한 번 깨워야 한다.
-#  - 이 repo 는 현재 공개(public)라 Actions 사용량이 무료다. private 로 전환하면
-#    스케줄 실행이 무료 Actions 분(월 2,000분/Linux)을 소모한다 — 이 작업은 1회 ~10초 * 6회/시 *
-#    24시간 ≈ 하루 24분, 월 ~720분이라 한도 안이지만 다른 워크플로와 합산됨에 유의.
+#  - GitHub Actions 는 실행마다 분을 올림으로 과금한다(10초만 써도 1분). 이 작업은 KST 낮 16시간 ×
+#    6회/시 ≈ 96회/일 ≈ 월 ~2,900분이다. 지금 repo 는 공개(public)라 무료지만, private 로 전환하면
+#    무료 Actions 한도(월 2,000분/Linux)를 넘는다 — 그때는 간격을 늘리거나 외부 핑으로 옮긴다.
+#  - Render 무료는 워크스페이스당 월 750시간이고, 다 쓰면 그 워크스페이스의 무료 서비스 전부가
+#    다음 달까지 멈춘다(render.com/docs/free). 24시간 깨우면 월 744시간이라 다른 무료 서비스가
+#    하나만 더 있어도 넘친다. KST 낮만(월 ~465시간) 돌려 여유를 둔다.
 #  - ping 은 슬립을 "예방"할 뿐, Render 가 재배포·OOM·플랫폼 점검으로 인스턴스를 내리는 순간의
 #    콜드스타트까지 없애지는 못한다. 그 짧은 창은 프런트의 재시도 로직(web/lib/api.ts callApi,
-#    WAKE_BUDGET_MS=90s)이 받아낸다. 즉 keepalive 는 "대부분의 평상시 슬립"을 지우는 장치다.
+#    WAKE_BUDGET_MS=90s)이 받아낸다.
 #
-# 대안 검토 (결론: GitHub Actions 로 구현) —
-#  - cron-job.org / UptimeRobot 등 외부 무료 핑: 60일 중단·Actions 분 소모가 없고 주기도 더 촘촘
-#    (1분)하다. 장점이 분명하지만 repo 밖 서비스라 계정·설정이 코드에 남지 않아 전시 인수인계
-#    때 보이지 않고, 가입/대시보드 관리가 별도로 든다. 이 저장소에 체크인되어 함께 버전 관리되는
-#    쪽을 택했다(과제 요구도 GitHub Actions). 더 강한 보장이 필요하면 이 워크플로와 cron-job.org 를
-#    함께 걸면 된다(둘 다 그냥 GET 이라 충돌 없음).
-#  - Render 자체 설정: 무료 플랜에는 슬립을 끄는 옵션이 없다(유료 Starter 이상만 always-on).
-#    따라서 Render 쪽에서 해결할 방법은 없다.
+# 대안 검토 (결론: GitHub Actions) — cron-job.org/UptimeRobot 등 외부 무료 핑은 60일 중단·Actions
+# 분 소모가 없고 주기도 촘촘하나, repo 밖이라 인수인계 때 안 보이고 계정 관리가 별도로 든다.
+# 저장소에 함께 버전 관리되는 쪽을 택했다. 더 강한 보장이 필요하면 둘을 병행하면 된다.
+# Render 자체 설정에는 무료 플랜용 always-on 옵션이 없다.
 
 on:
   schedule:
-    - cron: '*/10 * * * *'   # 10분마다 (UTC). 15분 슬립 창보다 짧게.
-  workflow_dispatch:          # 전시 직전 수동 예열용
+    - cron: '*/10 0-15 * * *'   # KST 9~24시(UTC 0~15시), 10분마다. 15분 슬립 창보다 짧게.
+  workflow_dispatch:            # 전시 직전·심야 심사 수동 예열용
+
+# 이 워크플로는 외부 GET 만 한다 — repo 내용에 쓰기 권한이 필요 없다.
+permissions: {}
 
 # 동시에 한 번만. 스케줄이 몰려도 중첩 실행을 막는다.
 concurrency:
@@ -42,18 +46,19 @@ jobs:
   ping:
     name: Ping backend
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 7          # 최악 60×3 + 15×2 = 210초여도 여유. 셋 다 멈춰도 타임아웃 전에 exit 0.
     steps:
       - name: Ping /health (실패해도 조용히 넘어감)
         run: |
           URL="https://course-fit-api-server.onrender.com/health"
           echo "ping → $URL"
           # 최대 3회 재시도. 콜드스타트 중이면 첫 응답이 느리거나 502/503 이 날 수 있어
-          # --max-time 을 넉넉히 주고, 그래도 실패하면 조용히 성공 처리한다(exit 0).
-          # keepalive 가 빨개져서 알림을 울리는 것이 이 워크플로의 목적이 아니다.
+          # --max-time 60 으로 한 번 호출을 60초에 끊고(평상시 health 는 1초, 콜드여도 ~25초),
+          # 그래도 실패하면 조용히 성공 처리한다(exit 0). keepalive 가 빨개져 알림을 울리는 것이
+          # 이 워크플로의 목적이 아니다.
           for i in 1 2 3; do
             code="$(curl -sS -o /dev/null -w '%{http_code}' \
-                      --max-time 90 --retry 0 "$URL" || echo 000)"
+                      --max-time 60 --retry 0 "$URL" || echo 000)"
             echo "시도 $i → HTTP $code"
             case "$code" in
               2*|3*) echo "깨어 있음(또는 깨움 완료)."; exit 0 ;;
