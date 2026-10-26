@@ -86,6 +86,7 @@ class Student:
     earned_by_area: dict[str, int]          # area -> 기이수학점  need용 (student_course)
     weights: dict[str, dict[str, float]]    # passed course_id -> {comp_id: weight}  σ용
     current_grade: int | None = None        # 이번 학기 학년 (성적표 기준). None = 성적표에 정규학기 없음
+    total_earned: int | None = None         # 총 취득학점 (성적표 합계). 영역 매핑과 무관한 전체 취득분 (#졸업학점 표시용)
 
 
 def connect(db_path=DB_PATH) -> sqlite3.Connection:
@@ -220,7 +221,8 @@ def grade_for_term(current_grade: int | None, admission_year: int, term: str) ->
 
 def load_student(conn, input_hash: str) -> Student:
     srow = conn.execute(
-        "SELECT input_hash, dept_id, admission_year, current_grade FROM student WHERE input_hash=?",
+        "SELECT input_hash, dept_id, admission_year, current_grade, total_earned "
+        "FROM student WHERE input_hash=?",
         (input_hash,),
     ).fetchone()
     if srow is None:
@@ -262,6 +264,7 @@ def load_student(conn, input_hash: str) -> Student:
         earned_by_area=earned_by_area,
         weights=load_weights(conn, passed.keys()),
         current_grade=srow["current_grade"],
+        total_earned=srow["total_earned"],
     )
 
 
@@ -302,6 +305,20 @@ def earliest_year(conn, dept_id: str) -> int | None:
     """이 학과가 지원하는 가장 이른 입학년도 (안내 메시지용). 없으면 None."""
     r = conn.execute(
         "SELECT MIN(admission_year) FROM graduation_requirement WHERE dept_id=?",
+        (dept_id,),
+    ).fetchone()
+    return r[0] if r and r[0] is not None else None
+
+
+def total_credits_required(conn, dept_id: str) -> int | None:
+    """이 학과의 졸업 총학점 (department.total_credits_required). 없으면 None.
+
+    영역별 min_credits 의 합이 아니라 책자가 명시한 총 졸업학점이다(산데공·경영 모두 132).
+    영역 합은 자유 영역(일반선택·추가 전공선택)과 매핑 과목이 0 개인 영역(특성화교양·
+    SW데이터활용역량)을 빼먹어 실제보다 작다 — "졸업까지 남은 학점"은 이 총학점에서 센다.
+    """
+    r = conn.execute(
+        "SELECT total_credits_required FROM department WHERE dept_id=?",
         (dept_id,),
     ).fetchone()
     return r[0] if r and r[0] is not None else None

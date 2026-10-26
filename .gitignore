@@ -54,3 +54,6 @@ docs/screenshots/
 
 # 학기 이관 대조용 로컬 스냅샷 (레포에 올리지 않는다)
 .baseline-*/
+
+# 교육과정 파일럿 원자료 (로컬 경로·내부 repo 참조가 들어있어 공개 레포에 올리지 않는다)
+data/curriculum_pilot/

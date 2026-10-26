@@ -81,7 +81,8 @@ export default function TimetableGrid({ courses, activeId, onHover, freeDays = [
           <div key={`lab-${p}`} style={{ gridColumn: 1, gridRow: r + 2 }}>
             <div className="flex h-full flex-col items-center justify-center border-b border-border bg-surface-2">
               <span className="tnum text-sm text-text-muted">{p}</span>
-              <span className="tnum text-[0.625rem] text-text-soft">
+              {/* 휴대폰에서 시간 글씨가 작아 확대해야 보였다(설문) — 모바일만 키우고 데스크톱은 그대로 */}
+              <span className="tnum text-caption text-text-soft sm:text-[0.625rem]">
                 {periodTime(p)}
               </span>
             </div>
@@ -137,16 +138,18 @@ export default function TimetableGrid({ courses, activeId, onHover, freeDays = [
                   })`,
                 }}
               >
+                {/* 휴대폰에서 과목 글씨가 작아 확대해야 보였다(설문) — 모바일만 한 단 키우고
+                    데스크톱(sm 이상)은 기존 크기 그대로 둔다 */}
                 <span
                   className={
-                    "text-caption font-semibold leading-tight " +
+                    "text-sm font-semibold leading-tight sm:text-caption " +
                     (active ? "text-brand-800" : "text-text")
                   }
                 >
                   {b.course.name}
                 </span>
                 {b.course.professor && (
-                  <span className="mt-0.5 text-[0.625rem] leading-tight text-text-soft">
+                  <span className="mt-0.5 text-caption leading-tight text-text-soft sm:text-[0.625rem]">
                     {b.course.professor}
                   </span>
                 )}

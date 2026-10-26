@@ -11,7 +11,7 @@ import CourseCard from "@/components/CourseCard";
 import CopyCodes from "@/components/CopyCodes";
 import JobFitBar from "@/components/JobFitBar";
 import InfoTip from "@/components/InfoTip";
-import { describeShape, diffFromFirst, shape } from "@/lib/altdiff";
+import { altChips, describeShape, diffFromFirst, shape } from "@/lib/altdiff";
 import { DAYS, WEEKDAYS } from "@/lib/slots";
 
 /** 시작 화면에서 넣은 학점이 없을 때(옛 세션, 주소로 바로 들어옴) 담을 학점 상한 */
@@ -187,6 +187,14 @@ export default function ResultClient() {
   const tt = rec.timetables[alt] ?? rec.timetables[0] ?? null;
   const need = Object.entries(rec.need).sort((a, b) => b[1] - a[1]);
   const needMax = Math.max(1, ...Object.values(rec.need));
+
+  /** 졸업까지 남은 학점 = 졸업 총학점 − 총 취득학점. 영역별 need 합은 자유 영역과 매핑
+   *  과목 0 개인 영역(특성화교양·SW데이터활용역량)을 빼먹어 실제의 절반쯤으로 작다 —
+   *  그래서 그 합을 총계로 쓰지 않는다. 백엔드가 두 값을 다 줄 때만 센다(옛 응답이면 null). */
+  const creditsToGraduation =
+    rec.student.totalRequired != null && rec.student.totalEarned != null
+      ? Math.max(0, rec.student.totalRequired - rec.student.totalEarned)
+      : null;
 
   /** 격자에 자리가 없는 과목 — 비대면·논문·실습 분반은 시간 슬롯이 없다.
    *  헤드라인 과목 수와 격자 칸 수가 어긋나 보이는 원인이라 분해해서 적는다(9/14 피드백 ②). */
@@ -476,8 +484,9 @@ export default function ResultClient() {
                   고정 문자열로 두면 백엔드가 false 를 줘도 화면은 계속 충족했다고 말한다. */}
               <ConstraintLine constraints={rec.constraints} />
 
-              {/* 성향을 바꾸면 무엇이 달라지는지 — 응답에 오는 두 목적함수 값을 그대로 쓴다 */}
-              <TimetableMeters tt={tt} />
+              {/* 성향을 바꾸면 무엇이 달라지는지 — 응답에 오는 두 목적함수 값을 그대로 쓴다.
+                  성향(mode·ε)도 넘겨, 이 성향이 둘 중 무엇을 먼저 맞추는지 화면에 드러낸다 */}
+              <TimetableMeters tt={tt} mode={rec.params.mode} eps={rec.params.eps} />
             </>
           )}
           </div>
@@ -487,38 +496,45 @@ export default function ResultClient() {
           </div>
 
           {/* 대안이 서로 같으면 버튼을 안 그린다 — 눌러도 아무 일도 안 일어나는 버튼은 두지 않는다.
-              무엇이 다른지 못 고르면 「안 1/2/3」은 라벨일 뿐이라 과목 수와 적합도를 같이 적는다. */}
+              읽는이는 「몇 번 안이 뭐가 다른가」가 아니라 「이 시간표가 어떤 한 주인가」로 고른다.
+              그래서 번호(안 1/2/3) 대신 각 안을 그 자체로 설명하는 칩을 버튼 얼굴에 둔다(중간발표 피드백,
+              「기준이 다 1안인가?」). 첫 칸이 보완 적합도 1순위라 「추천」. 전체 차이는 ⓘ 로. */}
           {rec.timetables.length > 1 && hasDistinctAlternatives && (
-            <div className="print-hide mt-4 flex flex-wrap items-center gap-2">
-              <span className="text-caption text-text-soft">
-                {alternativesShareCourses ? "같은 과목, 다른 분반" : "다른 안"}
-              </span>
-              {rec.timetables.map((t, i) => (
-                <button
-                  key={t.rank}
-                  onClick={() => setAlt(i)}
-                  aria-pressed={i === alt}
-                  className={
-                    "flex min-h-11 flex-col items-start justify-center rounded-sm border px-3 py-1 text-caption leading-tight transition-colors " +
-                    (i === alt
-                      ? "border-brand-400 bg-brand-50 font-semibold text-brand-700"
-                      : "border-border text-text-muted hover:bg-surface-3")
-                  }
-                >
-                  <span>안 {t.rank}</span>
-                  {/* 과목이 같으면 이 값도 셋 다 같다 — 같은 수를 세 번 적으면 노이즈다 */}
-                  {!alternativesShareCourses && (
-                    <span className="text-text-soft">
-                      <span className="tnum">{t.courses.length}</span>과목 · 보완{" "}
-                      <span className="tnum">{fitIndex(t)}</span>
-                    </span>
-                  )}
-                </button>
-              ))}
-              {/* 무엇이 다른지는 눌러 보기 전엔 몰랐다(#75). 늘 펼쳐 두기엔 길어서 ⓘ 로 연다 */}
-              <InfoTip label="안마다 무엇이 다른지">
-                <AltDiffs timetables={rec.timetables} />
-              </InfoTip>
+            <div className="print-hide mt-4">
+              <p className="mb-2 text-caption text-text-soft">
+                {alternativesShareCourses
+                  ? "같은 과목이고 분반만 달라요 — 수업 시간·교수님이 다르니 편한 쪽으로 고르세요"
+                  : "담긴 과목 구성이 조금씩 달라요 — 끌리는 쪽으로 고르세요"}
+              </p>
+              <div className="flex flex-wrap items-stretch gap-2">
+                {(() => {
+                  const chips = altChips(rec.timetables);
+                  return rec.timetables.map((t, i) => (
+                    <button
+                      key={t.rank}
+                      onClick={() => setAlt(i)}
+                      aria-pressed={i === alt}
+                      className={
+                        "flex min-h-11 items-center gap-2 rounded-sm border px-3 py-1.5 text-caption leading-tight transition-colors " +
+                        (i === alt
+                          ? "border-brand-400 bg-brand-50 font-semibold text-brand-700"
+                          : "border-border text-text-muted hover:bg-surface-3")
+                      }
+                    >
+                      {i === 0 && (
+                        <span className="rounded-sm bg-brand-600 px-1.5 py-0.5 text-[0.7rem] font-semibold text-white">
+                          추천
+                        </span>
+                      )}
+                      <span>{chips[i]}</span>
+                    </button>
+                  ));
+                })()}
+                {/* 바뀐 과목·교수 같은 상세는 길어서 ⓘ 로 연다(#75) */}
+                <InfoTip label="시간표마다 무엇이 다른지">
+                  <AltDiffs timetables={rec.timetables} />
+                </InfoTip>
+              </div>
             </div>
           )}
         </div>
@@ -535,7 +551,23 @@ export default function ResultClient() {
 
           {need.length > 0 && (
             <section>
-              <h2 className="text-h3 font-semibold">졸업까지 남은 것</h2>
+              {/* 영역별만 있고 「졸업까지 총 몇 학점」이 한눈에 안 보였다(사용자 설문 1순위 불편).
+                  제목 옆에 남은 학점 합계를 둬서 먼저 읽히게 한다. */}
+              <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
+                <h2 className="text-h3 font-semibold">졸업까지 남은 것</h2>
+                {/* 졸업 총학점(132)−취득학점. 영역별 부족분의 단순 합은 자유 영역과 매핑
+                    과목 0 개인 영역을 빼먹어 틀린 수라, 두 값이 다 올 때만 총계를 보인다.
+                    옛 응답이면 이 줄을 숨기고 아래 영역별 목록만 둔다 — 틀린 합은 띄우지 않는다. */}
+                {creditsToGraduation !== null && (
+                  <span className="text-sm text-text-muted">
+                    남은{" "}
+                    <b className="tnum text-h3 font-bold text-grad-ink">
+                      {creditsToGraduation}
+                    </b>
+                    학점
+                  </span>
+                )}
+              </div>
               {/* 어느 교육과정을 기준으로 셌는지 밝힌다. 입학년도와 다를 수 있다 —
                   2025학번 경영은 2022 교육과정을 따른다. 학생이 직접 확인할 수 있어야 한다. */}
               <p className="mt-1 text-caption text-text-soft">
@@ -649,17 +681,21 @@ function termLabel(term: string) {
 /** ⓘ 안의 내용 — 안 1의 한 주 모양, 그리고 안 2·3이 그와 다른 점 */
 function AltDiffs({ timetables }: { timetables: Timetable[] }) {
   const MAX_LINES = 4;
+  const diffs = diffFromFirst(timetables);
+  const chips = altChips(timetables);
   return (
     <span className="block space-y-2">
       <span className="block">
-        <b className="font-semibold text-text">안 1</b> {describeShape(shape(timetables[0]))}
+        <b className="font-semibold text-text">{chips[0]}</b>
+        <span className="text-text-soft"> · 추천</span>
+        <span className="block pl-3 text-text-soft">{describeShape(shape(timetables[0]))}</span>
       </span>
-      {diffFromFirst(timetables).map((d) => {
+      {diffs.map((d, j) => {
         const lines = [...d.changes, ...d.week];
         return (
           <span key={d.rank} className="block">
-            <b className="font-semibold text-text">안 {d.rank}</b>
-            {lines.length === 0 && " 안 1과 같은 시간"}
+            <b className="font-semibold text-text">{chips[j + 1]}</b>
+            {lines.length === 0 && <span className="text-text-soft"> 추천과 같은 시간</span>}
             {lines.slice(0, MAX_LINES).map((l) => (
               <span key={l} className="block pl-3">
                 {l}
@@ -732,12 +768,42 @@ function ConstraintLine({
  * 「졸업 우선」이 같은 화면으로 보였다(9/14 피드백 ⑧). 둘을 같은 0~100 눈금에
  * 나란히 두면 이 성향이 무엇을 얻고 무엇을 내줬는지 한눈에 읽힌다.
  */
-function TimetableMeters({ tt }: { tt: Timetable }) {
+function TimetableMeters({
+  tt,
+  mode,
+  eps,
+}: {
+  tt: Timetable;
+  mode: ModeId;
+  eps: number;
+}) {
   const fit = fitIndex(tt);
   const gradPct =
     tt.totalCredit > 0
       ? Math.round((tt.gradProgress / tt.totalCredit) * 100)
       : 0;
+
+  // 성향이 두 미터 중 무엇을 먼저 맞추나 — gap→역량 보완(0행), graduation→졸업 반영(1행),
+  // balanced→둘 다. 이 매핑이 성향 버튼을 누른 효과를 눈에 보이게 하는 축이다(9/14 피드백 ⑧,
+  // 교수: 「성향을 바꿔도 보여지는 게 다 똑같다」). 우선 미터만 선명히 두고 나머지는 눌러
+  // 「지금 이 성향이 무엇을 위해 고른 시간표인가」가 한눈에 읽히게 한다.
+  const primary = mode === "gap" ? 0 : mode === "graduation" ? 1 : null;
+  const lead =
+    mode === "gap" ? (
+      <>
+        지금 성향은 <b className="font-semibold text-gap-ink">역량 보완</b>을 최대로 맞춰요 —
+        졸업 반영은 그 다음
+      </>
+    ) : mode === "graduation" ? (
+      <>
+        지금 성향은 <b className="font-semibold text-grad-ink">졸업 반영</b>을 먼저 채워요 —
+        역량 보완은 그 다음
+      </>
+    ) : (
+      <>
+        지금 성향은 <b className="font-semibold text-text">역량 보완과 졸업 반영을 함께</b> 봐요
+      </>
+    );
 
   const rows = [
     {
@@ -763,8 +829,13 @@ function TimetableMeters({ tt }: { tt: Timetable }) {
   ];
 
   return (
-    <dl className="mt-4 space-y-2.5">
-      {rows.map((r) => (
+    <>
+      {/* 성향을 바꾸면 이 한 줄과 아래 강조 미터가 같이 바뀐다 — 버튼을 누른 효과가 보인다 */}
+      <p className="mt-4 text-caption text-text-soft">
+        {lead} · <span className="tnum">ε {eps}</span>
+      </p>
+    <dl className="mt-2 space-y-2.5">
+      {rows.map((r, i) => (
         <div
           key={r.label}
           className="grid grid-cols-[5rem_1fr_3.25rem] items-center gap-3"
@@ -772,9 +843,14 @@ function TimetableMeters({ tt }: { tt: Timetable }) {
           <dt className={"text-sm font-semibold " + r.ink} title={r.hint}>
             {r.label}
           </dt>
+          {/* 우선 미터가 아닌 쪽은 '막대만' 눌러 둔다 — 성향을 바꾸면 선명한 막대가
+              옮겨가 차이가 드러나되, 라벨·숫자 글자는 그대로라 대비(WCAG AA)가 유지된다 */}
           <dd className="h-1.5 overflow-hidden rounded-full bg-surface-3">
             <span
-              className="block h-full rounded-full transition-[width] duration-300"
+              className={
+                "block h-full rounded-full transition-[width,opacity] duration-300 " +
+                (primary !== null && i !== primary ? "opacity-45" : "")
+              }
               style={{
                 width: `${Math.max(0, Math.min(100, r.value))}%`,
                 background: r.color,
@@ -787,6 +863,7 @@ function TimetableMeters({ tt }: { tt: Timetable }) {
         </div>
       ))}
     </dl>
+    </>
   );
 }
 

@@ -48,6 +48,9 @@ class Recommendation:
     grade_level: int                # 후보를 거른 학년 (#42). 화면 고지용
     # 역량별 σ 기여 과목 [(course_id, grade_factor·w)]. 화면의 「무엇으로 쌓였나」용
     contributions: dict[str, list[tuple[str, float]]] = field(default_factory=dict)
+    # 졸업까지 남은 학점 표시용. 영역별 need 합이 아니라 총학점−취득학점으로 센다.
+    total_earned: int | None = None     # 성적표 총 취득학점 (영역 매핑과 무관)
+    total_required: int | None = None   # 학과 졸업 총학점 (department.total_credits_required, 132)
 
     @property
     def result(self) -> Result:
@@ -75,6 +78,7 @@ def recommend(input_hash, job_id, *, db_path=data.DB_PATH, U=18, L=12,
         min_credits = data.load_min_credits(conn, student.dept_id, student.admission_year)
         # 입학년도와 다를 수 있다 — 2025학번 경영은 2022 교육과정을 따른다(결정 ⑨).
         req_year = data.effective_year(conn, student.dept_id, student.admission_year)
+        total_required = data.total_credits_required(conn, student.dept_id)
     finally:
         conn.close()
 
@@ -99,4 +103,5 @@ def recommend(input_hash, job_id, *, db_path=data.DB_PATH, U=18, L=12,
         results=results, sigma=sigma, gap=gap, need=need,
         dept_id=student.dept_id, admission_year=student.admission_year,
         requirement_year=req_year, grade_level=grade, contributions=contributions,
+        total_earned=student.total_earned, total_required=total_required,
     )
