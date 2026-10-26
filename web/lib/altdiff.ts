@@ -87,13 +87,32 @@ export function altChips(timetables: Timetable[]): string[] {
     return parts.slice(0, 2).join(" · ");
   });
   const diffs = diffFromFirst(timetables); // timetables[1..] 에 정렬
-  return base.map((b, i) => {
+  const labels = base.map((b, i) => {
     const unique = b && base.filter((x) => x === b).length === 1;
     if (i === 0) return b || "기본";
     if (unique) return b;
     const tb = changedCourse(diffs[i - 1]);
     return b ? `${b} · ${tb}` : tb;
   });
+  // 여기까지도 라벨이 겹치면(같은 과목의 다른 분반이 시간까지 같은 경우) 분반/교수로 한 번 더 가른다.
+  const seen = new Map<string, number>();
+  for (const l of labels) seen.set(l, (seen.get(l) ?? 0) + 1);
+  return labels.map((l, i) => {
+    if (i === 0 || (seen.get(l) ?? 0) < 2) return l;
+    const extra = sectionTag(timetables[i], diffs[i - 1]);
+    return extra ? `${l} · ${extra}` : l;
+  });
+}
+
+/** 라벨이 끝까지 겹칠 때 쓰는 최후 구분자 — 바뀐 과목의 교수, 없으면 분반 번호. */
+function sectionTag(tt: Timetable, d: AltDiff | undefined): string | null {
+  const c = d?.changes[0];
+  const sep = c ? c.indexOf(": ") : -1;
+  const name = sep >= 0 ? c!.slice(0, sep) : null;
+  if (!name) return null;
+  const course = tt.courses.find((x) => x.name === name);
+  if (!course) return null;
+  return course.professor ? `교수 ${course.professor}` : `${course.section}분반`;
 }
 
 export interface AltDiff {

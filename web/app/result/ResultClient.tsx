@@ -486,7 +486,7 @@ export default function ResultClient() {
 
               {/* 성향을 바꾸면 무엇이 달라지는지 — 응답에 오는 두 목적함수 값을 그대로 쓴다.
                   성향(mode·ε)도 넘겨, 이 성향이 둘 중 무엇을 먼저 맞추는지 화면에 드러낸다 */}
-              <TimetableMeters tt={tt} mode={rec.params.mode} eps={rec.params.eps} />
+              <TimetableMeters tt={tt} mode={rec.params.mode} eps={rec.params.eps} loading={loading} />
             </>
           )}
           </div>
@@ -772,10 +772,14 @@ function TimetableMeters({
   tt,
   mode,
   eps,
+  loading,
 }: {
   tt: Timetable;
   mode: ModeId;
   eps: number;
+  /** 성향을 바꿔 추천을 다시 부르는 중인가. 이때 lead 문구는 새 성향으로 바로 바뀌지만
+   *  아래 미터 수치는 아직 이전 성향 응답(tt)이라, 다시 계산 중임을 밝혀 새 값으로 오해하지 않게 한다 */
+  loading: boolean;
 }) {
   const fit = fitIndex(tt);
   const gradPct =
@@ -833,8 +837,12 @@ function TimetableMeters({
       {/* 성향을 바꾸면 이 한 줄과 아래 강조 미터가 같이 바뀐다 — 버튼을 누른 효과가 보인다 */}
       <p className="mt-4 text-caption text-text-soft">
         {lead} · <span className="tnum">ε {eps}</span>
+        {/* 그리드의 "다시 계산하고 있어요"와 같은 신호 — 수치가 바뀌는 중임을 미터에도 밝힌다 */}
+        {loading && (
+          <span className="ml-2 font-semibold text-brand-700">· 다시 계산 중</span>
+        )}
       </p>
-    <dl className="mt-2 space-y-2.5">
+    <dl className="mt-2 space-y-2.5" aria-busy={loading}>
       {rows.map((r, i) => (
         <div
           key={r.label}
