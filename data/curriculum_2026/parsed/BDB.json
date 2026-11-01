@@ -1,0 +1,38 @@
+{"dept":"빅데이터비즈니스전공","dept_code":"BDB","courses":[
+  {"course_id":"002579","course_name":"컴퓨터SW기초","credit":3,"year":1,"semester":2,"raw_area":"전공필수","select_group":null,"is_major_required":true,"note":"개설학기 교양"},
+  {"course_id":"012201","course_name":"대학수학(1)","credit":3,"year":1,"semester":1,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"개설학기 교양"},
+  {"course_id":"034105","course_name":"경영데이터분석(초급)","credit":3,"year":1,"semester":1,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"개설학기 상경(1-1)"},
+  {"course_id":"753211","course_name":"마케팅","credit":3,"year":1,"semester":2,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"개설학기 상경(1-2)"},
+  {"course_id":"034204","course_name":"경영통계학","credit":3,"year":1,"semester":2,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"개설학기 상경(1-2)"},
+  {"course_id":"101810","course_name":"C-프로그래밍","credit":3,"year":1,"semester":2,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"개설학기 교양(1-2)"},
+
+  {"course_id":"002618","course_name":"빅데이터의이해","credit":3,"year":2,"semester":2,"raw_area":"전공필수","select_group":null,"is_major_required":true,"note":"sw기초, 학기변경(1→2), 개설학기 교양"},
+  {"course_id":"012208","course_name":"컴퓨터응용통계","credit":3,"year":2,"semester":1,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"이수구분 변경(전공필수→전공선택), 개설학기 교양"},
+  {"course_id":"012208","course_name":"컴퓨터응용통계","credit":3,"year":2,"semester":2,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"2학기 부학기 개설(동일 학수번호), 개설학기 교양"},
+  {"course_id":"750316","course_name":"디지털마케팅","credit":3,"year":2,"semester":1,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"개설학기 글경(3-2)"},
+  {"course_id":"754818","course_name":"소비자행동","credit":3,"year":2,"semester":1,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"개설학기 글경(2-1)"},
+  {"course_id":"756819","course_name":"광고기획론","credit":3,"year":2,"semester":2,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"개설학기 광홍(2-2)"},
+  {"course_id":"961832","course_name":"자료구조","credit":3,"year":2,"semester":2,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"개설학기 게임(2-2)"},
+  {"course_id":"012205","course_name":"선형대수학","credit":3,"year":2,"semester":2,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"개설학기 교양"},
+  {"course_id":"002595","course_name":"디지털디자인입문","credit":3,"year":2,"semester":2,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"개설학기 교양"},
+  {"course_id":"002580","course_name":"문제해결과 SW프로그래밍","credit":3,"year":2,"semester":2,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"개설학기 교양"},
+
+  {"course_id":"756318","course_name":"광고PR조사와데이터분석","credit":3,"year":3,"semester":1,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"개설학기 광고홍보(2-1)"},
+  {"course_id":"756830","course_name":"데이터분석과활용","credit":3,"year":3,"semester":1,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"개설학기 광고홍보(3-1)"},
+  {"course_id":"750517","course_name":"마케팅조사론","credit":3,"year":3,"semester":1,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"개설학기 글경(3-1)"},
+  {"course_id":"750516","course_name":"마케팅전략과기획","credit":3,"year":3,"semester":1,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"개설학기 글경(3-1)"},
+  {"course_id":"704826","course_name":"알고리즘및실습","credit":4,"year":3,"semester":1,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"개설학기 SW융합(3-1)"},
+  {"course_id":"704816","course_name":"데이터사이언스","credit":3,"year":3,"semester":2,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"개설학기 SW융합(3-2)"},
+  {"course_id":"750622","course_name":"데이터분석방법론","credit":3,"year":3,"semester":2,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"개설학기 글경(3-2)"},
+  {"course_id":"750614","course_name":"고객관계관리","credit":3,"year":3,"semester":2,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"개설학기 글경(3-2)"},
+  {"course_id":"704827","course_name":"자바프로그래밍및실습","credit":3,"year":3,"semester":2,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"시수4, 개설학기 SW융합(2-2)"},
+
+  {"course_id":"704612","course_name":"머신러닝및실습(2)","credit":3,"year":4,"semester":1,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"이수구분 변경(전공필수→전공선택), 개설학기 소융(3-1)"},
+  {"course_id":"756842","course_name":"마케팅트렌드","credit":3,"year":4,"semester":1,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"개설학기 광홍(4-1)"},
+  {"course_id":"756872","course_name":"디지털애널리틱스","credit":3,"year":4,"semester":2,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"개설학기 광홍(3-2)"},
+  {"course_id":"756873","course_name":"엔터테인먼트와문화산업","credit":3,"year":4,"semester":2,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"개설학기 광홍(4-2)"},
+  {"course_id":"704838","course_name":"데이터마이닝","credit":3,"year":4,"semester":2,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"개설학기 SW융합(4-2)"},
+  {"course_id":"961602","course_name":"데이터베이스","credit":3,"year":4,"semester":2,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"개설학기 게임(3-2)"},
+  {"course_id":"002776","course_name":"졸업논문","credit":3,"year":4,"semester":1,"raw_area":"일반선택","select_group":null,"is_major_required":false,"note":"양학기 개설(동일 학수번호)"},
+  {"course_id":"002776","course_name":"졸업논문","credit":3,"year":4,"semester":2,"raw_area":"일반선택","select_group":null,"is_major_required":false,"note":"양학기 개설(동일 학수번호)"}
+], "limits":[]}

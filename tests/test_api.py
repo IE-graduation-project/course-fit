@@ -68,7 +68,14 @@ def test_reference_matches_fixture_exactly(client):
 
 def test_reference_programs_expose_supported_years(client):
     programs = {p["dept"]: p["fromYear"] for p in client.get("/api/reference").json()["programs"]}
-    assert programs == {"BIZ": 2022, "IDE": 2026}
+    # 전학과 확장: 서울캠 전 학과가 노출된다. 하드코딩 대신 불변식으로 본다 —
+    # fromYear 는 각 단과대 졸업요건 표의 코호트 시작연도(공과 2026, 도시공학 2024, 그 외 2022).
+    assert len(programs) >= 44, f"지원 학과가 너무 적다: {len(programs)}"
+    assert programs["IDE"] == 2026 and programs["BIZ"] == 2022  # 파일럿 고정
+    assert programs["URB"] == 2024                              # 도시공학 비인증 코호트
+    assert programs["CSE"] == 2026 and programs["EE"] == 2026   # 공과 2026 코호트
+    assert all(y in (2022, 2024, 2026) for y in programs.values()), programs
+    assert "COMMON" not in programs                             # 교양 전용 pseudo-dept 는 제외
 
 
 # ── /api/transcript ────────────────────────────────────────────────────────

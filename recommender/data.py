@@ -2,7 +2,7 @@
 
 transcript 모듈을 import 하지 않으며, student/student_course 테이블을 통해서만 연결된다
 (접점=DB). 읽는 것:
-- 후보집합 C: course_section ⋈ course (dept∈{학생dept, COMMON} ∧ area≠일반선택)
+- 후보집합 C: course_section ⋈ course ⋈ course_dept (dept∈{학생dept, COMMON} ∧ area≠일반선택)
 - w_{c,k}: course_competency 의 과목별 상위 3역량 (#31),  ρ_k: job_competency
 - 학생 기수강: student_course 단일 원천
     · σ·선수충족 = matched ∧ passed ∧ ¬superseded
@@ -153,23 +153,40 @@ def load_candidates(conn, dept_id: str, *, term: str, grade: int | None) -> list
     depts = ["COMMON"] if dept_id == "COMMON" else [dept_id, "COMMON"]
     dep_q = ",".join("?" * len(depts))
     excl_q = ",".join("?" * len(EXCLUDED_CAND_AREAS))
+    # area·이수구분은 course_dept(과목×학과)에서 온다. 한 과목이 학생 학과와 COMMON 양쪽에
+    # 행을 가지면 자기 학과 행을 우선한다(ORDER BY 의 CASE + 아래 (course_id,section) 중복 제거).
     rows = conn.execute(
         f"""
-        SELECT s.course_id, s.section, c.course_name, c.credit, c.area, c.dept_id,
+        SELECT s.course_id, s.section, c.course_name, c.credit, cd.area, cd.dept_id,
                s.time_slots_int, c.prerequisites
         FROM course_section s
         JOIN course c ON c.course_id = s.course_id
+        JOIN course_dept cd ON cd.course_id = s.course_id AND cd.dept_id IN ({dep_q})
         WHERE s.source_term = ?
-          AND c.dept_id IN ({dep_q}) AND c.area NOT IN ({excl_q})
+          AND cd.area NOT IN ({excl_q})
           AND (? IS NULL OR COALESCE(s.grade, 0) = 0 OR s.grade <= ?)
-        ORDER BY s.course_id, s.section
+        ORDER BY s.course_id, s.section, CASE WHEN cd.dept_id = ? THEN 0 ELSE 1 END
         """,
-        (term, *depts, *EXCLUDED_CAND_AREAS, grade, grade),
+        (*depts, term, *EXCLUDED_CAND_AREAS, grade, grade, dept_id),
     ).fetchall()
+
+    # 같은 (course_id, section)이 자기 학과·COMMON 양쪽 course_dept 행으로 두 번 나오면
+    # 앞선(자기 학과 우선) 행만 남긴다. ORDER BY 로 번호는 이미 고정이다.
+    seen: set[tuple[str, str]] = set()
+    deduped = []
+    for r in rows:
+        key = (r["course_id"], r["section"])
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(r)
+    rows = deduped
 
     # 학생 학과에 같은 이름의 교양필수 변형이 있으면 다른 단과대 변형(COMMON)은 뺀다(#55).
     own = {_variant_base(n) for (n,) in conn.execute(
-        "SELECT course_name FROM course WHERE dept_id = ? AND area = '교양필수'", (dept_id,))}
+        """SELECT c.course_name FROM course c
+           JOIN course_dept cd ON cd.course_id = c.course_id
+           WHERE cd.dept_id = ? AND cd.area = '교양필수'""", (dept_id,))}
     own.discard(None)
     rows = [r for r in rows
             if not (r["area"] == "교양필수" and r["dept_id"] == "COMMON"
@@ -235,12 +252,23 @@ def load_student(conn, input_hash: str) -> Student:
     best_cmp: dict[str, float] = {}     # 재시도 중 최고 성적 선택용 (P/N·None은 0으로 비교)
     taken_ids: set[str] = set()
     earned_by_area: dict[str, int] = {}
+    # 과목의 「소속 학과」는 course_dept(과목×학과)에서 유도한다. 한 과목이 여러 학과에
+    # 걸쳐 있을 수 있어, 학생 학과 행이 있으면 그걸(자기 요건), 없으면 COMMON(교양), 그것도
+    # 없으면 임의의 타 학과를 고른다. _credited_area 는 이 값이 학생 학과가 아니면 일반선택으로 옮긴다(#40).
     for r in conn.execute(
         """SELECT sc.course_id, sc.area, sc.credit, sc.grade, sc.is_pn, sc.matched,
-                  sc.passed, sc.superseded, c.dept_id AS course_dept
-           FROM student_course sc LEFT JOIN course c ON c.course_id = sc.course_id
+                  sc.passed, sc.superseded,
+                  COALESCE(
+                    (SELECT cd.dept_id FROM course_dept cd
+                       WHERE cd.course_id=sc.course_id AND cd.dept_id=?),
+                    (SELECT cd.dept_id FROM course_dept cd
+                       WHERE cd.course_id=sc.course_id AND cd.dept_id='COMMON'),
+                    (SELECT cd.dept_id FROM course_dept cd
+                       WHERE cd.course_id=sc.course_id ORDER BY cd.dept_id LIMIT 1)
+                  ) AS course_dept
+           FROM student_course sc
            WHERE sc.input_hash=?""",
-        (input_hash,),
+        (srow["dept_id"], input_hash),
     ):
         cid = r["course_id"]
         if cid:

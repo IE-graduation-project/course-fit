@@ -733,10 +733,26 @@ function ProgramPicker({
       )
     : [];
 
+  // 전 학과를 지원하면서 목록이 길어졌다(수십 개). 그대로 버튼으로 깔면 학번 고르는
+  // 자리까지 한참 스크롤해야 해, 학과가 많을 때만 검색창을 띄워 좁힌다. 소수(파일럿)면 그대로 둔다.
+  const [query, setQuery] = useState("");
+  const q = query.trim();
+  const shown = q ? programs.filter((p) => p.name.includes(q)) : programs;
+
   return (
     <div className="fade-up space-y-4">
-      <div className="grid grid-cols-2 gap-2">
-        {programs.map((p) => {
+      {programs.length > 8 && (
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="학과 검색 (예: 컴퓨터, 경영, 영문)"
+          aria-label="학과 검색"
+          className="min-h-11 w-full rounded-lg border border-border bg-surface px-3 text-sm outline-none focus:border-brand-400"
+        />
+      )}
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+        {shown.map((p) => {
           const on = picked?.dept === p.dept;
           return (
             <button
@@ -754,6 +770,9 @@ function ProgramPicker({
           );
         })}
       </div>
+      {q && shown.length === 0 && (
+        <p className="text-sm text-text-muted">{`"${q}"에 맞는 학과가 없어요.`}</p>
+      )}
 
       {picked && (
         <div className="fade-up space-y-2">

@@ -30,24 +30,35 @@ CREATE TABLE IF NOT EXISTS graduation_requirement (
     UNIQUE (dept_id, admission_year, area)
 );
 
--- 3. course
+-- 3. course — 과목 고유정보(학과 무관). 학과별 이수구분은 course_dept 로 분리(#전학과 확장).
 CREATE TABLE IF NOT EXISTS course (
     course_id           TEXT    PRIMARY KEY,
     course_name         TEXT    NOT NULL,
     credit              INTEGER NOT NULL,
-    dept_id             TEXT    NOT NULL,
-    area                TEXT    NOT NULL,
-    allowed_years       TEXT,
     prerequisites       TEXT,
     time_slots_raw      TEXT,
     time_slots_int      TEXT,
     semester            TEXT,
     is_pn               INTEGER DEFAULT 0,
-    is_major_required   INTEGER DEFAULT 0,
     is_certified_sw     INTEGER DEFAULT 0,
+    liberal_area        TEXT
+);
+
+-- 3b. course_dept — 과목 × 개설학과별 이수구분. 한 과목이 여러 학과에 다른 area 로 들어갈 수
+-- 있다(예: 대학물리가 공대 7학과 공통 MSC, PBL 융합과목이 여러 전공 전공선택). course_id 단일
+-- dept·area 로는 못 담아 분리한다. #40(타 학과 전공=일반선택)은 "학생 dept 의 course_dept 행이
+-- 없으면 일반선택"으로 자연 흡수. MSC 공통과목은 각 공대 학과 행으로 들어가 그 학과만 후보로 받고
+-- 미대·문과는 안 받는다.
+CREATE TABLE IF NOT EXISTS course_dept (
+    course_id           TEXT    NOT NULL,
+    dept_id             TEXT    NOT NULL,
+    area                TEXT    NOT NULL,
+    is_major_required   INTEGER DEFAULT 0,
     msc_subarea         TEXT,
-    liberal_area        TEXT,
-    FOREIGN KEY (dept_id) REFERENCES department(dept_id)
+    allowed_years       TEXT,
+    PRIMARY KEY (course_id, dept_id),
+    FOREIGN KEY (course_id) REFERENCES course(course_id),
+    FOREIGN KEY (dept_id)   REFERENCES department(dept_id)
 );
 
 -- 4. competency
@@ -154,9 +165,10 @@ CREATE TABLE IF NOT EXISTS course_section (
 );
 
 -- Indexes (성능)
-CREATE INDEX IF NOT EXISTS idx_course_dept    ON course(dept_id);
-CREATE INDEX IF NOT EXISTS idx_course_area    ON course(area);
-CREATE INDEX IF NOT EXISTS idx_course_sem     ON course(semester);
+CREATE INDEX IF NOT EXISTS idx_coursedept_dept ON course_dept(dept_id);
+CREATE INDEX IF NOT EXISTS idx_coursedept_area ON course_dept(area);
+CREATE INDEX IF NOT EXISTS idx_coursedept_cid  ON course_dept(course_id);
+CREATE INDEX IF NOT EXISTS idx_course_sem      ON course(semester);
 CREATE INDEX IF NOT EXISTS idx_gr_dept_year   ON graduation_requirement(dept_id, admission_year);
 CREATE INDEX IF NOT EXISTS idx_cc_course      ON course_competency(course_id);
 CREATE INDEX IF NOT EXISTS idx_jc_job         ON job_competency(job_id);

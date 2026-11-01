@@ -30,8 +30,10 @@ def _conn(terms: tuple[str, ...]) -> sqlite3.Connection:
     conn.executescript(
         """
         CREATE TABLE course (
-            course_id TEXT PRIMARY KEY, course_name TEXT, credit INTEGER,
-            dept_id TEXT, area TEXT, prerequisites TEXT
+            course_id TEXT PRIMARY KEY, course_name TEXT, credit INTEGER, prerequisites TEXT
+        );
+        CREATE TABLE course_dept (
+            course_id TEXT, dept_id TEXT, area TEXT, PRIMARY KEY (course_id, dept_id)
         );
         CREATE TABLE course_section (
             course_id TEXT, section TEXT, source_term TEXT,
@@ -42,9 +44,8 @@ def _conn(terms: tuple[str, ...]) -> sqlite3.Connection:
         CREATE TABLE course_competency (course_id TEXT, comp_id TEXT, weight REAL);
         """
     )
-    conn.execute(
-        "INSERT INTO course VALUES ('C1','데이터분석',3,'IDE','전공선택','')"
-    )
+    conn.execute("INSERT INTO course VALUES ('C1','데이터분석',3,'')")
+    conn.execute("INSERT INTO course_dept VALUES ('C1','IDE','전공선택')")
     for term in terms:
         conn.execute(
             "INSERT INTO course_section "

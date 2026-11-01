@@ -74,8 +74,10 @@ def _conn() -> sqlite3.Connection:
     conn.executescript(
         """
         CREATE TABLE course (
-            course_id TEXT PRIMARY KEY, course_name TEXT, credit INTEGER,
-            dept_id TEXT, area TEXT, prerequisites TEXT
+            course_id TEXT PRIMARY KEY, course_name TEXT, credit INTEGER, prerequisites TEXT
+        );
+        CREATE TABLE course_dept (
+            course_id TEXT, dept_id TEXT, area TEXT, PRIMARY KEY (course_id, dept_id)
         );
         CREATE TABLE course_section (
             course_id TEXT, section TEXT, source_term TEXT, grade INTEGER,
@@ -86,7 +88,8 @@ def _conn() -> sqlite3.Connection:
     )
     for g in range(5):
         area = "공통교양" if g == 0 else "전공선택"
-        conn.execute("INSERT INTO course VALUES (?, ?, 3, 'IDE', ?, '')", (f"G{g}", f"학년{g}", area))
+        conn.execute("INSERT INTO course VALUES (?, ?, 3, '')", (f"G{g}", f"학년{g}"))
+        conn.execute("INSERT INTO course_dept VALUES (?, 'IDE', ?)", (f"G{g}", area))
         conn.execute("INSERT INTO course_section VALUES (?, '1', '2026-2', ?, '')", (f"G{g}", g))
     conn.commit()
     return conn
@@ -119,8 +122,8 @@ def test_validate_rejects_missing_section_grade():
     conn = sqlite3.connect(":memory:")
     conn.executescript((ROOT / "db" / "schema.sql").read_text(encoding="utf-8"))
     conn.execute("INSERT INTO department VALUES ('IDE', '산업데이터공학과', 132)")
-    conn.execute("INSERT INTO course (course_id, course_name, credit, dept_id, area) "
-                 "VALUES ('C1', '과목', 3, 'IDE', '전공선택')")
+    conn.execute("INSERT INTO course (course_id, course_name, credit) VALUES ('C1', '과목', 3)")
+    conn.execute("INSERT INTO course_dept (course_id, dept_id, area) VALUES ('C1', 'IDE', '전공선택')")
     conn.execute("INSERT INTO course_section (course_id, section, source_term, grade) "
                  "VALUES ('C1', '1', '2026-2', NULL)")
     errors = validate(conn)

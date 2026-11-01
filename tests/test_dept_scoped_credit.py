@@ -29,19 +29,22 @@ def _conn(student_dept: str) -> sqlite3.Connection:
     conn.row_factory = sqlite3.Row
     conn.executescript(
         """
-        CREATE TABLE course (course_id TEXT PRIMARY KEY, dept_id TEXT, area TEXT);
+        CREATE TABLE course_dept (course_id TEXT, dept_id TEXT, area TEXT,
+                                  PRIMARY KEY (course_id, dept_id));
         CREATE TABLE course_competency (course_id TEXT, comp_id TEXT, weight REAL);
         CREATE TABLE student (input_hash TEXT PRIMARY KEY, dept_id TEXT, admission_year INTEGER,
-                              current_grade INTEGER);
+                              current_grade INTEGER, total_earned INTEGER);
         CREATE TABLE student_course (
             input_hash TEXT, course_id TEXT, area TEXT, credit INTEGER, grade REAL,
             is_pn INTEGER, matched INTEGER, passed INTEGER, superseded INTEGER
         );
         """
     )
-    conn.execute("INSERT INTO student VALUES ('h', ?, 2026, NULL)", (student_dept,))
+    conn.execute("INSERT INTO student VALUES ('h', ?, 2026, NULL, NULL)", (student_dept,))
     for cid, dept, area, credit in CATALOG:
-        conn.execute("INSERT INTO course VALUES (?, ?, ?)", (cid, dept, area))
+        # 과목의 개설 학과·이수구분은 course_dept 로 분리됐다(#전학과 확장). load_student 은
+        # 여기서 과목의 소속 학과를 유도해 타 학과 전공을 일반선택으로 옮긴다(#40).
+        conn.execute("INSERT INTO course_dept VALUES (?, ?, ?)", (cid, dept, area))
         # student_course.area 는 load.py 가 카탈로그 영역을 그대로 복사한 값이다
         conn.execute(
             "INSERT INTO student_course VALUES ('h', ?, ?, ?, 4.0, 0, 1, 1, 0)",

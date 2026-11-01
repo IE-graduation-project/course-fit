@@ -1,0 +1,47 @@
+{"dept":"의료헬스케어AI전공","dept_code":"MAI","courses":[
+  {"course_id":"002641","course_name":"체험인공지능","credit":3,"year":1,"semester":1,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"sw소양"},
+  {"course_id":"012315","course_name":"파이썬프로그래밍(공-산)","credit":3,"year":1,"semester":1,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"sw심화"},
+  {"course_id":"888019","course_name":"바이오/의료데이터구조(바이오)","credit":3,"year":1,"semester":1,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":""},
+  {"course_id":"888004","course_name":"바이오헬스기초의학(바이오)","credit":2,"year":1,"semester":1,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":""},
+  {"course_id":"002534","course_name":"컴퓨터활용기초","credit":3,"year":1,"semester":2,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"sw기초"},
+  {"course_id":"002580","course_name":"문제해결과SW프로그래밍(공-컴)","credit":3,"year":1,"semester":2,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"sw심화"},
+  {"course_id":"888003","course_name":"바이오헬스인체의신비(바이오)","credit":2,"year":1,"semester":2,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":""},
+
+  {"course_id":"140315","course_name":"인공지능개론(공-산)","credit":3,"year":2,"semester":1,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":""},
+  {"course_id":"140316","course_name":"데이터사이언스(공-산)","credit":3,"year":2,"semester":1,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":""},
+  {"course_id":"012305","course_name":"객체지향프로그래밍","credit":3,"year":2,"semester":1,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"sw심화"},
+  {"course_id":"888024","course_name":"스마트병원과의료디지털(바이오)","credit":3,"year":2,"semester":1,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":""},
+  {"course_id":"140421","course_name":"데이터전처리(공-산)","credit":3,"year":2,"semester":2,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":""},
+  {"course_id":"888070","course_name":"고속의료데이터처리를위한실전GPU프로그래밍기초(바이오)","credit":3,"year":2,"semester":2,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":""},
+  {"course_id":"888005","course_name":"바이오헬스의료정보학(바이오)","credit":2,"year":2,"semester":2,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":""},
+  {"course_id":"013312","course_name":"자료구조및프로그래밍(공-컴)","credit":4,"year":2,"semester":2,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"sw심화"},
+
+  {"course_id":"888071","course_name":"바이오헬스통계적데이터분석(바이오)","credit":3,"year":3,"semester":1,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":""},
+  {"course_id":"002618","course_name":"빅데이터의이해","credit":3,"year":3,"semester":2,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"sw기초, 학기변경(1→2)"},
+  {"course_id":"888031","course_name":"의료IT알고리즘및웹프로그래밍(바이오)","credit":3,"year":3,"semester":1,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":""},
+  {"course_id":"101503","course_name":"알고리즘분석(공-컴)","credit":3,"year":3,"semester":1,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"sw심화"},
+  {"course_id":"101617","course_name":"기계학습기초(공-컴)","credit":3,"year":3,"semester":2,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"sw심화"},
+  {"course_id":"888098","course_name":"바이오헬스데이터마이닝(바이오)","credit":3,"year":3,"semester":2,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":""},
+  {"course_id":"140628","course_name":"데이터시각화(공-산)","credit":3,"year":3,"semester":2,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":""},
+  {"course_id":"140626","course_name":"텍스트마이닝(공-산)","credit":3,"year":3,"semester":2,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":""},
+  {"course_id":"101618","course_name":"데이터베이스시스템(공-컴)","credit":4,"year":3,"semester":2,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"sw심화, 명칭변경(구 기초데이터베이스)"},
+
+  {"course_id":"140715","course_name":"시스템분석(공-산)","credit":3,"year":4,"semester":1,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"양학기 개설"},
+  {"course_id":"140715","course_name":"시스템분석(공-산)","credit":3,"year":4,"semester":2,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"양학기 개설"},
+  {"course_id":"888091","course_name":"생체데이터기계학습실습(바이오)","credit":3,"year":4,"semester":1,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":""},
+  {"course_id":"101719","course_name":"기계학습심화(공-컴)","credit":3,"year":4,"semester":1,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"sw심화"},
+  {"course_id":"140815","course_name":"시스템설계(캡스톤디자인)(공-산)","credit":3,"year":4,"semester":1,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"양학기 개설"},
+  {"course_id":"140815","course_name":"시스템설계(캡스톤디자인)(공-산)","credit":3,"year":4,"semester":2,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"양학기 개설"},
+  {"course_id":"888042","course_name":"바이오/의료데이터와머신러닝의이해(바이오)","credit":3,"year":4,"semester":1,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":""},
+  {"course_id":"101712","course_name":"응용데이터베이스(공-컴)","credit":3,"year":4,"semester":1,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":""},
+  {"course_id":"101816","course_name":"딥러닝자연어처리(공-컴)","credit":3,"year":4,"semester":2,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":"sw심화"},
+  {"course_id":"888127","course_name":"나노바이오센서개론(바이오)","credit":3,"year":4,"semester":2,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":""},
+  {"course_id":"888078","course_name":"의료보안과블록체인이해(바이오)","credit":3,"year":4,"semester":2,"raw_area":"전공선택","select_group":null,"is_major_required":false,"note":""},
+  {"course_id":"002789","course_name":"졸업논문","credit":3,"year":4,"semester":1,"raw_area":"일반선택","select_group":null,"is_major_required":false,"note":"양학기 개설(동일 학수번호)"},
+  {"course_id":"002789","course_name":"졸업논문","credit":3,"year":4,"semester":2,"raw_area":"일반선택","select_group":null,"is_major_required":false,"note":"양학기 개설(동일 학수번호)"}
+], "limits":[
+  {"year":1,"semester":1,"credit_limit":19},{"year":1,"semester":2,"credit_limit":19},
+  {"year":2,"semester":1,"credit_limit":19},{"year":2,"semester":2,"credit_limit":19},
+  {"year":3,"semester":1,"credit_limit":19},{"year":3,"semester":2,"credit_limit":19},
+  {"year":4,"semester":1,"credit_limit":19},{"year":4,"semester":2,"credit_limit":19}
+]}

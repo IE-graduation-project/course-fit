@@ -65,21 +65,59 @@ class DepartmentRequest:
     p_abeek: str = "0"
 
 
+# 서울캠퍼스 전 학부 전공 스코프 (p_campus=1, p_gubun=2). hak03.jsp selected-term
+# 페이지의 goDetail01(p_ibhak, p_campus, p_gubun, p_dept, p_grade) 앵커에서 열거했다
+# (2026-2 기준, 2022+ 입학생 메뉴). 세종캠(p_campus=2)은 대상 아님. p_dept 는 학부
+# 단위라 한 스코프가 여러 학과를 포함한다(A200→컴퓨터·산업데이터, A160→신소재·화공,
+# F170 디자인학부→시각·산업디자인, O011→디자인경영·예술경영, I010→음악·실용음악).
+# 학과 귀속은 교과과정 판독(course_dept)이 담당하고, 여기서는 이번 학기 개설 분반·
+# 시간만 받는다. source_dept_name 은 공식 메뉴 표기 그대로다(출처 보존).
 MAJOR_DEPARTMENT_SCOPES = [
-    DepartmentRequest(
-        source_dept_code="A200",
-        source_dept_name="컴퓨터·데이터공학부(컴퓨터공학과, 산업·데이터공학과)",
-        p_campus="1",
-        p_gubun="2",
-        p_dept="A200",
-    ),
-    DepartmentRequest(
-        source_dept_code="B010",
-        source_dept_name="경영학부",
-        p_campus="1",
-        p_gubun="2",
-        p_dept="B010",
-    ),
+    DepartmentRequest("A000", "전공공통(공과대학)", "1", "2", "A000"),
+    DepartmentRequest("A040", "전자·전기공학부", "1", "2", "A040"),
+    DepartmentRequest("A170", "기계ㆍ시스템디자인공학과", "1", "2", "A170"),
+    DepartmentRequest("A191", "건설환경공학과", "1", "2", "A191"),
+    DepartmentRequest("A160", "신소재·화공시스템공학부 (신소재공학전공, 화학공학전공)", "1", "2", "A160"),
+    DepartmentRequest("A200", "컴퓨터·데이터공학부 (컴퓨터공학과, 산업·데이터공학과)", "1", "2", "A200"),
+    DepartmentRequest("J010", "건축학부", "1", "2", "J010"),
+    DepartmentRequest("J020", "도시공학과", "1", "2", "J020"),
+    DepartmentRequest("B010", "경영학부", "1", "2", "B010"),
+    DepartmentRequest("C010", "영어영문학과", "1", "2", "C010"),
+    DepartmentRequest("C020", "독어독문학과", "1", "2", "C020"),
+    DepartmentRequest("C030", "불어불문학과", "1", "2", "C030"),
+    DepartmentRequest("C040", "국어국문학과", "1", "2", "C040"),
+    DepartmentRequest("M000", "전공공통(법과대학)", "1", "2", "M000"),
+    DepartmentRequest("M020", "법학부", "1", "2", "M020"),
+    DepartmentRequest("E000", "전공공통(사범대학)", "1", "2", "E000"),
+    DepartmentRequest("E010", "수학교육과", "1", "2", "E010"),
+    DepartmentRequest("E020", "국어교육과", "1", "2", "E020"),
+    DepartmentRequest("E030", "영어교육과", "1", "2", "E030"),
+    DepartmentRequest("E040", "역사교육과", "1", "2", "E040"),
+    DepartmentRequest("E050", "교육학과", "1", "2", "E050"),
+    DepartmentRequest("F000", "전공공통(미술대학)", "1", "2", "F000"),
+    DepartmentRequest("F010", "동양화과", "1", "2", "F010"),
+    DepartmentRequest("F020", "회화과", "1", "2", "F020"),
+    DepartmentRequest("F030", "판화과", "1", "2", "F030"),
+    DepartmentRequest("F040", "조소과", "1", "2", "F040"),
+    DepartmentRequest("F090", "목조형가구학과", "1", "2", "F090"),
+    DepartmentRequest("F120", "예술학과", "1", "2", "F120"),
+    DepartmentRequest("F130", "금속조형디자인과", "1", "2", "F130"),
+    DepartmentRequest("F140", "도예ㆍ유리과", "1", "2", "F140"),
+    DepartmentRequest("F150", "섬유미술ㆍ패션디자인과", "1", "2", "F150"),
+    DepartmentRequest("F170", "디자인학부", "1", "2", "F170"),
+    DepartmentRequest("N010", "경제학부", "1", "2", "N010"),
+    DepartmentRequest("O011", "디자인경영융합학부/디자인·예술경영학부", "1", "2", "O011"),
+    DepartmentRequest("I010", "공연예술학부", "1", "2", "I010"),
+    DepartmentRequest("Z001", "문화예술경영전공", "1", "2", "Z001"),
+    DepartmentRequest("Z002", "공연예술전공", "1", "2", "Z002"),
+    DepartmentRequest("Z003", "건축공간예술전공", "1", "2", "Z003"),
+    DepartmentRequest("Z006", "사물인터넷공학전공", "1", "2", "Z006"),
+    DepartmentRequest("Z007", "지능로봇공학전공", "1", "2", "Z007"),
+    DepartmentRequest("Z008", "스마트도시데이터사이언스전공", "1", "2", "Z008"),
+    DepartmentRequest("Z009", "디자인엔지니어링전공", "1", "2", "Z009"),
+    DepartmentRequest("Z012", "데이터사이언스전공", "1", "2", "Z012"),
+    DepartmentRequest("Z014", "의료헬스케어AI전공", "1", "2", "Z014"),
+    DepartmentRequest("Z015", "헬스케어서비스전공", "1", "2", "Z015"),
 ]
 
 # Official Seoul-campus liberal-arts scopes exposed by `hak03.jsp` for
@@ -340,15 +378,27 @@ def _merge_duplicate_sections(rows: list[dict[str, str]]) -> list[dict[str, str]
 def crawl_sections(
     departments: Iterable[DepartmentRequest] = TARGET_DEPARTMENTS,
     term: str = SOURCE_TERM,
+    proxy: str | None = None,
 ) -> list[dict[str, str]]:
     """한 학기의 분반·시간표를 전부 긁는다. **단일 학기 전제**다.
 
     `_merge_duplicate_sections` 의 병합 키에 source_term 이 없어서, 두 학기를 한 번에
     모으면 과목명·교수·시간이 같은 분반이 한 행으로 합쳐진다. 다학기를 지원하려면
     병합 키부터 고쳐야 한다.
+
+    `proxy` 를 주면 그 프록시로 전 요청을 보낸다(예: 'socks5h://127.0.0.1:1080').
+    홍익대 서버가 집·클라우드 egress 를 막아, 이 PC 에서는 교내를 뚫는 SOCKS 터널을
+    통해야 한다(소스 획득 레인 참고).
+
+    전 학부 스코프(45개)로 넓히면 전공공통·신설 전공 중 이번 학기 개설이 없어 0건인
+    스코프가 섞인다. 예전엔 0건을 즉시 실패로 봤지만, 이제는 스코프별로 경고만 하고
+    전체 합계가 0일 때만 실패한다 — 한 학부의 미개설이 전체 크롤을 중단시키면 안 된다.
     """
+    departments = list(departments)
     term_label = term_label_of(term)
     session = requests.Session()
+    if proxy:
+        session.proxies.update({"http": proxy, "https": proxy})
     session.headers.update(
         {
             "User-Agent": "course-fit timetable crawler (+https://cn.hongik.ac.kr/app/timetable/)",
@@ -361,12 +411,23 @@ def crawl_sections(
 
     _term_page, p_yy, p_hakgi = fetch_selected_term_page(session, term_label)
     all_rows: list[dict[str, str]] = []
+    empty_scopes: list[str] = []
     for department in departments:
         detail = fetch_department_detail(session, department, p_yy=p_yy, p_hakgi=p_hakgi)
         rows = parse_detail_rows(detail, department, source_term=term)
         if not rows:
-            raise TimetableCrawlerError(f"No timetable rows parsed for {department.p_dept}")
+            empty_scopes.append(department.source_dept_code)
+            print(f"  [WARN] 분반 0건: {department.source_dept_code} {department.source_dept_name}",
+                  file=sys.stderr)
+            continue
         all_rows.extend(rows)
+    if not all_rows:
+        raise TimetableCrawlerError(
+            f"어느 스코프에서도 분반을 못 읽었습니다 (대상 {len(departments)}개). "
+            "term·프록시·egress 터널을 확인하세요."
+        )
+    if empty_scopes:
+        print(f"  [INFO] 개설 0건 스코프 {len(empty_scopes)}개: {empty_scopes}", file=sys.stderr)
     return sorted(_merge_duplicate_sections(all_rows), key=section_sort_key)
 
 
@@ -410,10 +471,16 @@ def main(argv: list[str] | None = None) -> int:
         help="크롤할 학기 (예: 2026-2). 정규학기 1·2만 받는다. 기본값 없음 — "
              "빠뜨리면 옛 학기를 긁어 새 CSV 를 덮는다.",
     )
+    parser.add_argument(
+        "--proxy",
+        default=None,
+        help="전 요청을 보낼 프록시 (예: socks5h://127.0.0.1:1080). 홍익대 egress 가 막힌 "
+             "호스트에서 교내를 뚫는 SOCKS 터널로 크롤할 때 지정한다.",
+    )
     args = parser.parse_args(argv)
 
     try:
-        rows = crawl_sections(term=args.term)
+        rows = crawl_sections(term=args.term, proxy=args.proxy)
         write_csv(rows, args.output, term=args.term)
     except (requests.RequestException, TimetableCrawlerError, OSError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)

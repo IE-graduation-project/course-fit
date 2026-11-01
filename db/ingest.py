@@ -27,6 +27,7 @@ LOAD_ORDER = [
     ("competency",             "competency.csv"),
     ("course",                 "course.csv"),
     ("course",                 "course_crawled.csv"),  # 다년도 시간표 보강분 (이슈 #18)
+    ("course_dept",            "course_dept.csv"),     # 과목×학과 이수구분 (FK: course·department 적재 후)
     ("course_section",         "course_section.csv"),  # 개설 학기 분반/시간표 (FK: course 적재 후)
     ("job",                    "job.csv"),
     ("course_competency",      "course_competency.csv"),
@@ -106,22 +107,22 @@ def validate(conn: sqlite3.Connection) -> list[str]:
             f"course_competency: course_id={row[0]} weight 합={row[1]} (기대 ≤ 1.0)"
         )
 
-    # 검증 4: course.area ∈ enum
+    # 검증 4: course_dept.area ∈ enum
     placeholders = ",".join(["?"] * len(VALID_AREAS))
     cur = conn.execute(
-        f"SELECT DISTINCT area FROM course WHERE area NOT IN ({placeholders})",
+        f"SELECT DISTINCT area FROM course_dept WHERE area NOT IN ({placeholders})",
         tuple(VALID_AREAS),
     )
     for row in cur:
-        errors.append(f"course.area enum 위반: '{row[0]}'")
+        errors.append(f"course_dept.area enum 위반: '{row[0]}'")
 
-    # 검증 5: course.area가 해당 dept의 graduation_requirement에 존재 (warning)
+    # 검증 5: course_dept.area가 해당 dept의 graduation_requirement에 존재 (warning)
     cur = conn.execute("""
-        SELECT DISTINCT c.dept_id, c.area
-        FROM course c
+        SELECT DISTINCT cd.dept_id, cd.area
+        FROM course_dept cd
         WHERE NOT EXISTS (
             SELECT 1 FROM graduation_requirement g
-            WHERE g.dept_id = c.dept_id AND g.area = c.area
+            WHERE g.dept_id = cd.dept_id AND g.area = cd.area
         )
     """)
     for row in cur:
@@ -130,24 +131,48 @@ def validate(conn: sqlite3.Connection) -> list[str]:
             file=sys.stderr,
         )
 
-    # 검증 6: course.allowed_years 1~4 범위
-    cur = conn.execute("SELECT course_id, allowed_years FROM course WHERE allowed_years IS NOT NULL")
-    for course_id, years_str in cur:
+    # 검증 6: course_dept.allowed_years 1~4 범위
+    cur = conn.execute(
+        "SELECT course_id, dept_id, allowed_years FROM course_dept WHERE allowed_years IS NOT NULL"
+    )
+    for course_id, dept_id, years_str in cur:
         try:
             years = [int(y.strip()) for y in years_str.split(",")]
             if any(y < 1 or y > 4 for y in years):
-                errors.append(f"course {course_id}: allowed_years 범위 위반 '{years_str}'")
+                errors.append(f"course_dept {course_id}/{dept_id}: allowed_years 범위 위반 '{years_str}'")
         except ValueError:
-            errors.append(f"course {course_id}: allowed_years 파싱 실패 '{years_str}'")
+            errors.append(f"course_dept {course_id}/{dept_id}: allowed_years 파싱 실패 '{years_str}'")
 
     # 검증 7: msc_subarea NOT NULL ⟹ area = 'MSC'
     cur = conn.execute("""
-        SELECT course_id, area, msc_subarea FROM course
+        SELECT course_id, dept_id, area, msc_subarea FROM course_dept
         WHERE msc_subarea IS NOT NULL AND area != 'MSC'
     """)
     for row in cur:
         errors.append(
-            f"course {row[0]}: msc_subarea='{row[2]}'인데 area='{row[1]}' (기대 'MSC')"
+            f"course_dept {row[0]}/{row[1]}: msc_subarea='{row[3]}'인데 area='{row[2]}' (기대 'MSC')"
+        )
+
+    # 검증 4b: 모든 course_dept 행의 course_id·dept_id 가 실제 존재 (FK 무결성)
+    cur = conn.execute("""
+        SELECT cd.course_id FROM course_dept cd
+        LEFT JOIN course c ON c.course_id = cd.course_id
+        WHERE c.course_id IS NULL
+    """)
+    orphan_c = [r[0] for r in cur]
+    if orphan_c:
+        errors.append(
+            f"course_dept: course 카탈로그에 없는 course_id {len(orphan_c)}개 (예: {orphan_c[:5]})"
+        )
+    cur = conn.execute("""
+        SELECT DISTINCT cd.dept_id FROM course_dept cd
+        LEFT JOIN department d ON d.dept_id = cd.dept_id
+        WHERE d.dept_id IS NULL
+    """)
+    orphan_d = [r[0] for r in cur]
+    if orphan_d:
+        errors.append(
+            f"course_dept: department 에 없는 dept_id {len(orphan_d)}개 (예: {orphan_d[:5]})"
         )
 
     # 검증 8: course_section 은 한 학기만 — 섞이면 같은 분반이 중복 후보가 되고
@@ -208,15 +233,18 @@ def validate(conn: sqlite3.Connection) -> list[str]:
     # 검증 12: 지정 학년이 비었거나 범위 밖인가 (#42)
     # 0 은 "학년 무관"이라는 뜻이라, 크롤러가 이 열을 빠뜨려 NULL·빈 값이 들어오면
     # 학년 제약이 조용히 풀려 1학년에게 4학년 전공이 추천된다.
+    # 5 는 건축학전공(5년제)의 5학년 지정 과목 — 전학과 확장에서 들어온 유효 값이다.
+    # (단 추천 엔진의 grade_for_term 상한은 4년제 기준 4라, 5년제 5학년 과목 추천은
+    #  아직 한계. 학과별 수업연한 모델은 후속. 여기선 적재를 막지 않도록 허용만 한다.)
     cur = conn.execute("""
         SELECT course_id, section, grade FROM course_section
-        WHERE grade IS NULL OR grade NOT IN (0, 1, 2, 3, 4)
+        WHERE grade IS NULL OR grade NOT IN (0, 1, 2, 3, 4, 5)
     """)
     bad = cur.fetchall()
     if bad:
         sample = [f"{r[0]}-{r[1]}({r[2]!r})" for r in bad[:5]]
         errors.append(
-            f"course_section: 지정 학년이 비었거나 0~4 밖인 행 {len(bad)}개 "
+            f"course_section: 지정 학년이 비었거나 0~5 밖인 행 {len(bad)}개 "
             f"(예: {sample}). 시간표 크롤의 grade 열을 확인하세요."
         )
 
