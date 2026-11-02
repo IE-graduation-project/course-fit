@@ -96,8 +96,11 @@ def conn():
     ensure_schema(c)
     c.execute("INSERT INTO department VALUES ('IDE', '산업데이터공학과', 132)")
     c.execute(
-        "INSERT INTO course (course_id, course_name, credit, dept_id, area) "
-        "VALUES ('140316', '데이터사이언스', 3, 'IDE', '전공필수')"
+        "INSERT INTO course (course_id, course_name, credit) "
+        "VALUES ('140316', '데이터사이언스', 3)"
+    )
+    c.execute(
+        "INSERT INTO course_dept (course_id, dept_id, area) VALUES ('140316', 'IDE', '전공필수')"
     )
     c.commit()
     yield c
@@ -151,8 +154,10 @@ def test_load_idempotent(conn):
 
 def test_load_pn_course(conn):
     conn.execute(
-        "INSERT INTO course (course_id, course_name, credit, dept_id, area) "
-        "VALUES ('140999', '세미나', 1, 'IDE', '전공선택')"
+        "INSERT INTO course (course_id, course_name, credit) VALUES ('140999', '세미나', 1)"
+    )
+    conn.execute(
+        "INSERT INTO course_dept (course_id, dept_id, area) VALUES ('140999', 'IDE', '전공선택')"
     )
     conn.commit()
     meta = StudentMeta(student_no="C0001")
@@ -195,8 +200,10 @@ def test_text_load_end_to_end(conn):
     for cid, area in [("311001", "전공필수"), ("311002", "전공기초"), ("311003", "전공선택"),
                       ("311004", "전공기초"), ("900001", "공통교양")]:
         conn.execute(
-            "INSERT INTO course (course_id, course_name, credit, dept_id, area) VALUES (?, ?, 3, 'BIZ', ?)",
-            (cid, cid, area),
+            "INSERT INTO course (course_id, course_name, credit) VALUES (?, ?, 3)", (cid, cid)
+        )
+        conn.execute(
+            "INSERT INTO course_dept (course_id, dept_id, area) VALUES (?, 'BIZ', ?)", (cid, area)
         )
     conn.commit()
 

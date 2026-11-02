@@ -65,7 +65,7 @@ def curriculum(conn) -> list[str]:
     mapped = {r[0] for r in conn.execute("SELECT DISTINCT course_id FROM course_competency")}
     rest = [
         cid for (cid,) in conn.execute(
-            "SELECT course_id FROM course WHERE dept_id='IDE' "
+            "SELECT course_id FROM course_dept WHERE dept_id='IDE' "
             "AND area IN ('전공필수','전공선택','MSC') ORDER BY course_id")
         if cid in grade and cid in mapped and cid not in first
     ]

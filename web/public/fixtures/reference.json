@@ -111,14 +111,224 @@
   ],
   "programs": [
     {
+      "dept": "ACM",
+      "name": "문화예술경영전공",
+      "fromYear": 2022
+    },
+    {
+      "dept": "APM",
+      "name": "실용음악전공",
+      "fromYear": 2022
+    },
+    {
+      "dept": "ARCH",
+      "name": "건축학전공",
+      "fromYear": 2022
+    },
+    {
+      "dept": "ARM",
+      "name": "예술경영전공",
+      "fromYear": 2022
+    },
+    {
+      "dept": "ART",
+      "name": "예술학과",
+      "fromYear": 2022
+    },
+    {
       "dept": "BIZ",
       "name": "경영학과",
+      "fromYear": 2022
+    },
+    {
+      "dept": "CE",
+      "name": "건설환경공학과",
+      "fromYear": 2026
+    },
+    {
+      "dept": "CGC",
+      "name": "도예·유리과",
+      "fromYear": 2022
+    },
+    {
+      "dept": "CHE",
+      "name": "화학공학전공",
+      "fromYear": 2026
+    },
+    {
+      "dept": "CSE",
+      "name": "컴퓨터공학과",
+      "fromYear": 2026
+    },
+    {
+      "dept": "DAM",
+      "name": "디자인·예술경영학부",
+      "fromYear": 2022
+    },
+    {
+      "dept": "DEN",
+      "name": "디자인엔지니어링전공",
+      "fromYear": 2022
+    },
+    {
+      "dept": "DSC",
+      "name": "데이터사이언스전공",
+      "fromYear": 2022
+    },
+    {
+      "dept": "ECON",
+      "name": "경제학부 경제학전공",
+      "fromYear": 2022
+    },
+    {
+      "dept": "EDU",
+      "name": "교육학과",
+      "fromYear": 2022
+    },
+    {
+      "dept": "EE",
+      "name": "전자·전기공학부",
+      "fromYear": 2026
+    },
+    {
+      "dept": "EED",
+      "name": "영어교육과",
+      "fromYear": 2022
+    },
+    {
+      "dept": "ENG",
+      "name": "영어영문학과",
+      "fromYear": 2022
+    },
+    {
+      "dept": "FRE",
+      "name": "불어불문학과",
+      "fromYear": 2022
+    },
+    {
+      "dept": "GER",
+      "name": "독어독문학과",
+      "fromYear": 2022
+    },
+    {
+      "dept": "HED",
+      "name": "역사교육과",
       "fromYear": 2022
     },
     {
       "dept": "IDE",
       "name": "산업데이터공학과",
       "fromYear": 2026
+    },
+    {
+      "dept": "IND",
+      "name": "산업디자인전공",
+      "fromYear": 2022
+    },
+    {
+      "dept": "INT",
+      "name": "실내건축학전공",
+      "fromYear": 2022
+    },
+    {
+      "dept": "IOT",
+      "name": "사물인터넷전공",
+      "fromYear": 2022
+    },
+    {
+      "dept": "IRB",
+      "name": "지능로봇공학전공",
+      "fromYear": 2022
+    },
+    {
+      "dept": "KED",
+      "name": "국어교육과",
+      "fromYear": 2022
+    },
+    {
+      "dept": "KOR",
+      "name": "국어국문학과",
+      "fromYear": 2022
+    },
+    {
+      "dept": "LAW",
+      "name": "법과대학 법학부",
+      "fromYear": 2022
+    },
+    {
+      "dept": "MCD",
+      "name": "금속조형디자인과",
+      "fromYear": 2022
+    },
+    {
+      "dept": "MED",
+      "name": "수학교육과",
+      "fromYear": 2022
+    },
+    {
+      "dept": "MSD",
+      "name": "기계·시스템디자인공학과",
+      "fromYear": 2026
+    },
+    {
+      "dept": "MSE",
+      "name": "신소재공학전공",
+      "fromYear": 2026
+    },
+    {
+      "dept": "MUS",
+      "name": "뮤지컬전공",
+      "fromYear": 2022
+    },
+    {
+      "dept": "OKP",
+      "name": "동양화과",
+      "fromYear": 2022
+    },
+    {
+      "dept": "PFA",
+      "name": "공연예술전공",
+      "fromYear": 2022
+    },
+    {
+      "dept": "PNT",
+      "name": "회화과",
+      "fromYear": 2022
+    },
+    {
+      "dept": "PRT",
+      "name": "판화과",
+      "fromYear": 2022
+    },
+    {
+      "dept": "SCD",
+      "name": "스마트도시데이터사이언스전공",
+      "fromYear": 2022
+    },
+    {
+      "dept": "SCU",
+      "name": "조소과",
+      "fromYear": 2022
+    },
+    {
+      "dept": "TFD",
+      "name": "섬유미술·패션디자인과",
+      "fromYear": 2022
+    },
+    {
+      "dept": "URB",
+      "name": "도시공학과",
+      "fromYear": 2024
+    },
+    {
+      "dept": "VCD",
+      "name": "시각디자인전공",
+      "fromYear": 2022
+    },
+    {
+      "dept": "WFU",
+      "name": "목조형가구학과",
+      "fromYear": 2022
     }
   ]
 }

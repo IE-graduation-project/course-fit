@@ -38,9 +38,10 @@ def test_nothing_else_is_dropped(dept):
     term = data.active_term(conn)
     kept = {(c.course_id, c.section) for c in data.load_candidates(conn, dept, term=term, grade=None)}
     offered = conn.execute(
-        "SELECT s.course_id, s.section, c.course_name FROM course_section s "
+        "SELECT DISTINCT s.course_id, s.section, c.course_name FROM course_section s "
         "JOIN course c ON c.course_id = s.course_id "
-        "WHERE s.source_term = ? AND c.dept_id IN (?, 'COMMON') AND c.area <> '일반선택'",
-        (term, dept)).fetchall()
+        "JOIN course_dept cd ON cd.course_id = s.course_id AND cd.dept_id IN (?, 'COMMON') "
+        "WHERE s.source_term = ? AND cd.area <> '일반선택'",
+        (dept, term)).fetchall()
     dropped = {r["course_name"] for r in offered if (r["course_id"], r["section"]) not in kept}
     assert dropped and all(n.startswith("논리적사고와글쓰기") and n != OWN[dept] for n in dropped), dropped

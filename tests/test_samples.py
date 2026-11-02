@@ -48,10 +48,20 @@ def test_every_sample_has_an_expected_grade():
     assert set(SAMPLES) == set(EXPECTED_GRADE)
 
 
-def test_every_supported_department_has_a_sample():
+def test_samples_map_to_supported_departments():
+    """샘플은 모두 지원 학과(졸업요건이 정의된 학과)여야 한다.
+
+    역방향("모든 지원 학과가 샘플을 가진다")은 전학과 확장(서울캠 전 학과) 뒤에는 성립하지
+    않는다 — 신규 학과는 사용자가 자기 성적표를 올려 쓰고, 데모 샘플(web/lib/sample.ts)은
+    파일럿 학과(IDE·BIZ)에만 둔다. 프론트는 샘플이 없는 학과엔 프리필 버튼을 숨길 뿐
+    (start/page.tsx: `SAMPLE_TRANSCRIPTS[dept]?.[year] ?? null`) 선택 자체는 막지 않는다.
+    따라서 지키는 불변식은 "샘플이 가리키는 학과는 반드시 지원 학과"다(끊긴 샘플 금지).
+    """
     conn = sqlite3.connect(ROOT / "db" / "app.db")
-    depts = {r[0] for r in conn.execute("SELECT DISTINCT dept_id FROM graduation_requirement")}
-    assert depts <= {d for d, _ in SAMPLES}, f"샘플이 없는 학과: {depts - {d for d, _ in SAMPLES}}"
+    supported = {r[0] for r in conn.execute("SELECT DISTINCT dept_id FROM graduation_requirement")}
+    sample_depts = {d for d, _ in SAMPLES}
+    assert sample_depts <= supported, f"지원되지 않는 학과의 샘플: {sample_depts - supported}"
+    assert {"IDE", "BIZ"} <= sample_depts, "데모 기본 학과(IDE·BIZ)엔 샘플이 있어야 한다"
 
 
 @pytest.mark.parametrize("key", KEYS)
@@ -61,10 +71,15 @@ def test_sample_courses_belong_to_that_department(key):
     res = parse_transcript_text(SAMPLES[key], dept_id=dept)
     assert res.courses, "샘플에서 과목을 못 읽었다"
     conn = sqlite3.connect(ROOT / "db" / "app.db")
-    catalog = dict(conn.execute("SELECT course_id, dept_id FROM course"))
+    # 과목×학과 이수구분은 course_dept 로 분리됐다 — 한 과목이 여러 학과에 걸칠 수 있어
+    # course_id → 개설 학과 집합으로 모은다.
+    catalog: dict[str, set[str]] = {}
+    for cid, d in conn.execute("SELECT course_id, dept_id FROM course_dept"):
+        catalog.setdefault(cid, set()).add(d)
     ids = {c.course_id for c in res.courses}
     assert ids - set(catalog) == KNOWN_RETIRED.get(key, set())
-    foreign = {cid: catalog[cid] for cid in ids & set(catalog) if catalog[cid] not in (dept, "COMMON")}
+    foreign = {cid: catalog[cid] for cid in ids & set(catalog)
+               if not (catalog[cid] & {dept, "COMMON"})}
     assert not foreign, f"{key} 샘플에 다른 학과 과목: {foreign}"
 
 

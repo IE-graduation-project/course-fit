@@ -39,9 +39,23 @@ def ensure_schema(conn: sqlite3.Connection) -> None:
     conn.commit()
 
 
-def _catalog_areas(conn: sqlite3.Connection) -> dict[str, str]:
-    """course_id -> area (catalog가 권위 있는 영역 소스)."""
-    return {cid: area for cid, area in conn.execute("SELECT course_id, area FROM course")}
+def _catalog_areas(conn: sqlite3.Connection, student_dept: str | None) -> dict[str, str]:
+    """course_id -> area (catalog가 권위 있는 영역 소스).
+
+    area 는 course_dept(과목×학과)에 있고 학과마다 다를 수 있다. 학생 학과 행을 우선하고,
+    없으면 COMMON(교양), 그것도 없으면 가장 작은 dept_id 의 타 학과를 고른다 —
+    recommender.data.load_student 의 course_dept 유도와 같은 우선순위라, 뒤이은
+    _credited_area 의 「타 학과 전공 = 일반선택」(#40) 판정이 일관되게 맞물린다.
+    """
+    best: dict[str, tuple[tuple[int, str], str]] = {}
+    for cid, dept, area in conn.execute(
+        "SELECT course_id, dept_id, area FROM course_dept"
+    ):
+        prio = 0 if dept == student_dept else (1 if dept == "COMMON" else 2)
+        key = (prio, dept)
+        if cid not in best or key < best[cid][0]:
+            best[cid] = (key, area)
+    return {cid: v[1] for cid, v in best.items()}
 
 
 def _delete_existing(conn: sqlite3.Connection, input_hash: str) -> None:
@@ -57,7 +71,7 @@ def load_transcript(
     source_file: str | None = None,
 ) -> str:
     """TranscriptResult를 student/student_course에 적재하고 input_hash를 반환한다."""
-    catalog = _catalog_areas(conn)
+    catalog = _catalog_areas(conn, result.meta.dept_id)
     h = result.input_hash
     created_at = created_at or datetime.now(timezone.utc).isoformat()
 

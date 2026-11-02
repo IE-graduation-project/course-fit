@@ -57,3 +57,6 @@ docs/screenshots/
 
 # 교육과정 파일럿 원자료 (로컬 경로·내부 repo 참조가 들어있어 공개 레포에 올리지 않는다)
 data/curriculum_pilot/
+
+# 리팩터·크롤 로컬 백업(git 히스토리가 정본)
+data/_archive/
