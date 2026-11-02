@@ -190,7 +190,8 @@ def recommend_endpoint(req: RecommendRequest) -> dict:
         rec = recommend(req.studentId, req.job, db_path=str(db.db_path()),
                         U=req.maxCredits, L=req.minCredits, alpha=rparams.ALPHA_DEFAULT,
                         eps=eps, k=req.topK, time_limit=SOLVE_TIME_LIMIT,
-                        area_weight=PREFERENCE_AREA_WEIGHT.get(mode), free_days=free_days)
+                        area_weight=PREFERENCE_AREA_WEIGHT.get(mode), free_days=free_days,
+                        exclude_courses=req.excludeCourses)
         return build_payload(conn, rec, app.state.ref, job_id=req.job, mode=mode, eps=eps,
                              alpha=rparams.ALPHA_DEFAULT, max_credits=req.maxCredits,
                              min_credits=req.minCredits, top_k=req.topK, free_days=free_days)

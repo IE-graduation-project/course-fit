@@ -62,11 +62,16 @@ def recommend(input_hash, job_id, *, db_path=data.DB_PATH, U=18, L=12,
               alpha=params.ALPHA_DEFAULT, eps=0.0, k=3,
               time_limit: float | None = None,
               area_weight: dict[str, int] | None = None,
-              free_days=()) -> Recommendation:
+              free_days=(), exclude_courses=()) -> Recommendation:
     """파라미터 사전계산(σ/gap/Score/need) → 2단계 ILP(top-k) → Recommendation.
 
     dept/입학년도는 student 테이블에서 읽으므로 인자로 받지 않는다.
+
+    `exclude_courses` 는 사용자가 "이 과목 빼고 다시"로 지정한 course_id 집합이다. 후보에서
+    미리 빼고 다시 푼다 — free_days 와 같은 제약 축이라 식은 그대로고, ILP 가 그 과목 없이
+    다음 최적 조합을 찾는다.
     """
+    exclude_courses = set(exclude_courses)
     conn = data.connect(db_path)
     try:
         comp = data.comp_ids(conn)
@@ -75,6 +80,8 @@ def recommend(input_hash, job_id, *, db_path=data.DB_PATH, U=18, L=12,
         term = data.active_term(conn)
         grade = data.grade_for_term(student.current_grade, student.admission_year, term)
         candidates = data.load_candidates(conn, student.dept_id, term=term, grade=grade)
+        if exclude_courses:
+            candidates = [c for c in candidates if c.course_id not in exclude_courses]
         min_credits = data.load_min_credits(conn, student.dept_id, student.admission_year)
         # 입학년도와 다를 수 있다 — 2025학번 경영은 2022 교육과정을 따른다(결정 ⑨).
         req_year = data.effective_year(conn, student.dept_id, student.admission_year)
