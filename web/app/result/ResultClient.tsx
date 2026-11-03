@@ -91,6 +91,17 @@ export default function ResultClient() {
   /** 성적표가 없어서 애초에 물어볼 수가 없는 상태 (실 API 일 때만) */
   const [needTranscript, setNeedTranscript] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /** 「이 과목 빼고 다시」로 뺀 과목. courseId → 과목명(배너·되돌리기용) */
+  const [excluded, setExcluded] = useState<Map<string, string>>(new Map());
+  const excludedKey = Array.from(excluded.keys()).sort().join(",");
+  const excludeCourse = (c: { courseId: string; name: string }) => {
+    stepped.current = true;
+    setExcluded((m) => new Map(m).set(c.courseId, c.name));
+  };
+  const restoreExcluded = () => {
+    stepped.current = true;
+    setExcluded(new Map());
+  };
 
   useEffect(() => {
     fetchReference().then(setRef).catch(console.error);
@@ -141,6 +152,7 @@ export default function ResultClient() {
         mode,
         maxCredits: credits,
         freeDays: freeKey === "" ? [] : freeKey.split(",").map(Number),
+        excludeCourses: excludedKey === "" ? [] : excludedKey.split(","),
       })
         .then((r) => {
           if (cancelled) return;
@@ -170,7 +182,7 @@ export default function ResultClient() {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [job, mode, credits, freeKey, limitRead, maxCredits]);
+  }, [job, mode, credits, freeKey, limitRead, maxCredits, excludedKey]);
 
   useEffect(() => {
     const c = picked === null || picked === startCredits ? "" : `&credits=${picked}`;
@@ -462,6 +474,21 @@ export default function ResultClient() {
       <h2 className="print-hide mt-8 text-caption font-semibold text-text-muted">
         추천 결과
       </h2>
+
+      {excluded.size > 0 && (
+        // 뺀 과목을 밝히고 되돌릴 길을 둔다. 안 그러면 왜 과목이 사라졌는지 모른다.
+        <div className="print-hide mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-md border border-border bg-surface-3 px-3 py-2 text-sm text-text-muted">
+          <span className="font-semibold text-text">뺀 과목 {excluded.size}개</span>
+          <span className="text-text-soft">{Array.from(excluded.values()).join(" · ")}</span>
+          <button
+            type="button"
+            onClick={restoreExcluded}
+            className="ml-auto min-h-9 rounded-sm px-2 font-semibold text-brand-700 hover:underline"
+          >
+            다시 담기
+          </button>
+        </div>
+      )}
       <section
         className="print-stack mt-2.5 grid gap-6 transition-opacity duration-200 lg:grid-cols-[1.35fr_1fr]"
         style={{ opacity: loading ? 0.45 : 1 }}
@@ -539,7 +566,7 @@ export default function ResultClient() {
           )}
         </div>
 
-        <div className="space-y-6">
+        <aside className="space-y-6" aria-label="진단과 졸업요건">
           <section>
             <h2 className="text-h3 font-semibold">
               {rec.job.name}까지 뭐가 모자란가
@@ -595,7 +622,7 @@ export default function ResultClient() {
               </ul>
             </section>
           )}
-        </div>
+        </aside>
       </section>
 
       <section
@@ -650,6 +677,7 @@ export default function ResultClient() {
               areaPlaced={(tt?.courses ?? [])
                 .filter((o) => o.area === c.area)
                 .reduce((n, o) => n + o.credit, 0)}
+              onExclude={excludeCourse}
             />
           ))}
         </div>

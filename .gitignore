@@ -60,3 +60,6 @@ data/curriculum_pilot/
 
 # 리팩터·크롤 로컬 백업(git 히스토리가 정본)
 data/_archive/
+
+# 내부 전략 문서(공개 커밋 안 함)
+docs/_내부_*

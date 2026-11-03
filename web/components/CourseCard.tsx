@@ -17,12 +17,15 @@ export default function CourseCard({
   active,
   onHover,
   areaPlaced,
+  onExclude,
 }: {
   course: RecommendedCourse;
   active: boolean;
   onHover?: (id: string | null) => void;
   /** 이 시간표가 이 과목과 같은 영역에 담은 학점 합. 남은 학점보다 많으면 넘친다고 말한다 */
   areaPlaced?: number;
+  /** 「이 과목 빼고 다시」 — 누르면 이 과목(courseId)을 뺀 채로 다시 추천한다 */
+  onExclude?: (course: RecommendedCourse) => void;
 }) {
   const key = courseKey(course);
   const reasons = course.careerReason.filter((r) => r.share >= 0.05);
@@ -120,6 +123,19 @@ export default function CourseCard({
             </>
           )}
         </p>
+      )}
+
+      {onExclude && (
+        // 마음에 안 드는 과목을 빼고 그 자리에 다른 과목을 받아 본다. 되돌리기는 위의 배너에서.
+        <div className="print-hide mt-3 flex justify-end">
+          <button
+            type="button"
+            onClick={() => onExclude(course)}
+            className="-mr-1 inline-flex min-h-9 items-center rounded-sm px-2 text-caption font-semibold text-text-soft transition-colors hover:text-danger"
+          >
+            이 과목 빼고 다시
+          </button>
+        </div>
       )}
     </div>
   );
