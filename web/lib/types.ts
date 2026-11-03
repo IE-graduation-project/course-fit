@@ -113,6 +113,8 @@ export interface RecommendRequest {
   topK?: number; // 기본 3
   /** 공강으로 비울 요일. 0=월 … 4=금. 그 요일에 수업이 있는 분반은 추천에서 빠진다 */
   freeDays?: number[];
+  /** 이 과목들(courseId)은 추천에서 뺀다. 학생이 「이 과목 빼고 다시」를 누른 과목 */
+  excludeCourses?: string[];
 }
 
 /** POST /api/recommend 응답 = recommender.explain.build_explanation 확장판 */
