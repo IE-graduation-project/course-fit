@@ -574,6 +574,12 @@ export default function ResultClient() {
             <div className="mt-3.5">
               <CompetencyChart diagnosis={rec.diagnosis} reference={ref} />
             </div>
+            {/* 매핑이 자동이라는 걸 밝혀 둔다(C10). 방향이 어긋난 과목이 있을 수 있어
+                「신뢰도 지표」 대신, 무엇을 근거로 했고 어떻게 받아들여야 하는지를 한 줄로 둔다. */}
+            <p className="mt-3 text-caption leading-relaxed text-text-soft">
+              채용공고와 과목 설명을 자동으로 맞춰 계산한 추정이에요. 방향이 어긋나는 과목이
+              있을 수 있어 <b className="font-semibold text-text-muted">참고용</b>으로 봐 주세요.
+            </p>
           </section>
 
           {need.length > 0 && (

@@ -55,6 +55,16 @@ export default function CopyCodes({ courses }: { courses: RecommendedCourse[] })
         <IconCopy />
         학수번호 {courses.length}개 복사
       </button>
+      {/* 학기당 한 번 쓰고 나가는 도구라 결과를 들고 나갈 수단이 필요하다(B6·C6).
+          화면에 이미 print 전용 서식(print-hide/keep/stack)이 깔려 있어, 인쇄 대화상자에서
+          「PDF로 저장」을 고르면 그대로 한 장이 나온다. 저장한 PDF 를 그대로 공유하면 된다. */}
+      <button
+        onClick={() => window.print()}
+        className="print-hide inline-flex min-h-11 items-center gap-2 rounded-md border border-border-strong px-4 text-sm font-semibold text-text transition-colors hover:bg-surface-3"
+      >
+        <IconPrint />
+        인쇄 · PDF로 저장
+      </button>
       <span aria-live="polite" className="text-caption text-text-muted">
         {state === "done" && "복사했어요. 한 줄에 학수번호-분반, 과목명, 시간 순서예요."}
         {state === "fail" && "이 브라우저는 자동 복사가 막혀 있어요. 아래 칸을 길게 눌러 복사해 주세요."}
@@ -88,6 +98,26 @@ function IconCopy() {
     >
       <rect x="9" y="9" width="11" height="11" rx="2" />
       <path d="M5 15V5a2 2 0 0 1 2-2h10" />
+    </svg>
+  );
+}
+
+function IconPrint() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <path d="M6 9V2h12v7" />
+      <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+      <rect x="6" y="14" width="12" height="8" rx="1" />
     </svg>
   );
 }

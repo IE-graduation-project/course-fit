@@ -55,8 +55,12 @@ export default function TimetableGrid({ courses, activeId, onHover, freeDays = [
 
   return (
     <div>
+      {/* 모바일(sm 미만)은 좁은 격자 대신 요일별 세로 리스트로 — 휴대폰에서 5열 격자가
+          칸마다 눌려 과목명이 쪼개졌다(설문·B5). 데스크톱은 기존 주간 격자 그대로. */}
+      <MobileDayList courses={courses} activeId={activeId} onHover={onHover} freeDays={freeDays} />
+
       <div
-        className="grid overflow-hidden rounded-lg border border-border bg-surface"
+        className="hidden overflow-hidden rounded-lg border border-border bg-surface sm:grid"
         style={{
           gridTemplateColumns: `3rem repeat(${days.length}, minmax(0, 1fr))`,
           gridTemplateRows: `auto repeat(${periods.length}, minmax(3.25rem, auto))`,
@@ -180,6 +184,86 @@ export default function TimetableGrid({ courses, activeId, onHover, freeDays = [
           분반(비대면·논문·실습 등)이라 격자에는 자리가 없지만,{" "}
           <b className="text-text">추천에는 포함된 과목</b>입니다.
         </p>
+      )}
+    </div>
+  );
+}
+
+/**
+ * 모바일 전용 — 요일별로 과목을 세로로 쌓는다. 격자보다 과목명·시간·교수명이 다 읽힌다.
+ * 연강은 한 블록으로 묶어 시작~끝 시각을 보여준다. 공강으로 비운 요일은 그 자리에 밝힌다.
+ */
+function MobileDayList({ courses, activeId, onHover, freeDays = [] }: Props) {
+  const items = courses.flatMap((course) =>
+    toBlocks(course.slots).map((b) => ({ course, ...b })),
+  );
+  const maxDay = Math.max(WEEKDAYS - 1, ...items.map((b) => b.day), ...freeDays);
+  const dayIdx = Array.from({ length: maxDay + 1 }, (_, i) => i);
+  const unscheduled = courses.filter((c) => c.slots.length === 0);
+
+  return (
+    <div className="space-y-2.5 sm:hidden">
+      {dayIdx.map((day) => {
+        const dayItems = items
+          .filter((b) => b.day === day)
+          .sort((a, b) => a.start - b.start);
+        const free = freeDays.includes(day);
+        if (dayItems.length === 0 && !free) return null;
+        return (
+          <div key={day} className="overflow-hidden rounded-lg border border-border bg-surface">
+            <div className="flex items-baseline gap-2 border-b border-border bg-surface-2 px-3 py-1.5">
+              <span className="text-sm font-bold text-text">{DAYS[day]}요일</span>
+              {free && <span className="text-caption font-semibold text-brand-700">공강으로 비움</span>}
+            </div>
+            {dayItems.length === 0 ? (
+              <p className="px-3 py-3 text-caption text-text-soft">이 요일은 비워 뒀어요</p>
+            ) : (
+              <ul>
+                {dayItems.map((b) => {
+                  const key = courseKey(b.course);
+                  const active = activeId === key;
+                  return (
+                    <li
+                      key={`${key}-${b.start}`}
+                      onMouseEnter={() => onHover?.(key)}
+                      onMouseLeave={() => onHover?.(null)}
+                      className={
+                        "flex items-start gap-3 px-3 py-2.5 " +
+                        (active ? "bg-brand-50" : "")
+                      }
+                      style={{ borderLeft: `3px solid var(${active ? "--color-brand-500" : "--color-border-strong"})` }}
+                    >
+                      <span className="tnum w-24 shrink-0 text-caption text-text-soft">
+                        {periodTime(b.start)}~{periodTime(b.start + b.span)}
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block text-sm font-semibold leading-tight text-text">{b.course.name}</span>
+                        {b.course.professor && (
+                          <span className="mt-0.5 block break-keep text-caption text-text-soft">{b.course.professor}</span>
+                        )}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+        );
+      })}
+      {unscheduled.length > 0 && (
+        <div className="overflow-hidden rounded-lg border border-border bg-surface">
+          <div className="border-b border-border bg-surface-2 px-3 py-1.5">
+            <span className="text-sm font-bold text-text">시간 미지정</span>
+          </div>
+          <ul>
+            {unscheduled.map((c) => (
+              <li key={courseKey(c)} className="px-3 py-2.5 text-sm font-semibold text-text">
+                {c.name}
+                {c.professor && <span className="ml-2 text-caption font-normal text-text-soft">{c.professor}</span>}
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   );
