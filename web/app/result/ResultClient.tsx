@@ -8,6 +8,7 @@ import type { CreditLimit, ModeId, Recommendation, Reference, Timetable } from "
 import TimetableGrid, { courseKey } from "@/components/TimetableGrid";
 import CompetencyChart from "@/components/CompetencyChart";
 import CourseCard from "@/components/CourseCard";
+import JobPostings from "@/components/JobPostings";
 import CopyCodes from "@/components/CopyCodes";
 import JobFitBar from "@/components/JobFitBar";
 import InfoTip from "@/components/InfoTip";
@@ -628,6 +629,9 @@ export default function ResultClient() {
               </ul>
             </section>
           )}
+
+          {/* 목표 직무의 실제 채용공고 — 진단의 ρ(직무가 원하는 수준)가 어디서 왔는지 드러낸다(C12) */}
+          <JobPostings jobId={job} jobName={rec.job.name} />
         </aside>
       </section>
 
