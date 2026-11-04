@@ -33,6 +33,7 @@ data/*
 !data/competency.csv
 !data/course.csv
 !data/course_crawled.csv
+!data/course_dept.csv
 !data/course_section.csv
 !data/job.csv
 !data/course_competency.csv
