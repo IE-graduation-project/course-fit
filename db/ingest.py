@@ -95,6 +95,14 @@ def validate(conn: sqlite3.Connection) -> list[str]:
     """무결성 검증. 에러 메시지 리스트 반환 (빈 리스트면 OK)."""
     errors: list[str] = []
 
+    # 검증 1: LOAD_ORDER 의 모든 대상 테이블은 비어 있으면 안 된다.
+    # load_csv 는 CSV 가 없으면 조용히 SKIP 하므로(빌드는 성공), .dockerignore 화이트리스트에서
+    # 한 파일을 빠뜨리면 그 테이블이 빈 채로 배포된다 — course_dept 를 빠뜨려 전 학과 후보가
+    # 0건이 된 적이 있다(2026-11-04). 빈 핵심 테이블은 여기서 빌드를 세운다.
+    for table in dict.fromkeys(t for t, _ in LOAD_ORDER):
+        if conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0] == 0:
+            errors.append(f"핵심 테이블 비어있음: {table} (CSV 누락? .dockerignore 화이트리스트 확인)")
+
     # 검증 2: course_competency.weight 합 ≤ 1.0 (= r_c relevance, 무관 과목은 0에 가까움)
     cur = conn.execute("""
         SELECT course_id, ROUND(SUM(weight), 4) AS total
