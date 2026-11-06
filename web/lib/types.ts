@@ -160,6 +160,18 @@ export interface Recommendation {
   need: Record<string, number>;
   /** 상위 k개 대안 시간표. [0] 이 1순위 */
   timetables: Timetable[];
+  /** 시간이 겹쳐 1등 시간표에서 빠진 고가치 과목. 학생이 원하면 겹친 과목을 빼고 넣을 수 있다 */
+  droppedByConflict?: {
+    courseId: string;
+    section: string;
+    name: string;
+    credit: number;
+    area: string;
+    timeRaw: string | null;
+    professor: string | null;
+    conflictsWith: string;
+    conflictsWithId: string;
+  }[];
   constraints: {
     noTimeConflict: boolean;
     creditBounds: boolean;

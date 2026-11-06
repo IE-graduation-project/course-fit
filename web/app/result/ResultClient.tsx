@@ -15,6 +15,13 @@ import InfoTip from "@/components/InfoTip";
 import { altChips, describeShape, diffFromFirst, shape } from "@/lib/altdiff";
 import { DAYS, WEEKDAYS } from "@/lib/slots";
 
+/** 받침에 맞는 조사 「과/와」. 봇이 사용자에게 내는 글이라 조사를 맞춘다(한글 끝만 판정). */
+function gwa(word: string): string {
+  const c = word.charCodeAt(word.length - 1);
+  if (c >= 0xac00 && c <= 0xd7a3) return (c - 0xac00) % 28 === 0 ? "와" : "과";
+  return "와"; // 영문·숫자 끝은 와 기본
+}
+
 /** 시작 화면에서 넣은 학점이 없을 때(옛 세션, 주소로 바로 들어옴) 담을 학점 상한 */
 const DEFAULT_CREDITS = 18;
 /** 수강가능 최대학점을 모를 때(옛 서버 응답)의 상한 */
@@ -705,6 +712,47 @@ export default function ResultClient() {
             />
           ))}
         </div>
+
+        {/* 시간이 겹쳐 빠진 고가치 과목(발표 피드백). 겹친 과목을 빼면 이 과목을 넣을 수 있다 —
+            「이 과목 빼고 다시」(C8)와 같은 길로 묶어, 겹친 과목을 빼고 다시 풀게 한다. */}
+        {(rec.droppedByConflict?.length ?? 0) > 0 && (
+          <div className="print-hide mt-10">
+            <h3 className="text-h3 font-bold">시간이 겹쳐 빠진 과목</h3>
+            <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-text-muted">
+              점수는 높았지만 추천 과목과 시간이 겹쳐 이번 시간표엔 같이 못 담았어요. 이게 더
+              중요하면 <b className="text-text">겹친 과목을 빼고</b> 다시 추천받아 이 과목이 들어올
+              자리를 만들 수 있어요.
+            </p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              {rec.droppedByConflict!.map((d) => (
+                <div
+                  key={`${d.courseId}-${d.section}`}
+                  className="rounded-lg border border-dashed border-border-strong bg-surface-3 p-4"
+                >
+                  <h4 className="text-h3 font-semibold leading-snug">{d.name}</h4>
+                  <p className="mt-1 text-caption text-text-soft">
+                    <span className="tnum font-semibold text-text-muted">
+                      {d.courseId}-{d.section}
+                    </span>
+                    {" · "}
+                    {[`${d.credit}학점`, d.area, d.timeRaw, d.professor].filter(Boolean).join(" · ")}
+                  </p>
+                  <p className="mt-2.5 text-sm text-text-muted">
+                    <b className="font-semibold text-grad-ink">{d.conflictsWith}</b>
+                    {gwa(d.conflictsWith)} 시간이 겹쳐 빠졌어요.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => excludeCourse({ courseId: d.conflictsWithId, name: d.conflictsWith })}
+                    className="mt-3 inline-flex min-h-10 items-center rounded-md border border-border-strong px-3 text-sm font-semibold text-text transition-colors hover:bg-surface"
+                  >
+                    “{d.conflictsWith}” 빼고 다시 추천
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </section>
 
       <footer className="mt-16 border-t border-border pt-6 text-caption text-text-soft">

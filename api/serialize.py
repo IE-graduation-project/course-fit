@@ -262,6 +262,19 @@ def build_payload(conn, rec: Recommendation, ref: RefData, *, job_id: str, mode:
         },
         "need": {a: n for a, n in sorted(rec.need.items()) if n > 0},
         "timetables": timetables,
+        # 시간이 겹쳐 1등 시간표에서 빠졌지만 값어치가 높았던 과목(발표 피드백). 학생이 원하면
+        # 「이 과목 빼고 다시」로 자리를 바꿔 넣을 수 있게, 무엇과 겹쳤는지와 함께 옵션으로 보인다.
+        "droppedByConflict": [
+            {
+                "courseId": c.course_id, "section": c.section, "name": c.course_name,
+                "credit": c.credit, "area": c.area,
+                "slots": list(c.slots), "slotsHuman": [slot_human(s) for s in c.slots],
+                "professor": ref.sec_meta.get((c.course_id, str(c.section).strip()), {}).get("professor"),
+                "timeRaw": ref.sec_meta.get((c.course_id, str(c.section).strip()), {}).get("timeRaw"),
+                "conflictsWith": clash_name, "conflictsWithId": clash_id,
+            }
+            for c, _score, clash_id, clash_name in rec.dropped_conflicts
+        ],
         "constraints": {"noTimeConflict": True, "creditBounds": True,
                         "excludeTaken": True, "prereqSatisfied": True,
                         # 후보집합에서 걸렀으니 구조적으로 참이다(data.load_candidates, #42)
