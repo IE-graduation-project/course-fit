@@ -18,11 +18,12 @@ import { jobRank } from "@/lib/competency";
 export default function JobFitBar({
   fits,
   active,
-  onChange,
+  onToggle,
 }: {
   fits: JobFit[];
-  active: string;
-  onChange: (jobId: string) => void;
+  /** 선택한 직무들(다중 선택). 여러 개를 함께 고르면 요구 역량의 합집합으로 진단한다 */
+  active: string[];
+  onToggle: (jobId: string) => void;
 }) {
   const ordered = [...fits].sort((a, b) => jobRank(a.job) - jobRank(b.job));
   const best = fits.reduce<JobFit | null>(
@@ -41,7 +42,7 @@ export default function JobFitBar({
     if (!el || !box) return;
     const target = el.offsetLeft - (box.clientWidth - el.clientWidth) / 2;
     box.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
-  }, [active]);
+  }, [active.join(",")]);
 
   return (
     <div
@@ -51,13 +52,14 @@ export default function JobFitBar({
       className="scroll-fade-x flex gap-1 overflow-x-auto rounded-lg border border-border bg-surface p-1"
     >
       {ordered.map((f) => {
-        const selected = f.job === active;
+        const selected = active.includes(f.job);
+        const isPrimary = f.job === active[0];
         return (
           <button
             key={f.job}
-            ref={selected ? activeRef : undefined}
+            ref={isPrimary ? activeRef : undefined}
             aria-pressed={selected}
-            onClick={() => onChange(f.job)}
+            onClick={() => onToggle(f.job)}
             className={
               "flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-sm px-3 text-sm transition-colors " +
               (selected

@@ -76,7 +76,8 @@ def recommend(input_hash, job_id, *, db_path=data.DB_PATH, U=18, L=12,
     try:
         comp = data.comp_ids(conn)
         student = data.load_student(conn, input_hash)
-        rho = data.load_rho(conn, job_id)
+        # job_id 는 하나(str)일 수도 여럿(list)일 수도 있다. 여럿이면 요구 역량의 합집합(역량별 max).
+        rho = data.load_rho_union(conn, job_id)
         term = data.active_term(conn)
         grade = data.grade_for_term(student.current_grade, student.admission_year, term)
         candidates = data.load_candidates(conn, student.dept_id, term=term, grade=grade)

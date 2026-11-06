@@ -18,7 +18,8 @@ class TranscriptRequest(BaseModel):
 
 class RecommendRequest(BaseModel):
     studentId: str
-    job: str
+    job: str                       # 하위호환. jobs 가 비어 있으면 이 하나를 쓴다
+    jobs: list[str] = Field(default_factory=list)  # 직무 다중 선택. 주면 요구 역량을 합집합(역량별 max)
     mode: str | None = None        # gap | balanced | graduation. eps를 주면 무시된다
     eps: float | None = Field(default=None, ge=0.0, le=1.0)
     maxCredits: int = Field(default=18, ge=1, le=30)

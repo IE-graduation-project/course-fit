@@ -184,15 +184,18 @@ def recommend_endpoint(req: RecommendRequest) -> dict:
             raise ApiError(404, "student_not_found",
                            "성적표를 찾을 수 없습니다. 다시 붙여넣어 주세요. "
                            "(보관 기간이 지나 삭제되었을 수 있습니다.)")
-        if conn.execute("SELECT 1 FROM job WHERE job_id=?", (req.job,)).fetchone() is None:
-            raise ApiError(400, "unknown_job", f"없는 직무입니다: {req.job}")
+        # 직무는 하나(job)이거나 여럿(jobs)이다. jobs 가 비면 job 하나로 본다. 순서 보존·중복 제거.
+        job_ids = list(dict.fromkeys(req.jobs)) if req.jobs else [req.job]
+        for jid in job_ids:
+            if conn.execute("SELECT 1 FROM job WHERE job_id=?", (jid,)).fetchone() is None:
+                raise ApiError(400, "unknown_job", f"없는 직무입니다: {jid}")
 
-        rec = recommend(req.studentId, req.job, db_path=str(db.db_path()),
+        rec = recommend(req.studentId, job_ids, db_path=str(db.db_path()),
                         U=req.maxCredits, L=req.minCredits, alpha=rparams.ALPHA_DEFAULT,
                         eps=eps, k=req.topK, time_limit=SOLVE_TIME_LIMIT,
                         area_weight=PREFERENCE_AREA_WEIGHT.get(mode), free_days=free_days,
                         exclude_courses=req.excludeCourses)
-        return build_payload(conn, rec, app.state.ref, job_id=req.job, mode=mode, eps=eps,
+        return build_payload(conn, rec, app.state.ref, job_id=job_ids, mode=mode, eps=eps,
                              alpha=rparams.ALPHA_DEFAULT, max_credits=req.maxCredits,
                              min_credits=req.minCredits, top_k=req.topK, free_days=free_days)
     finally:
