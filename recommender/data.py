@@ -313,6 +313,19 @@ def load_rho(conn, job_id: str) -> dict[str, float]:
     return {r["comp_id"]: r["required_level"] for r in rows}
 
 
+def load_rho_union(conn, job_ids) -> dict[str, float]:
+    """여러 직무를 함께 목표로 할 때의 ρ_k — 역량별 최댓값(요구의 합집합).
+
+    학생이 두 직무를 함께 준비하면 두 직무가 원하는 역량을 다 채워야 한다. 그래서
+    역량마다 더 높은 요구수준을 택한다. 상반된 직군을 함께 고르면 요구 역량이 넓어져
+    추천이 여러 역량으로 퍼질 뿐, 품질이 낮아지는 게 아니다(한 직무면 기존과 동일).
+    """
+    ids = [job_ids] if isinstance(job_ids, str) else list(dict.fromkeys(job_ids))
+    rhos = [load_rho(conn, j) for j in ids]
+    keys = set().union(*(r.keys() for r in rhos)) if rhos else set()
+    return {k: max(r.get(k, 0.0) for r in rhos) for k in keys}
+
+
 def effective_year(conn, dept_id: str, admission_year: int) -> int | None:
     """이 학생에게 적용될 교육과정 개정 연도. 없으면 None.
 

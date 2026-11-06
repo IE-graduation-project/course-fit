@@ -175,8 +175,14 @@ def build_payload(conn, rec: Recommendation, ref: RefData, *, job_id: str, mode:
     분해(gap_k · w_{c,k}), gradReason은 그 영역의 남은 졸업 부족학점이다.
     """
     comp_ids = ref.comp_ids
-    job_name = dict(ref.jobs).get(job_id, job_id)
-    rho = data.load_rho(conn, job_id)
+    # job_id 는 하나(str)일 수도 여럿(list)일 수도 있다. 여럿이면 요구 역량을 합집합(역량별 max).
+    job_ids = [job_id] if isinstance(job_id, str) else list(dict.fromkeys(job_id))
+    names = dict(ref.jobs)
+    job_names = [names.get(j, j) for j in job_ids]
+    primary = job_ids[0]
+    # 화면 제목용 표시명. 여럿이면 "데이터 분석가 외 N".
+    job_name = job_names[0] if len(job_ids) == 1 else f"{job_names[0]} 외 {len(job_ids) - 1}"
+    rho = data.load_rho_union(conn, job_ids)
 
     # 계약: ILP가 못 풀면 500이 아니라 200 + timetables: []. 학생 입장에서 500은
     # "서비스 고장", 빈 결과는 "조건이 빡세다"라 화면 메시지가 달라야 한다.
@@ -236,7 +242,8 @@ def build_payload(conn, rec: Recommendation, ref: RefData, *, job_id: str, mode:
         "fitByJob": [{"job": jid, "name": jname,
                       "fit": job_fit(rec.sigma, data.load_rho(conn, jid), comp_ids)}
                      for jid, jname in ref.jobs],
-        "job": {"id": job_id, "name": job_name},
+        "job": {"id": primary, "name": job_name,
+                "ids": job_ids, "names": job_names},
         "params": {"mode": mode, "eps": eps, "alpha": alpha,
                    "maxCredits": max_credits, "minCredits": min_credits, "topK": top_k,
                    # 공강으로 비운 요일(0=월 … 4=금). 화면이 무엇이 적용됐는지 밝힌다

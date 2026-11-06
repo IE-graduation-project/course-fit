@@ -106,6 +106,8 @@ export interface TranscriptSemester {
 export interface RecommendRequest {
   studentId: string;
   job: string;
+  /** 직무 다중 선택. 주면 요구 역량을 합집합(역량별 max)으로 본다. 비면 job 하나를 쓴다 */
+  jobs?: string[];
   mode?: ModeId;
   eps?: number; // 주면 mode 무시
   maxCredits?: number; // 기본 18
@@ -135,7 +137,8 @@ export interface Recommendation {
     /** 학과 졸업 총학점(department.total_credits_required, 132). 옛 응답엔 없다 */
     totalRequired?: number;
   };
-  job: JobRef;
+  /** 주 직무(id·name) + 다중 선택 시 전체(ids·names). 단일이면 ids=[id] */
+  job: { id: string; name: string; ids?: string[]; names?: string[] };
   /**
    * 직무 6종 각각의 적합도(0~100). σ 는 직무와 무관해서 한 번에 다 낼 수 있고,
    * 시간표·성향(ε)에 흔들리지 않는다 — 목표를 고르기 전에 비교하라고 있는 값이다.

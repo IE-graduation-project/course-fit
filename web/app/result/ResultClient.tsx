@@ -36,7 +36,18 @@ const toFreeDays = (v: unknown): number[] =>
 export default function ResultClient() {
   const params = useSearchParams();
   const router = useRouter();
-  const [job, setJob] = useState(params.get("job") ?? "DA");
+  /** 선택한 목표 직무들(다중 선택). 첫 번째가 주 직무(URL·공고 링크용). 최소 1개는 유지한다. */
+  const [jobs, setJobs] = useState<string[]>(() => {
+    const multi = (params.get("jobs") ?? "").split(",").filter(Boolean);
+    return multi.length > 0 ? multi : [params.get("job") ?? "DA"];
+  });
+  const job = jobs[0];
+  const jobsKey = jobs.join(",");
+  /** 직무 토글 — 들어 있으면 빼고(마지막 하나는 남긴다), 없으면 더한다 */
+  const toggleJob = (id: string) =>
+    setJobs((cur) =>
+      cur.includes(id) ? (cur.length > 1 ? cur.filter((j) => j !== id) : cur) : [...cur, id],
+    );
   const [mode, setMode] = useState<ModeId>(
     (params.get("mode") ?? "balanced") as ModeId,
   );
@@ -150,6 +161,7 @@ export default function ResultClient() {
       fetchRecommendation({
         studentId,
         job,
+        jobs,
         mode,
         maxCredits: credits,
         freeDays: freeKey === "" ? [] : freeKey.split(",").map(Number),
@@ -183,15 +195,17 @@ export default function ResultClient() {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [job, mode, credits, freeKey, limitRead, maxCredits, excludedKey]);
+  }, [jobsKey, mode, credits, freeKey, limitRead, maxCredits, excludedKey]);
 
   useEffect(() => {
     const c = picked === null || picked === startCredits ? "" : `&credits=${picked}`;
     // 시작 화면에서 고른 요일과 같으면 생략한다. 다 끈 것은 `free=` 로 남긴다 — 없으면 고른 요일로 돌아간다
     const f =
       pickedFree === null || freeKey === (enteredFree ?? []).join(",") ? "" : `&free=${freeKey}`;
-    router.replace(`/result?job=${job}&mode=${mode}${c}${f}`, { scroll: false });
-  }, [job, mode, picked, startCredits, pickedFree, freeKey, enteredFree, router]);
+    // 직무가 하나면 기존 `job=` 그대로(옛 링크 호환), 여럿이면 `jobs=` 로 담는다.
+    const jq = jobs.length > 1 ? `jobs=${jobsKey}` : `job=${job}`;
+    router.replace(`/result?${jq}&mode=${mode}${c}${f}`, { scroll: false });
+  }, [job, jobs, jobsKey, mode, picked, startCredits, pickedFree, freeKey, enteredFree, router]);
 
   if (needTranscript) return <NeedTranscript />;
   if (loading && !rec) return <Analyzing />;
@@ -320,9 +334,9 @@ export default function ResultClient() {
         </h2>
       {/* 목표 — 6종을 한 줄에 놓고 적합도까지 같이 (switch and see) */}
       <div className="mt-2.5">
-        <JobFitBar fits={rec.fitByJob} active={job} onChange={setJob} />
+        <JobFitBar fits={rec.fitByJob} active={jobs} onToggle={toggleJob} />
         <p className="mt-1.5 text-caption text-text-soft">
-          옆 숫자는 지금 성적으로 그 직무에 얼마나 맞는지 (0~100)
+          옆 숫자는 지금 성적으로 그 직무에 얼마나 맞는지 (0~100) · <b className="font-semibold text-text-muted">여러 개를 함께 골라도</b> 돼요
         </p>
       </div>
 
