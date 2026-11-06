@@ -51,11 +51,50 @@ class Recommendation:
     # 졸업까지 남은 학점 표시용. 영역별 need 합이 아니라 총학점−취득학점으로 센다.
     total_earned: int | None = None     # 성적표 총 취득학점 (영역 매핑과 무관)
     total_required: int | None = None   # 학과 졸업 총학점 (department.total_credits_required, 132)
+    # 시간 충돌로 1등 시간표에서 빠진 고가치 후보 [(Candidate, score, 겹친_선택과목명)].
+    # "정말 중요한 수업이 겹쳐 하나가 떨어졌을 때 그것도 옵션으로"(발표 피드백)를 위해 화면에 띄운다.
+    dropped_conflicts: list = field(default_factory=list)
 
     @property
     def result(self) -> Result:
         """1등 시간표 (하위호환)."""
         return self.results[0]
+
+
+def _dropped_by_conflict(results, candidates, score_by_course, *, top_n: int = 3):
+    """1등 시간표에 들었어도 좋았을 만큼 점수가 높은데, 선택된 과목과 시간이 겹쳐 빠진 후보.
+
+    발표 피드백: "정말 중요한 수업 2개가 겹쳐 하나가 떨어지면, 그걸 듣고 싶은 학생도 있으니
+    옵션으로 보여 달라." 1등 해의 선택 과목과 슬롯이 겹치고, 점수가 선택된 과목 중 가장 낮은
+    것 이상인 비선택 후보만 고른다(겹치지 않았으면 들어올 값어치였다는 뜻). 과목 단위로 묶어
+    최고점 분반만, 점수 내림차순 top_n.
+    """
+    solved = [r for r in results if r.status == "Optimal"]
+    if not solved:
+        return []
+    selected = solved[0].selected
+    if not selected:
+        return []
+    sel_ids = {c.course_id for c in selected}
+    owner = {}  # slot → 겹친 선택 과목 (course_id, name)
+    for c in selected:
+        for s in c.slots:
+            owner.setdefault(s, (c.course_id, c.course_name))
+    floor = min(score_by_course.get(c.course_id, 0.0) for c in selected)
+    best: dict[str, tuple] = {}
+    for c in candidates:
+        if c.course_id in sel_ids:
+            continue
+        sc = score_by_course.get(c.course_id, 0.0)
+        if sc <= 0 or sc < floor:
+            continue
+        clash = next((owner[s] for s in c.slots if s in owner), None)
+        if clash is None:
+            continue
+        prev = best.get(c.course_id)
+        if prev is None or sc > prev[1]:
+            best[c.course_id] = (c, sc, clash[0], clash[1])
+    return sorted(best.values(), key=lambda t: -t[1])[:top_n]
 
 
 def recommend(input_hash, job_id, *, db_path=data.DB_PATH, U=18, L=12,
@@ -107,8 +146,10 @@ def recommend(input_hash, job_id, *, db_path=data.DB_PATH, U=18, L=12,
         passed_ids=set(student.passed.keys()),
         eps=eps, k=k, time_limit=time_limit, area_weight=area_weight, free_days=free_days,
     )
+    dropped = _dropped_by_conflict(results, candidates, score_by_course)
     return Recommendation(
         results=results, sigma=sigma, gap=gap, need=need,
+        dropped_conflicts=dropped,
         dept_id=student.dept_id, admission_year=student.admission_year,
         requirement_year=req_year, grade_level=grade, contributions=contributions,
         total_earned=student.total_earned, total_required=total_required,
